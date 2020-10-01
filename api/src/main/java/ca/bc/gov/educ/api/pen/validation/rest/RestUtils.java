@@ -80,7 +80,9 @@ public class RestUtils {
   @PostConstruct
   public void init() {
     setGenderCodesMap();
-    log.info("Called student api and loaded {} gender codes", this.genderCodesMap.size());
+    log.info("Called student api and loaded {} gender codes", this.genderCodesMap.values().size());
+    setGradeCodesMap();
+    log.info("Called student api and loaded {} grade codes", this.gradeCodesMap.values().size());
   }
 
   /**

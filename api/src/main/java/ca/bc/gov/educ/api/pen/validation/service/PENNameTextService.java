@@ -37,6 +37,7 @@ public class PENNameTextService {
   @PostConstruct
   public void init() {
     this.setPenNameTexts();
+    log.info("loaded {} entries into pen name text map ", penNameTextMap.values().size());
   }
 
   /**
