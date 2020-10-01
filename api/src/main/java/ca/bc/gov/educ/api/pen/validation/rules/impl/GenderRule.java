@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationFieldCode.GENDER;
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueSeverityCode.ERROR;
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueTypeCode.GENDER_ERR;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationFieldCode.GENDER;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueSeverityCode.ERROR;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueTypeCode.GENDER_ERR;
 import static lombok.AccessLevel.PRIVATE;
 
 /**
@@ -44,7 +44,7 @@ public class GenderRule extends BaseRule {
   @Override
   public List<PenRequestStudentValidationIssue> validate(PenRequestStudentValidationPayload validationPayload) {
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
-    var genderCodes = restUtils.getGenderCodesFromStudentAPI();
+    var genderCodes = restUtils.getGenderCodes();
     String genderCode = validationPayload.getGenderCode();
     if (StringUtils.isBlank(genderCode)) {
       results.add(createValidationEntity(ERROR, GENDER_ERR, GENDER));

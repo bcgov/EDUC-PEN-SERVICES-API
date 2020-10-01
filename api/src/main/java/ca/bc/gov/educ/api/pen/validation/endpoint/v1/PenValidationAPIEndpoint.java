@@ -22,20 +22,20 @@ import java.util.List;
  * The interface Pen validation api endpoint.
  */
 @RequestMapping("/api/v1/pen-validation")
-@OpenAPIDefinition(info = @Info(title = "API for Pen Registry data Validation.", description = "This API is responsible for data validation of student requests .", version = "1"), security = {@SecurityRequirement(name = "OAUTH2", scopes = {"VALIDATE_STUDENT_REQUEST_PEN"})})
+@OpenAPIDefinition(info = @Info(title = "API for Pen Registry data Validation.", description = "This API is responsible for data validation of student requests .", version = "1"), security = {@SecurityRequirement(name = "OAUTH2", scopes = {"VALIDATE_STUDENT_DEMOGRAPHICS"})})
 public interface PenValidationAPIEndpoint {
 
   /**
-   * Create pen request batch list.
+   * Validate student data.
    *
    * @param validationPayload the validation payload
    * @return the list
    */
   @PostMapping("/student-request")
-  @PreAuthorize("#oauth2.hasAnyScope('VALIDATE_STUDENT_REQUEST_PEN')")
+  @PreAuthorize("#oauth2.hasAnyScope('VALIDATE_STUDENT_DEMOGRAPHICS')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "400", description = "BAD REQUEST")})
   @Transactional
   @Tag(name = "Endpoint to validate student request.", description = "Endpoint to validate student request.")
   @Schema(name = "PenRequestStudentValidationIssue", implementation = PenRequestStudentValidationIssue.class)
-  List<PenRequestStudentValidationIssue> createPenRequestBatch(@Validated @RequestBody PenRequestStudentValidationPayload validationPayload);
+  List<PenRequestStudentValidationIssue> validateStudentData(@Validated @RequestBody PenRequestStudentValidationPayload validationPayload);
 }

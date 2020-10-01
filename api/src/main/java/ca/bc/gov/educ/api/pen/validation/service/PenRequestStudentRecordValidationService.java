@@ -50,6 +50,7 @@ public class PenRequestStudentRecordValidationService {
         validationResult.addAll(result);
       }
     });
+    log.debug("found {} error/warnings for this transaction :: {}", validationResult.size(), validationPayload.getTransactionID());
     return validationResult;
   }
 

@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationFieldCode.SUBMITTED_PEN;
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueSeverityCode.WARNING;
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueTypeCode.CHECK_DIGIT;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationFieldCode.SUBMITTED_PEN;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueSeverityCode.WARNING;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueTypeCode.CHECK_DIGIT;
 
 
 /**
@@ -31,7 +31,7 @@ public class SubmittedPENRule extends BaseRule {
   public List<PenRequestStudentValidationIssue> validate(PenRequestStudentValidationPayload validationPayload) {
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
     if (StringUtils.isNotBlank(validationPayload.getSubmittedPen())) {
-      boolean isInvalidCheckDigit = validateCheckDigit(validationPayload.getSubmittedPen().trim(), validationPayload.getTransactionID());
+      boolean isInvalidCheckDigit = !validCheckDigit(validationPayload.getSubmittedPen().trim(), validationPayload.getTransactionID());
       if (isInvalidCheckDigit) {
         results.add(createValidationEntity(WARNING, CHECK_DIGIT, SUBMITTED_PEN));
       }
@@ -47,7 +47,7 @@ public class SubmittedPENRule extends BaseRule {
    * @param transactionID the transaction id
    * @return the boolean
    */
-  protected boolean validateCheckDigit(String pen, String transactionID) {
+  protected boolean validCheckDigit(String pen, String transactionID) {
     log.debug(" transactionID :: {}, input :: pen={}", transactionID, pen);
     if (pen.length() != 9 || !pen.matches("-?\\d+(\\.\\d+)?")) {
       return false;

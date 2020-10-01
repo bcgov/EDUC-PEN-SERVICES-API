@@ -1,0 +1,34 @@
+[
+  {
+    "genderCode": "F",
+    "label": "Female",
+    "description": "Persons whose current gender is female. This includes cisgender and transgender persons who are female.",
+    "displayOrder": 1,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "genderCode": "M",
+    "label": "Male",
+    "description": "Persons whose current gender is male. This includes cisgender and transgender persons who are male.",
+    "displayOrder": 2,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "genderCode": "X",
+    "label": "Gender Diverse",
+    "description": "Persons whose current gender is not exclusively as male or female. It includes people who do not have one gender, have no gender, are non-binary, or are Two-Spirit.",
+    "displayOrder": 3,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "genderCode": "U",
+    "label": "Unknown",
+    "description": "Persons whose gender is not known at the time of data collection. It may or may not get updated at a later point in time. X is different than U.",
+    "displayOrder": 4,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  }
+]

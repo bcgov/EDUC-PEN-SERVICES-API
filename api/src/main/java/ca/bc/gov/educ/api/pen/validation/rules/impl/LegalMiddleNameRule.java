@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.pen.validation.rules.impl;
 
 import ca.bc.gov.educ.api.pen.validation.rules.BaseRule;
+import ca.bc.gov.educ.api.pen.validation.service.PENNameTextService;
 import ca.bc.gov.educ.api.pen.validation.struct.v1.PenRequestStudentValidationIssue;
 import ca.bc.gov.educ.api.pen.validation.struct.v1.PenRequestStudentValidationPayload;
 import lombok.extern.slf4j.Slf4j;
@@ -10,10 +11,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationFieldCode.*;
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueSeverityCode.WARNING;
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueTypeCode.EMBEDDED_MID;
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueTypeCode.REPEAT_MID;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationFieldCode.*;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueSeverityCode.WARNING;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueTypeCode.EMBEDDED_MID;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueTypeCode.REPEAT_MID;
 
 
 /**
@@ -21,6 +22,13 @@ import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudent
  */
 @Slf4j
 public class LegalMiddleNameRule extends BaseRule {
+  
+  private final PENNameTextService penNameTextService;
+
+  public LegalMiddleNameRule(final PENNameTextService penNameTextService) {
+    this.penNameTextService = penNameTextService;
+  }
+
   /**
    * Validates the student record for the given rule.
    *
@@ -36,7 +44,7 @@ public class LegalMiddleNameRule extends BaseRule {
       defaultValidationForNameFields(results, legalMiddleName, LEGAL_MID);
     }
     if (results.isEmpty() && StringUtils.isNotBlank(legalMiddleName)) {
-      checkFieldValueExactMatchWithInvalidText(results, legalMiddleName, LEGAL_MID, validationPayload.getIsInteractive());
+      checkFieldValueExactMatchWithInvalidText(results, legalMiddleName, LEGAL_MID, validationPayload.getIsInteractive(), penNameTextService.getPenNameTexts());
     }
     if (results.isEmpty() && StringUtils.isNotBlank(legalMiddleName)
         && legalFirstNameHasNoErrors(validationPayload) && legalLastNameHasNoErrors(validationPayload)

@@ -12,9 +12,9 @@ import java.time.format.ResolverStyle;
 import java.util.LinkedList;
 import java.util.List;
 
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationFieldCode.BIRTH_DATE;
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueSeverityCode.ERROR;
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueTypeCode.*;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationFieldCode.BIRTH_DATE;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueSeverityCode.ERROR;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueTypeCode.*;
 
 /**
  * The type Birth date rule.

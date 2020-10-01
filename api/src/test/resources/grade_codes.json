@@ -1,0 +1,154 @@
+[
+  {
+    "gradeCode": "01",
+    "label": "Grade 1",
+    "description": "First grade.",
+    "displayOrder": 1,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "02",
+    "label": "Grade 2",
+    "description": "Second grade.",
+    "displayOrder": 2,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "03",
+    "label": "Grade 3",
+    "description": "Third grade.",
+    "displayOrder": 3,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "04",
+    "label": "Grade 4",
+    "description": "Fourth grade.",
+    "displayOrder": 4,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "05",
+    "label": "Grade 5",
+    "description": "Fifth grade.",
+    "displayOrder": 5,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "06",
+    "label": "Grade 6",
+    "description": "Sixth grade.",
+    "displayOrder": 6,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "07",
+    "label": "Grade 7",
+    "description": "Seventh grade.",
+    "displayOrder": 7,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "08",
+    "label": "Grade 8",
+    "description": "Eighth grade.",
+    "displayOrder": 8,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "09",
+    "label": "Grade 9",
+    "description": "Ninth grade.",
+    "displayOrder": 9,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "10",
+    "label": "Grade 10",
+    "description": "Tenth grade.",
+    "displayOrder": 10,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "11",
+    "label": "Grade 11",
+    "description": "Eleventh grade.",
+    "displayOrder": 11,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "12",
+    "label": "Grade 12",
+    "description": "Twelfth grade.",
+    "displayOrder": 12,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "EL",
+    "label": "Early Learning",
+    "description": "Early learning.",
+    "displayOrder": 13,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "GA",
+    "label": "Graduated Adult",
+    "description": "Graduated adult.",
+    "displayOrder": 14,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "KF",
+    "label": "Kindergarten Full",
+    "description": "Kindergarten full-time.",
+    "displayOrder": 15,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "SU",
+    "label": "Secondary Upgraded",
+    "description": "Secondary upgraded.",
+    "displayOrder": 16,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "EU",
+    "label": "Elementary Upgraded",
+    "description": "Elementary upgraded.",
+    "displayOrder": 17,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "HS",
+    "label": "Home schooled",
+    "description": "Home schooled.",
+    "displayOrder": 18,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  },
+  {
+    "gradeCode": "KH",
+    "label": "Kindergarten Half",
+    "description": "Kindergarten half-time.",
+    "displayOrder": 19,
+    "effectiveDate": "2020-01-01T00:00:00",
+    "expiryDate": "2099-12-31T00:00:00"
+  }
+]

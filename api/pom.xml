@@ -12,7 +12,8 @@
   <properties>
     <sonar.language>java</sonar.language>
     <sonar.exclusions>
-      src/main/resources/**,src/main/java/ca/bc/gov/educ/api/pen/validation/endpoint/**
+      src/main/resources/**,src/main/java/ca/bc/gov/educ/api/pen/validation/endpoint/**,src/main/java/ca/bc/gov/educ/api/pen/validation/struct/**
+      ,src/main/java/ca/bc/gov/educ/api/pen/validation/model/**,src/main/java/ca/bc/gov/educ/api/pen/validation/rest/**
     </sonar.exclusions>
     <java.version>11</java.version>
 
