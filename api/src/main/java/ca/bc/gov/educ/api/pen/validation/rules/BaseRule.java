@@ -1,18 +1,22 @@
 package ca.bc.gov.educ.api.pen.validation.rules;
 
-import ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationFieldCode;
-import ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueSeverityCode;
-import ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueTypeCode;
+import ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationFieldCode;
+import ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueSeverityCode;
+import ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueTypeCode;
+import ca.bc.gov.educ.api.pen.validation.model.PENNameText;
+import ca.bc.gov.educ.api.pen.validation.service.PENNameTextService;
 import ca.bc.gov.educ.api.pen.validation.struct.v1.PenRequestStudentValidationIssue;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueSeverityCode.ERROR;
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueSeverityCode.WARNING;
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueTypeCode.*;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueSeverityCode.ERROR;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueSeverityCode.WARNING;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueTypeCode.*;
 
 
 /**
@@ -23,6 +27,7 @@ public abstract class BaseRule implements Rule {
    * The constant SPACE.
    */
   protected static final String SPACE = " ";
+  public static final String FC = "FC";
   /**
    * The Not allowed chars.
    */
@@ -83,9 +88,9 @@ public abstract class BaseRule implements Rule {
    * @return the entity
    */
   protected PenRequestStudentValidationIssue createValidationEntity(
-      PenRequestBatchStudentValidationIssueSeverityCode issueSeverityCode,
-      PenRequestBatchStudentValidationIssueTypeCode issueTypeCode,
-      PenRequestBatchStudentValidationFieldCode fieldCode) {
+      PenRequestStudentValidationIssueSeverityCode issueSeverityCode,
+      PenRequestStudentValidationIssueTypeCode issueTypeCode,
+      PenRequestStudentValidationFieldCode fieldCode) {
 
     return PenRequestStudentValidationIssue.builder()
         .penRequestBatchValidationIssueSeverityCode(issueSeverityCode.toString())
@@ -139,7 +144,7 @@ public abstract class BaseRule implements Rule {
    * @param fieldCode  the field code
    */
   protected void defaultValidationForNameFields(@NonNull List<PenRequestStudentValidationIssue> results, @NonNull String fieldValue,
-                                                @NonNull PenRequestBatchStudentValidationFieldCode fieldCode) {
+                                                @NonNull PenRequestStudentValidationFieldCode fieldCode) {
     fieldValue = fieldValue.trim();
     if (fieldContainsInvalidCharacters(fieldValue, notAllowedChars)) {
       results.add(createValidationEntity(ERROR, INV_CHARS, fieldCode));
@@ -168,21 +173,46 @@ public abstract class BaseRule implements Rule {
    * @param fieldValue    the field value
    * @param fieldCode     the field code
    * @param isInteractive the is interactive
+   * @param penNameTexts  the pen name texts
    */
-  protected void checkFieldValueExactMatchWithInvalidText(List<PenRequestStudentValidationIssue> results, String fieldValue, PenRequestBatchStudentValidationFieldCode fieldCode, boolean isInteractive) {
-
+  protected void checkFieldValueExactMatchWithInvalidText(List<PenRequestStudentValidationIssue> results, String fieldValue, PenRequestStudentValidationFieldCode fieldCode, boolean isInteractive, List<PENNameText> penNameTexts) {
+    var filteredList = penNameTexts.stream().filter(el -> el.getEffectiveDate().isBefore(LocalDateTime.now()) && el.getExpiryDate().isAfter(LocalDateTime.now()) && fieldValue.equalsIgnoreCase(el.getInvalidText())).collect(Collectors.toList());
     switch (fieldCode) {
       case LEGAL_FIRST:
+        if (!filteredList.isEmpty()) {
+          boolean isError = filteredList.stream().anyMatch(el -> el.getLegalGivenCheck().equalsIgnoreCase(FC));
+          createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+        }
         break;
       case LEGAL_LAST:
+        if (!filteredList.isEmpty()) {
+          boolean isError = filteredList.stream().anyMatch(el -> el.getLegalSurnameCheck().equalsIgnoreCase(FC));
+          createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+        }
         break;
       case LEGAL_MID:
+        if (!filteredList.isEmpty()) {
+          boolean isError = filteredList.stream().anyMatch(el -> el.getLegalMiddleCheck().equalsIgnoreCase(FC));
+          createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+        }
         break;
       case USUAL_LAST:
+        if (!filteredList.isEmpty()) {
+          boolean isError = filteredList.stream().anyMatch(el -> el.getUsualSurnameCheck().equalsIgnoreCase(FC));
+          createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+        }
         break;
       case USUAL_FIRST:
+        if (!filteredList.isEmpty()) {
+          boolean isError = filteredList.stream().anyMatch(el -> el.getUsualGivenCheck().equalsIgnoreCase(FC));
+          createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+        }
         break;
       case USUAL_MID:
+        if (!filteredList.isEmpty()) {
+          boolean isError = filteredList.stream().anyMatch(el -> el.getUsualMiddleCheck().equalsIgnoreCase(FC));
+          createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+        }
         break;
       default:
         break;
@@ -190,20 +220,33 @@ public abstract class BaseRule implements Rule {
 
   }
 
+  private void createValidationErrorForInteractiveAndBatch(List<PenRequestStudentValidationIssue> results, PenRequestStudentValidationFieldCode fieldCode, boolean isInteractive, boolean isError) {
+    if (isInteractive) {
+      results.add(createValidationEntity(WARNING, BLOCKED_NAME, fieldCode));
+    } else {
+      if (isError) {
+        results.add(createValidationEntity(ERROR, BLOCKED_NAME, fieldCode));
+      } else {
+        results.add(createValidationEntity(WARNING, BLOCKED_NAME, fieldCode));
+      }
+    }
+  }
+
   /**
    * Do validate.
    *
-   * @param isInteractive the is interactive
-   * @param results       the results
-   * @param fieldValue    the field value
-   * @param fieldCode     the field code
+   * @param isInteractive      the is interactive
+   * @param results            the results
+   * @param fieldValue         the field value
+   * @param fieldCode          the field code
+   * @param penNameTextService the pen name text service
    */
-  protected void doValidate(boolean isInteractive, List<PenRequestStudentValidationIssue> results, String fieldValue, PenRequestBatchStudentValidationFieldCode fieldCode) {
+  protected void doValidate(boolean isInteractive, List<PenRequestStudentValidationIssue> results, String fieldValue, PenRequestStudentValidationFieldCode fieldCode, PENNameTextService penNameTextService) {
     if (StringUtils.isNotBlank(fieldValue)) {
       defaultValidationForNameFields(results, fieldValue, fieldCode);
     }
     if (results.isEmpty()) {
-      checkFieldValueExactMatchWithInvalidText(results, fieldValue, fieldCode, isInteractive);
+      checkFieldValueExactMatchWithInvalidText(results, fieldValue, fieldCode, isInteractive, penNameTextService.getPenNameTexts());
     }
   }
 }

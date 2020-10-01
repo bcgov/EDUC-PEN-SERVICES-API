@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.pen.validation.config;
 import ca.bc.gov.educ.api.pen.validation.rest.RestUtils;
 import ca.bc.gov.educ.api.pen.validation.rules.Rule;
 import ca.bc.gov.educ.api.pen.validation.rules.impl.*;
+import ca.bc.gov.educ.api.pen.validation.service.PENNameTextService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,8 +34,9 @@ public class RulesConfig {
    */
   @Bean
   @Order(2)
-  public Rule legalLastNameRule() {
-    return new LegalLastNameRule();
+  @Autowired
+  public Rule legalLastNameRule(final PENNameTextService penNameTextService) {
+    return new LegalLastNameRule(penNameTextService);
   }
 
   /**
@@ -44,8 +46,9 @@ public class RulesConfig {
    */
   @Bean
   @Order(3)
-  public Rule legalFirstNameRule() {
-    return new LegalFirstNameRule();
+  @Autowired
+  public Rule legalFirstNameRule(final PENNameTextService penNameTextService) {
+    return new LegalFirstNameRule(penNameTextService);
   }
 
   /**
@@ -55,8 +58,9 @@ public class RulesConfig {
    */
   @Bean
   @Order(4)
-  public Rule legalMiddleNameRule() {
-    return new LegalMiddleNameRule();
+  @Autowired
+  public Rule legalMiddleNameRule(final PENNameTextService penNameTextService) {
+    return new LegalMiddleNameRule(penNameTextService);
   }
 
   /**
@@ -66,8 +70,9 @@ public class RulesConfig {
    */
   @Bean
   @Order(5)
-  public Rule usualFirstNameRule() {
-    return new UsualFirstNameRule();
+  @Autowired
+  public Rule usualFirstNameRule(final PENNameTextService penNameTextService) {
+    return new UsualFirstNameRule(penNameTextService);
   }
 
   /**
@@ -77,8 +82,9 @@ public class RulesConfig {
    */
   @Bean
   @Order(6)
-  public Rule usualLastNameRule() {
-    return new UsualLastNameRule();
+  @Autowired
+  public Rule usualLastNameRule(final PENNameTextService penNameTextService) {
+    return new UsualLastNameRule(penNameTextService);
   }
 
   /**
@@ -88,8 +94,9 @@ public class RulesConfig {
    */
   @Bean
   @Order(7)
-  public Rule usualMiddleNameRule() {
-    return new UsualMiddleNameRule();
+  @Autowired
+  public Rule usualMiddleNameRule(final PENNameTextService penNameTextService) {
+    return new UsualMiddleNameRule(penNameTextService);
   }
 
   /**
@@ -125,6 +132,13 @@ public class RulesConfig {
   @Order(10)
   public Rule birthDateRule() {
     return new BirthDateRule();
+  }
+
+  @Bean
+  @Order(11)
+  @Autowired
+  public Rule gradeCodeRule(final RestUtils restUtils) {
+    return new GradeCodeRule(restUtils);
   }
 
 }

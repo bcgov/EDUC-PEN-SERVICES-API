@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,11 +38,13 @@ public class PenRequestStudentValidationPayload {
   /**
    * The Is interactive.
    */
+  @NotNull
   Boolean isInteractive;
 
   /**
    * The Transaction id.
    */
+  @NotNull
   String transactionID;
   /**
    * The Pen request batch student id.

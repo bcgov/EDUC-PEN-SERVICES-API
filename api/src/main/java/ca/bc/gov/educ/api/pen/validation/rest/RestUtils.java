@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.pen.validation.rest;
 
 import ca.bc.gov.educ.api.pen.validation.properties.ApplicationProperties;
 import ca.bc.gov.educ.api.pen.validation.struct.v1.GenderCode;
+import ca.bc.gov.educ.api.pen.validation.struct.v1.GradeCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -9,8 +10,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -18,10 +17,14 @@ import org.springframework.security.oauth2.client.token.grant.client.ClientCrede
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * The type Rest utils.
@@ -29,9 +32,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @Slf4j
 public class RestUtils {
+  public static final String GRADE_CODES = "gradeCodes";
+  public static final String GENDER_CODES = "genderCodes";
   private final Map<String, List<GenderCode>> genderCodesMap = new ConcurrentHashMap<>();
+  private final Map<String, List<GradeCode>> gradeCodesMap = new ConcurrentHashMap<>();
   private static final String PARAMETERS_ATTRIBUTE = "parameters";
-
+  private final ReadWriteLock genderLock = new ReentrantReadWriteLock();
+  private final ReadWriteLock gradeLock = new ReentrantReadWriteLock();
   private final ApplicationProperties props;
 
   /**
@@ -70,35 +77,80 @@ public class RestUtils {
     return new OAuth2RestTemplate(resourceDetails, new DefaultOAuth2ClientContext());
   }
 
+  @PostConstruct
+  public void init() {
+    setGenderCodesMap();
+    log.info("Called student api and loaded {} gender codes", this.genderCodesMap.size());
+  }
+
   /**
    * Gets gender codes from student api.
    *
    * @return the gender codes from student api
    */
-  @Retryable(value = {Exception.class}, maxAttempts = 10, backoff = @Backoff(multiplier = 2, delay = 2000))
-  public synchronized List<GenderCode> getGenderCodesFromStudentAPI() {
-    if (this.genderCodesMap.size() == 0) {
-      RestTemplate restTemplate = getRestTemplate();
-      HttpHeaders headers = new HttpHeaders();
-      headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-      ParameterizedTypeReference<List<GenderCode>> responseType = new ParameterizedTypeReference<>() {
-      };
-      var responseBody = restTemplate.exchange(props.getStudentApiURL() + "/gender-codes", HttpMethod.GET, new HttpEntity<>(PARAMETERS_ATTRIBUTE, headers), responseType).getBody();
-      this.genderCodesMap.put("genderCodes", responseBody);
-      return responseBody;
-    } else {
-      return this.genderCodesMap.get("genderCodes");
+  public List<GenderCode> getGenderCodes() {
+    Lock readLock = genderLock.readLock();
+    try {
+      readLock.lock();
+      return this.genderCodesMap.get(GENDER_CODES);
+    } finally {
+      readLock.unlock();
+    }
+  }
+
+  public List<GradeCode> getGradeCodes() {
+    Lock readLock = gradeLock.readLock();
+    try {
+      readLock.lock();
+      return this.gradeCodesMap.get(GRADE_CODES);
+    } finally {
+      readLock.unlock();
     }
   }
 
   /**
    * Reload cache.
    */
-  @Scheduled( cron="0 0 0 * * *")
-  public void reloadCache(){
+  @Scheduled(cron = "0 0 0 * * *")
+  public void reloadCache() {
     log.info("started reloading cache..");
-    this.genderCodesMap.clear();
-    getGenderCodesFromStudentAPI();
+    setGenderCodesMap();
+    setGradeCodesMap();
     log.info("reloading cache completed..");
+  }
+
+  public void setGenderCodesMap() {
+    Lock writeLock = genderLock.writeLock();
+    try {
+      writeLock.lock();
+      this.genderCodesMap.clear();
+      RestTemplate restTemplate = getRestTemplate();
+      HttpHeaders headers = new HttpHeaders();
+      headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+      ParameterizedTypeReference<List<GenderCode>> responseType = new ParameterizedTypeReference<>() {
+      };
+      var responseBody = restTemplate.exchange(props.getStudentApiURL() + "/gender-codes", HttpMethod.GET, new HttpEntity<>(PARAMETERS_ATTRIBUTE, headers), responseType).getBody();
+      this.genderCodesMap.put(GENDER_CODES, responseBody);
+    } finally {
+      writeLock.unlock();
+    }
+  }
+
+
+  public void setGradeCodesMap() {
+    Lock writeLock = gradeLock.writeLock();
+    try {
+      writeLock.lock();
+      this.gradeCodesMap.clear();
+      RestTemplate restTemplate = getRestTemplate();
+      HttpHeaders headers = new HttpHeaders();
+      headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+      ParameterizedTypeReference<List<GradeCode>> responseType = new ParameterizedTypeReference<>() {
+      };
+      var responseBody = restTemplate.exchange(props.getStudentApiURL() + "/grade-codes", HttpMethod.GET, new HttpEntity<>(PARAMETERS_ATTRIBUTE, headers), responseType).getBody();
+      this.gradeCodesMap.put(GRADE_CODES, responseBody);
+    } finally {
+      writeLock.unlock();
+    }
   }
 }

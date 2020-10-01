@@ -10,9 +10,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationFieldCode.POSTAL_CODE;
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueSeverityCode.WARNING;
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudentValidationIssueTypeCode.PC_ERR;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationFieldCode.POSTAL_CODE;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueSeverityCode.WARNING;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueTypeCode.PC_ERR;
 
 /**
  * The type Postal code rule.
@@ -20,7 +20,7 @@ import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestBatchStudent
 @Slf4j
 public class PostalCodeRule extends BaseRule {
 
-  private static final Pattern pattern = Pattern.compile("^(([A-Z]\\d[A-Z]\\d[A-Z]\\d|)|([A-Z]\\d[A-Z]\\s\\d[A-Z]\\d|))$");
+  private static final Pattern pattern = Pattern.compile("^([A-Z]\\d[A-Z]\\d[A-Z]\\d|)$");
 
   /**
    * Validates the student record for the given rule.
