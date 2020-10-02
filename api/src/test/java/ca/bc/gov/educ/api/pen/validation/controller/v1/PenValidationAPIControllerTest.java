@@ -77,12 +77,13 @@ public class PenValidationAPIControllerTest {
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenValidPayload_shouldReturnStatusOkWithBlankArray() throws Exception {
-
+    String payload = validationPayloadAsJSONString(createValidationPayload());
+    log.info(payload);
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
         .perform(post("/api/v1/pen-validation/student-request")
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(createValidationPayload())))
+            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(payload))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
 
   }
@@ -424,6 +425,7 @@ public class PenValidationAPIControllerTest {
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
+
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenDOBInInvalidFormat_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -437,6 +439,7 @@ public class PenValidationAPIControllerTest {
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
+
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenBlankDOB_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -450,6 +453,7 @@ public class PenValidationAPIControllerTest {
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
+
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenDOBEarlierTo1900_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -463,6 +467,7 @@ public class PenValidationAPIControllerTest {
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
+
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenDOBLaterThanCurrentDate_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -490,6 +495,7 @@ public class PenValidationAPIControllerTest {
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
+
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInappropriateAgeForGradeCode_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
@@ -503,11 +509,12 @@ public class PenValidationAPIControllerTest {
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
+
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInappropriateAgeForGradeCode2_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
     var payload = createValidationPayload();
-    payload.setDob(LocalDate.now().toString().replaceAll("-",""));
+    payload.setDob(LocalDate.now().toString().replaceAll("-", ""));
     payload.setGradeCode("01");
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
@@ -517,6 +524,7 @@ public class PenValidationAPIControllerTest {
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
+
   private String validationPayloadAsJSONString(PenRequestStudentValidationPayload payload) throws JsonProcessingException {
     return new ObjectMapper().writeValueAsString(payload);
   }

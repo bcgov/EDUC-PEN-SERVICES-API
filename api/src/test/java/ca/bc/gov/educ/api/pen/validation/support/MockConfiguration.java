@@ -1,5 +1,7 @@
 package ca.bc.gov.educ.api.pen.validation.support;
 
+import ca.bc.gov.educ.api.pen.validation.messaging.MessagePublisher;
+import ca.bc.gov.educ.api.pen.validation.messaging.MessageSubscriber;
 import ca.bc.gov.educ.api.pen.validation.rest.RestUtils;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
@@ -24,5 +26,16 @@ public class MockConfiguration {
     return Mockito.mock(RestUtils.class);
   }
 
+  @Bean
+  @Primary
+  public MessagePublisher messagePublisher() {
+    return Mockito.mock(MessagePublisher.class);
+  }
+
+  @Bean
+  @Primary
+  public MessageSubscriber messageSubscriber() {
+    return Mockito.mock(MessageSubscriber.class);
+  }
 
 }
