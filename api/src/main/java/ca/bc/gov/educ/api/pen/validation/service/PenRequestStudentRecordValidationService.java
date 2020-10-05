@@ -3,11 +3,13 @@ package ca.bc.gov.educ.api.pen.validation.service;
 import ca.bc.gov.educ.api.pen.validation.rules.Rule;
 import ca.bc.gov.educ.api.pen.validation.struct.v1.PenRequestStudentValidationIssue;
 import ca.bc.gov.educ.api.pen.validation.struct.v1.PenRequestStudentValidationPayload;
+import com.google.common.base.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Pen request batch student record validation service.
@@ -43,6 +45,7 @@ public class PenRequestStudentRecordValidationService {
    * @return the list
    */
   public List<PenRequestStudentValidationIssue> validateStudentRecord(final PenRequestStudentValidationPayload validationPayload) {
+    var stopwatch = Stopwatch.createStarted();
     var validationResult = validationPayload.getIssueList();
     rules.forEach(rule -> {
       var result = rule.validate(validationPayload);
@@ -51,6 +54,8 @@ public class PenRequestStudentRecordValidationService {
       }
     });
     log.debug("found {} error/warnings for this transaction :: {}", validationResult.size(), validationPayload.getTransactionID());
+    stopwatch.stop();
+    log.info("Completed validateStudentRecord for {} in {} milli seconds",validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
     return validationResult;
   }
 

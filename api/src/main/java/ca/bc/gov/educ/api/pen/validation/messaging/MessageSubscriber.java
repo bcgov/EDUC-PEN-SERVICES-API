@@ -32,7 +32,7 @@ import java.util.concurrent.TimeoutException;
  */
 @Component
 @Slf4j
-@SuppressWarnings("java:S2142")
+@SuppressWarnings({"java:S2142","java:S112"})
 public class MessageSubscriber extends MessagePubSub {
 
 

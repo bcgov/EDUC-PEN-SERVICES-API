@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.pen.validation.service;
 
+import ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueSeverityCode;
 import ca.bc.gov.educ.api.pen.validation.messaging.MessagePublisher;
 import ca.bc.gov.educ.api.pen.validation.struct.v1.Event;
 import ca.bc.gov.educ.api.pen.validation.struct.v1.PenRequestStudentValidationPayload;
@@ -12,7 +13,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import static ca.bc.gov.educ.api.pen.validation.constants.EventOutcome.*;
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueSeverityCode.ERROR;
 import static lombok.AccessLevel.PRIVATE;
 
 @Service
@@ -38,7 +38,7 @@ public class EventHandlerService {
       if (result.isEmpty()) {
         event.setEventOutcome(VALIDATION_SUCCESS_NO_ERROR_WARNING);
       } else {
-        var isError = result.stream().anyMatch(x -> x.getPenRequestBatchValidationIssueSeverityCode().equals(ERROR.toString()));
+        var isError = result.stream().anyMatch(x -> x.getPenRequestBatchValidationIssueSeverityCode().equals(PenRequestStudentValidationIssueSeverityCode.ERROR.toString()));
         if (isError) {
           event.setEventOutcome(VALIDATION_SUCCESS_WITH_ERROR);
         } else {

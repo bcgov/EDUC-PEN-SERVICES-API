@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.pen.validation.rules.BaseRule;
 import ca.bc.gov.educ.api.pen.validation.struct.v1.GradeAgeRange;
 import ca.bc.gov.educ.api.pen.validation.struct.v1.PenRequestStudentValidationIssue;
 import ca.bc.gov.educ.api.pen.validation.struct.v1.PenRequestStudentValidationPayload;
+import com.google.common.base.Stopwatch;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationFieldCode.BIRTH_DATE;
@@ -108,6 +110,7 @@ public class GradeCodeRule extends BaseRule {
    */
   @Override
   public List<PenRequestStudentValidationIssue> validate(PenRequestStudentValidationPayload validationPayload) {
+    var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
     var gradeCodes = restUtils.getGradeCodes();
     String gradeCode = validationPayload.getGradeCode();
@@ -126,6 +129,8 @@ public class GradeCodeRule extends BaseRule {
       checkForYoungAndOld(results, gradeCode, validationPayload);
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
+    stopwatch.stop();
+    log.info("Completed for {} in {} milli seconds",validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
     return results;
   }
 
