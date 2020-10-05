@@ -1,5 +1,9 @@
 package ca.bc.gov.educ.api.pen.validation.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
 import org.hibernate.annotations.Immutable;
 
@@ -74,12 +78,16 @@ public class PENNameText {
    * The Effective date.
    */
   @Column(name = "EFFECTIVE_DATE")
+  @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+  @JsonSerialize(using = LocalDateTimeSerializer.class)
   LocalDateTime effectiveDate;
 
   /**
    * The Expiry date.
    */
   @Column(name = "EXPIRY_DATE")
+  @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+  @JsonSerialize(using = LocalDateTimeSerializer.class)
   LocalDateTime expiryDate;
 
   /**
@@ -93,6 +101,8 @@ public class PENNameText {
    * The Create date.
    */
   @Column(name = "CREATE_DATE", updatable = false)
+  @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+  @JsonSerialize(using = LocalDateTimeSerializer.class)
   LocalDateTime createDate;
 
   /**
@@ -106,6 +116,8 @@ public class PENNameText {
    * The Update date.
    */
   @Column(name = "UPDATE_DATE")
+  @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+  @JsonSerialize(using = LocalDateTimeSerializer.class)
   LocalDateTime updateDate;
 
 

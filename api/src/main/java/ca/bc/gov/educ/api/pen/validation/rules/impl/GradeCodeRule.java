@@ -12,9 +12,9 @@ import org.apache.commons.lang3.StringUtils;
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
-import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +22,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationFieldCode.*;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationFieldCode.BIRTH_DATE;
+import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationFieldCode.GRADE_CODE;
 import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueSeverityCode.ERROR;
 import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueSeverityCode.WARNING;
 import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIssueTypeCode.*;
@@ -36,6 +37,8 @@ public class GradeCodeRule extends BaseRule {
 
   private final Map<String, GradeAgeRange> gradeAgeRangeMap = new ConcurrentHashMap<>();
 
+  private LocalDate currentDate;
+
   @Getter(PRIVATE)
   private final RestUtils restUtils;
 
@@ -48,6 +51,32 @@ public class GradeCodeRule extends BaseRule {
     this.restUtils = restUtils;
   }
 
+
+  /**
+   * Init.
+   * Grade Code: Age on Sept 30
+   * <p>
+   * HS: 4 - 19
+   * KH: 4 - 7
+   * KF: 4 - 7
+   * 01: 5 - 8
+   * 02: 6 - 9
+   * 03: 7 - 10
+   * 04: 8 - 11
+   * 05: 9 - 12
+   * 06: 10 - 13
+   * 07: 11 - 14
+   * EU: 4 and up
+   * 08: 12 - 15
+   * 09: 13 - 16
+   * 10: 14- 18
+   * 11: 15 - 19
+   * 12: 16 - 21
+   * <p>
+   * EL: under 7
+   * SU: 12 and up
+   * GA: 19 and up
+   */
   @PostConstruct
   public void init() {
     gradeAgeRangeMap.put("EL", GradeAgeRange.builder().lowerRange(0).upperRange(7).build()); // no lower range so assuming baby is just born.
@@ -86,9 +115,9 @@ public class GradeCodeRule extends BaseRule {
       results.add(createValidationEntity(ERROR, GRADE_CD_ERR, GRADE_CODE));
     } else {
       String finalGradeCode = gradeCode.trim();
-      long filteredCount = gradeCodes.stream().filter(gender -> LocalDateTime.now().isAfter(gender.getEffectiveDate())
-          && LocalDateTime.now().isBefore(gender.getExpiryDate())
-          && finalGradeCode.equalsIgnoreCase(gender.getGradeCode())).count();
+      long filteredCount = gradeCodes.stream().filter(gradeCode1 -> LocalDateTime.now().isAfter(gradeCode1.getEffectiveDate())
+          && LocalDateTime.now().isBefore(gradeCode1.getExpiryDate())
+          && finalGradeCode.equalsIgnoreCase(gradeCode1.getGradeCode())).count();
       if (filteredCount < 1) {
         results.add(createValidationEntity(ERROR, GRADE_CD_ERR, GRADE_CODE));
       }
@@ -148,10 +177,7 @@ public class GradeCodeRule extends BaseRule {
    * @param validationPayload the entire payload.
    */
   private void checkForYoungAndOld(List<PenRequestStudentValidationIssue> results, String gradeCode, PenRequestStudentValidationPayload validationPayload) {
-    int schoolYear = getSchoolYear(LocalDate.now());
-    LocalDate schoolDate = LocalDate.parse(schoolYear + "-09-30");
-    var dobDate = LocalDate.parse(validationPayload.getDob(), DateTimeFormatter.ofPattern("uuuuMMdd").withResolverStyle(ResolverStyle.STRICT));
-    int diff = (int) ChronoUnit.YEARS.between(dobDate, schoolDate);
+    int diff = calculateAge(validationPayload.getDob());
     var gradeAgeRange = Optional.ofNullable(gradeAgeRangeMap.get(gradeCode));
     if (gradeAgeRange.isPresent()) {
       if (diff < gradeAgeRange.get().getLowerRange()) {
@@ -163,10 +189,17 @@ public class GradeCodeRule extends BaseRule {
     }
   }
 
-  private int getSchoolYear(LocalDate localDate) {
+  protected int calculateAge(String dob) {
+    int schoolYear = getSchoolYear(getCurrentDate());
+    LocalDate schoolDate = LocalDate.parse(schoolYear + "-09-30");
+    var dobDate = LocalDate.parse(dob, DateTimeFormatter.ofPattern("uuuuMMdd").withResolverStyle(ResolverStyle.STRICT));
+    return Period.between(dobDate, schoolDate).getYears();
+  }
+
+  protected int getSchoolYear(LocalDate localDate) {
     var currentMonth = localDate.getMonth();
     var schoolYear = localDate.getYear();
-    if (!(currentMonth.getValue() > 5 && currentMonth.getValue() < 10)) {
+    if (currentMonth.getValue() < 6) {
       schoolYear = schoolYear - 1;
     }
     log.debug("calculated year is :: {}", schoolYear);
@@ -175,6 +208,18 @@ public class GradeCodeRule extends BaseRule {
 
   private boolean noDOBErrorReported(List<PenRequestStudentValidationIssue> issueList) {
     var result = issueList.stream().filter(element -> element.getPenRequestBatchValidationFieldCode().equals(BIRTH_DATE.getCode())).collect(Collectors.toList());
-    return result.size() < 1;
+    return result.isEmpty();
+  }
+
+
+  public void setCurrentDate(LocalDate currentDate) {
+    this.currentDate = currentDate;
+  }
+
+  public LocalDate getCurrentDate() {
+    if (this.currentDate == null) {
+      this.currentDate = LocalDate.now();
+    }
+    return this.currentDate;
   }
 }

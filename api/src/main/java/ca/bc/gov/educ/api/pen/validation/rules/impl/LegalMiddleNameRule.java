@@ -22,7 +22,7 @@ import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValid
  */
 @Slf4j
 public class LegalMiddleNameRule extends BaseRule {
-  
+
   private final PENNameTextService penNameTextService;
 
   public LegalMiddleNameRule(final PENNameTextService penNameTextService) {
@@ -50,8 +50,6 @@ public class LegalMiddleNameRule extends BaseRule {
         && legalFirstNameHasNoErrors(validationPayload) && legalLastNameHasNoErrors(validationPayload)
         && (legalMiddleName.equals(validationPayload.getLegalFirstName()) || legalMiddleName.equals(validationPayload.getLegalLastName()))) {
       results.add(createValidationEntity(WARNING, REPEAT_MID, LEGAL_MID));
-    } else {
-      log.debug("Legal First Name and Legal Last Name has errors so, skipping this check :: {}", validationPayload.getTransactionID());
     }
     if (results.isEmpty() && StringUtils.isNotBlank(legalMiddleName)
         && legalFirstNameHasNoErrors(validationPayload)
@@ -65,11 +63,11 @@ public class LegalMiddleNameRule extends BaseRule {
 
   private boolean legalLastNameHasNoErrors(PenRequestStudentValidationPayload validationPayload) {
     var result = validationPayload.getIssueList().stream().filter(element -> element.getPenRequestBatchValidationFieldCode().equals(LEGAL_LAST.getCode())).collect(Collectors.toList());
-    return result.size() <= 0;
+    return result.isEmpty();
   }
 
   private boolean legalFirstNameHasNoErrors(PenRequestStudentValidationPayload validationPayload) {
     var result = validationPayload.getIssueList().stream().filter(element -> element.getPenRequestBatchValidationFieldCode().equals(LEGAL_FIRST.getCode())).collect(Collectors.toList());
-    return result.size() <= 0;
+    return result.isEmpty();
   }
 }
