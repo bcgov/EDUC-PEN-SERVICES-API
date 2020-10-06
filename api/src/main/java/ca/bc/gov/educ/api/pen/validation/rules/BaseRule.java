@@ -230,7 +230,7 @@ public abstract class BaseRule implements Rule {
       }
     } else {
       if (log.isDebugEnabled()) {
-        log.debug("Skip this check as one of the values are null  fieldValue :: {}, fieldCode :: {} , penNameTexts :: {} ", fieldValue, fieldCode, penNameTexts);
+        log.debug("Skip this check as one of the values are null  fieldValue :: {}, fieldCode :: {} ", fieldValue, fieldCode);
       }
     }
   }
