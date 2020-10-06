@@ -61,7 +61,10 @@ public class EventHandlerService {
         }
         event.setEventPayload(JsonUtil.getJsonStringFromObject(result));
       }
-      log.debug("responding back :: {}", event);
+      if (log.isDebugEnabled()) {
+        log.debug("responding back :: {}", event);
+      }
+      log.info("responding back with :: {} errors/warnings , event outcome :: {}, for transaction ID :: {}", result.size(), event.getEventOutcome().toString(), validationPayload.getTransactionID());
       getMessagePublisher().dispatchMessage(event.getReplyTo(), JsonUtil.getJsonStringFromObject(event).getBytes());
     } catch (JsonProcessingException e) {
       log.error("JsonProcessingException for saga ::, {} , :: {}", event.getSagaId(), e);
