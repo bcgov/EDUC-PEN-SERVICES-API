@@ -194,6 +194,12 @@ public class GradeCodeRule extends BaseRule {
     }
   }
 
+  /**
+   * Calculate age int.
+   *
+   * @param dob the dob
+   * @return the int
+   */
   protected int calculateAge(String dob) {
     int schoolYear = getSchoolYear(getCurrentDate());
     LocalDate schoolDate = LocalDate.parse(schoolYear + "-09-30");
@@ -201,6 +207,12 @@ public class GradeCodeRule extends BaseRule {
     return Period.between(dobDate, schoolDate).getYears();
   }
 
+  /**
+   * Gets school year.
+   *
+   * @param localDate the local date
+   * @return the school year
+   */
   protected int getSchoolYear(LocalDate localDate) {
     var currentMonth = localDate.getMonth();
     var schoolYear = localDate.getYear();
@@ -217,10 +229,20 @@ public class GradeCodeRule extends BaseRule {
   }
 
 
+  /**
+   * Sets current date.
+   *
+   * @param currentDate the current date
+   */
   public void setCurrentDate(LocalDate currentDate) {
     this.currentDate = currentDate;
   }
 
+  /**
+   * Gets current date.
+   *
+   * @return the current date
+   */
   public LocalDate getCurrentDate() {
     if (this.currentDate == null) {
       this.currentDate = LocalDate.now();

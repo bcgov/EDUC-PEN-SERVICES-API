@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import static ca.bc.gov.educ.api.pen.validation.constants.EventOutcome.*;
 import static lombok.AccessLevel.PRIVATE;
 
+/**
+ * The type Event handler service.
+ */
 @Service
 @Slf4j
 public class EventHandlerService {
@@ -24,12 +27,23 @@ public class EventHandlerService {
   @Getter(PRIVATE)
   private final MessagePublisher messagePublisher;
 
+  /**
+   * Instantiates a new Event handler service.
+   *
+   * @param validationService the validation service
+   * @param messagePublisher  the message publisher
+   */
   @Autowired
   public EventHandlerService(PenRequestStudentRecordValidationService validationService, MessagePublisher messagePublisher) {
     this.validationService = validationService;
     this.messagePublisher = messagePublisher;
   }
 
+  /**
+   * Handle validate student demog data event.
+   *
+   * @param event the event
+   */
   @Async("subscriberExecutor")
   public void handleValidateStudentDemogDataEvent(Event event) {
     try {

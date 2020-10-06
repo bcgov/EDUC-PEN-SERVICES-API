@@ -68,6 +68,11 @@ public class PenValidationApiResourceApplication {
     }
   }
 
+  /**
+   * Thread pool task executor executor.
+   *
+   * @return the executor
+   */
   @Bean(name = "subscriberExecutor")
   public Executor threadPoolTaskExecutor() {
     ThreadFactory namedThreadFactory =

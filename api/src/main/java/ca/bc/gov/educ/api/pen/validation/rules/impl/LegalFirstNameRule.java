@@ -25,6 +25,11 @@ public class LegalFirstNameRule extends BaseRule {
 
   private final PENNameTextService penNameTextService;
 
+  /**
+   * Instantiates a new Legal first name rule.
+   *
+   * @param penNameTextService the pen name text service
+   */
   public LegalFirstNameRule(final PENNameTextService penNameTextService) {
     this.penNameTextService = penNameTextService;
   }

@@ -22,13 +22,24 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+/**
+ * The type Legal first name rule test.
+ */
 @RunWith(JUnitParamsRunner.class)
 public class LegalFirstNameRuleTest {
   private LegalFirstNameRule rule;
   private static List<PENNameText> penNameTexts;
+  /**
+   * The Service.
+   */
   @Mock
   PENNameTextService service;
 
+  /**
+   * Sets .
+   *
+   * @throws IOException the io exception
+   */
   @Before
   public void setup() throws IOException {
     MockitoAnnotations.initMocks(this);
@@ -42,6 +53,12 @@ public class LegalFirstNameRuleTest {
     }
   }
 
+  /**
+   * Test validate given different legal first name should return results.
+   *
+   * @param legalFirstName the legal first name
+   * @param expectedErrors the expected errors
+   */
   @Test
   @Parameters({
       "null, 1",

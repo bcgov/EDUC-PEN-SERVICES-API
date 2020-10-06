@@ -19,21 +19,35 @@ import java.util.stream.Collectors;
 
 import static lombok.AccessLevel.PRIVATE;
 
+/**
+ * The type Pen name text service.
+ */
 @Service
 @Slf4j
 public class PENNameTextService {
 
+  /**
+   * The constant PEN_NAME_TEXT.
+   */
   public static final String PEN_NAME_TEXT = "PEN_NAME_TEXT";
   private final Map<String, List<PENNameText>> penNameTextMap = new ConcurrentHashMap<>();
   private final ReadWriteLock penNameTextLock = new ReentrantReadWriteLock();
   @Getter(PRIVATE)
   private final PenNameTextRepository penNameTextRepository;
 
+  /**
+   * Instantiates a new Pen name text service.
+   *
+   * @param penNameTextRepository the pen name text repository
+   */
   @Autowired
   public PENNameTextService(final PenNameTextRepository penNameTextRepository) {
     this.penNameTextRepository = penNameTextRepository;
   }
 
+  /**
+   * Init.
+   */
   @PostConstruct
   public void init() {
     this.setPenNameTexts();
@@ -50,10 +64,18 @@ public class PENNameTextService {
     log.info("reloading cache completed..");
   }
 
+  /**
+   * Gets pen name texts.
+   *
+   * @return the pen name texts
+   */
   public List<PENNameText> getPenNameTexts() {
     Lock readLock = penNameTextLock.readLock();
     try {
       readLock.lock();
+      if (this.penNameTextMap.get(PEN_NAME_TEXT) == null || this.penNameTextMap.get(PEN_NAME_TEXT).isEmpty()) {
+        this.setPenNameTexts();
+      }
       return this.penNameTextMap.get(PEN_NAME_TEXT);
     } finally {
       readLock.unlock();

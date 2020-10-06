@@ -12,17 +12,29 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * The type Submitted pen rule test.
+ */
 @RunWith(JUnitParamsRunner.class)
 public class SubmittedPENRuleTest {
   private SubmittedPENRule rule;
 
 
+  /**
+   * Sets .
+   */
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
     rule = new SubmittedPENRule();
   }
 
+  /**
+   * Test validate given different pen should return results.
+   *
+   * @param submittedPEN   the submitted pen
+   * @param expectedErrors the expected errors
+   */
   @Test
   @Parameters({
       "null, 0",

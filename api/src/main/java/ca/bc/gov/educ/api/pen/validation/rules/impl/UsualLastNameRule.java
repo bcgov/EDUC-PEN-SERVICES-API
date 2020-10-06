@@ -21,6 +21,11 @@ import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValid
 public class UsualLastNameRule extends BaseRule {
   private final PENNameTextService penNameTextService;
 
+  /**
+   * Instantiates a new Usual last name rule.
+   *
+   * @param penNameTextService the pen name text service
+   */
   public UsualLastNameRule(final PENNameTextService penNameTextService) {
     this.penNameTextService = penNameTextService;
   }

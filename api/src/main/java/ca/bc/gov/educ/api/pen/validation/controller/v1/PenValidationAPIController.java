@@ -20,6 +20,11 @@ import java.util.List;
 public class PenValidationAPIController implements PenValidationAPIEndpoint {
   private final PenRequestStudentRecordValidationService service;
 
+  /**
+   * Instantiates a new Pen validation api controller.
+   *
+   * @param service the service
+   */
   @Autowired
   public PenValidationAPIController(PenRequestStudentRecordValidationService service) {
     this.service = service;

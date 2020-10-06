@@ -27,6 +27,11 @@ public class LegalMiddleNameRule extends BaseRule {
 
   private final PENNameTextService penNameTextService;
 
+  /**
+   * Instantiates a new Legal middle name rule.
+   *
+   * @param penNameTextService the pen name text service
+   */
   public LegalMiddleNameRule(final PENNameTextService penNameTextService) {
     this.penNameTextService = penNameTextService;
   }

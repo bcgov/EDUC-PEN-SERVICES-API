@@ -22,13 +22,24 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+/**
+ * The type Legal middle name rule test.
+ */
 @RunWith(JUnitParamsRunner.class)
 public class LegalMiddleNameRuleTest {
   private LegalMiddleNameRule rule;
   private static List<PENNameText> penNameTexts;
+  /**
+   * The Service.
+   */
   @Mock
   PENNameTextService service;
 
+  /**
+   * Sets .
+   *
+   * @throws IOException the io exception
+   */
   @Before
   public void setup() throws IOException {
     MockitoAnnotations.initMocks(this);
@@ -42,6 +53,12 @@ public class LegalMiddleNameRuleTest {
     }
   }
 
+  /**
+   * Test validate given different legal middle name should return results.
+   *
+   * @param legalMiddleName the legal middle name
+   * @param expectedErrors  the expected errors
+   */
   @Test
   @Parameters({
       "null, 0",
@@ -77,6 +94,14 @@ public class LegalMiddleNameRuleTest {
     assertThat(result).size().isEqualTo(expectedErrors);
   }
 
+  /**
+   * Test validate given different legal middle name and first name and last name should return results.
+   *
+   * @param legalMiddleName the legal middle name
+   * @param legalFirstName  the legal first name
+   * @param legalLastName   the legal last name
+   * @param expectedErrors  the expected errors
+   */
   @Test
   @Parameters({
       "null,XX,ahjks, 0",

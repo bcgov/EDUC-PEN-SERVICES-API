@@ -27,6 +27,9 @@ public abstract class BaseRule implements Rule {
    * The constant SPACE.
    */
   protected static final String SPACE = " ";
+  /**
+   * The constant FC.
+   */
   public static final String FC = "FC";
   /**
    * The Not allowed chars.

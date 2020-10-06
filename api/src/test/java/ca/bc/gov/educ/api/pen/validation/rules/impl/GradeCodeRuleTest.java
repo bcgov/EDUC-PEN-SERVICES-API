@@ -15,18 +15,33 @@ import java.time.format.ResolverStyle;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
+/**
+ * The type Grade code rule test.
+ */
 @RunWith(JUnitParamsRunner.class)
 public class GradeCodeRuleTest {
 
   private GradeCodeRule gradeCodeRule;
+  /**
+   * The Rest utils.
+   */
   @MockBean
   RestUtils restUtils;
 
+  /**
+   * Sets up.
+   */
   @Before
   public void setUp() {
     gradeCodeRule = new GradeCodeRule(restUtils);
   }
 
+  /**
+   * Test get school year given different inputs should return calculated year.
+   *
+   * @param currentDate  the current date
+   * @param expectedYear the expected year
+   */
   @Test
   @Parameters({
       "20200601, 2020",
@@ -49,6 +64,10 @@ public class GradeCodeRuleTest {
    * If current month is Oct thru May, use the prior Sept 30.
    * So if current date is in Feb of 2021, compare the student's birthdate to 2020-09-30 (the prior Sept 30). Find the difference in years between this date and the student's birthdate.
    * E.g. if student was born 2011-08-08, difference between birthdate and 2020-09-30 is 9 full years; the student's age as of 2021-09-30 was 9.
+   *
+   * @param currentDate the current date
+   * @param dob         the dob
+   * @param expectedAge the expected age
    */
   @Test
   @Parameters({

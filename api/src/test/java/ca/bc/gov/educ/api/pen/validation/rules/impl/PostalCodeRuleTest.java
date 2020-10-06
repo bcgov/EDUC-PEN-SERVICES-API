@@ -12,18 +12,30 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * The type Postal code rule test.
+ */
 @RunWith(JUnitParamsRunner.class)
 public class PostalCodeRuleTest {
 
   private PostalCodeRule rule;
 
 
+  /**
+   * Sets .
+   */
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
     rule = new PostalCodeRule();
   }
 
+  /**
+   * Validate.
+   *
+   * @param postalCode     the postal code
+   * @param expectedErrors the expected errors
+   */
   @Test
   @Parameters({
       "null, 0",

@@ -35,6 +35,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * The type Pen validation api controller test.
+ */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
@@ -44,16 +47,27 @@ public class PenValidationAPIControllerTest {
 
   private List<GenderCode> genderCodes;
   private List<GradeCode> gradeCodes;
+  /**
+   * The Controller.
+   */
   @Autowired
   PenValidationAPIController controller;
   /**
    * The Mock mvc.
    */
   private MockMvc mockMvc;
+  /**
+   * The Rest utils.
+   */
   @Autowired
   RestUtils restUtils;
 
 
+  /**
+   * Sets up.
+   *
+   * @throws IOException the io exception
+   */
   @Before
   public void setUp() throws IOException {
     MockitoAnnotations.initMocks(this);
@@ -74,6 +88,11 @@ public class PenValidationAPIControllerTest {
     }
   }
 
+  /**
+   * Test validate student data given valid payload should return status ok with blank array.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenValidPayload_shouldReturnStatusOkWithBlankArray() throws Exception {
@@ -88,6 +107,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid submitted pen should return status ok with validation results.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidSubmittedPEN_shouldReturnStatusOkWithValidationResults() throws Exception {
@@ -102,6 +126,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given blank legal surname should return status ok with validation results.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenBlankLegalSurname_shouldReturnStatusOkWithValidationResults() throws Exception {
@@ -116,6 +145,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid legal surname which matched the blocked name should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidLegalSurnameWhichMatchedTheBlockedName_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -130,6 +164,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid legal surname which matched the blocked name should return status ok with validation results as warning.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidLegalSurnameWhichMatchedTheBlockedName_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
@@ -144,6 +183,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given one char legal surname should return status ok with validation results as warning.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenOneCharLegalSurname_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
@@ -158,6 +202,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given blank legal first name should return status ok with issue type code blank field.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenBlankLegalFirstName_shouldReturnStatusOkWithIssueTypeCodeBlankField() throws Exception {
@@ -172,6 +221,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given apostrophe in legal first name should return status ok with issue type code apostrophe.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenApostropheInLegalFirstName_shouldReturnStatusOkWithIssueTypeCodeApostrophe() throws Exception {
@@ -186,6 +240,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid legal first name which matched the blocked name should return status ok with issue type code blocked name.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidLegalFirstNameWhichMatchedTheBlockedName_shouldReturnStatusOkWithIssueTypeCodeBlockedName() throws Exception {
@@ -200,6 +259,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid legal first name should return status ok with validation results as warning issue type code blankinname.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidLegalFirstName_shouldReturnStatusOkWithValidationResultsAsWarningIssueTypeCodeBLANKINNAME() throws Exception {
@@ -214,6 +278,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given one char legal first name should return status ok with validation results as warning.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenOneCharLegalFirstName_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
@@ -228,6 +297,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid char in legal first name should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -242,6 +316,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid char in legal first name 2 should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName2_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -256,6 +335,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid char in legal first name 3 should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName3_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -270,6 +354,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid char in legal first name 4 should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName4_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -284,6 +373,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid char in legal first name 5 should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName5_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -298,6 +392,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid char in legal first name 6 should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName6_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -312,6 +411,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid char in legal first name 7 should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName7_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -326,6 +430,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid char in legal first name 8 should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName8_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -340,6 +449,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid char in legal first name 9 should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName9_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -354,6 +468,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given same legal mid as legal first should return status ok with validation results as warning.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenSameLegalMidAsLegalFirst_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
@@ -369,6 +488,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given same legal mid as legal last should return status ok with validation results as warning.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenSameLegalMidAsLegalLast_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
@@ -384,6 +508,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid gender code should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidGenderCode_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -398,6 +527,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given blank gender code should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenBlankGenderCode_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -412,6 +546,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid postal code should return status ok with validation results as warning.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidPostalCode_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
@@ -426,6 +565,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given dob in invalid format should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenDOBInInvalidFormat_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -440,6 +584,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given blank dob should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenBlankDOB_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -454,6 +603,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given dob earlier to 1900 should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenDOBEarlierTo1900_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -468,6 +622,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given dob later than current date should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenDOBLaterThanCurrentDate_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -482,6 +641,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given invalid grade code should return status ok with validation results as error.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidGradeCode_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
@@ -496,6 +660,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given inappropriate age for grade code should return status ok with validation results as warning.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInappropriateAgeForGradeCode_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
@@ -510,6 +679,11 @@ public class PenValidationAPIControllerTest {
 
   }
 
+  /**
+   * Test validate student data given inappropriate age for grade code 2 should return status ok with validation results as warning.
+   *
+   * @throws Exception the exception
+   */
   @Test
   @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInappropriateAgeForGradeCode2_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {

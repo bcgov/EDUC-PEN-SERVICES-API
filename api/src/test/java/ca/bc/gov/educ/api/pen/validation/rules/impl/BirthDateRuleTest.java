@@ -11,15 +11,27 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * The type Birth date rule test.
+ */
 @RunWith(JUnitParamsRunner.class)
 public class BirthDateRuleTest {
   private BirthDateRule birthDateRule;
 
+  /**
+   * Sets .
+   */
   @Before
   public void setup() {
     birthDateRule = new BirthDateRule();
   }
 
+  /**
+   * Test validate given different dob should return results.
+   *
+   * @param dob            the dob
+   * @param expectedErrors the expected errors
+   */
   @Test
   @Parameters({
       "null, 1",

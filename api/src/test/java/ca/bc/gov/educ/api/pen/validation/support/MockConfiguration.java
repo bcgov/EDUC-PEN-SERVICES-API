@@ -26,12 +26,22 @@ public class MockConfiguration {
     return Mockito.mock(RestUtils.class);
   }
 
+  /**
+   * Message publisher message publisher.
+   *
+   * @return the message publisher
+   */
   @Bean
   @Primary
   public MessagePublisher messagePublisher() {
     return Mockito.mock(MessagePublisher.class);
   }
 
+  /**
+   * Message subscriber message subscriber.
+   *
+   * @return the message subscriber
+   */
   @Bean
   @Primary
   public MessageSubscriber messageSubscriber() {

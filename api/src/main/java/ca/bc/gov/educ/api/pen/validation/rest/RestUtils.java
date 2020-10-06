@@ -32,7 +32,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Component
 @Slf4j
 public class RestUtils {
+  /**
+   * The constant GRADE_CODES.
+   */
   public static final String GRADE_CODES = "gradeCodes";
+  /**
+   * The constant GENDER_CODES.
+   */
   public static final String GENDER_CODES = "genderCodes";
   private final Map<String, List<GenderCode>> genderCodesMap = new ConcurrentHashMap<>();
   private final Map<String, List<GradeCode>> gradeCodesMap = new ConcurrentHashMap<>();
@@ -77,6 +83,9 @@ public class RestUtils {
     return new OAuth2RestTemplate(resourceDetails, new DefaultOAuth2ClientContext());
   }
 
+  /**
+   * Init.
+   */
   @PostConstruct
   public void init() {
     setGenderCodesMap();
@@ -100,6 +109,11 @@ public class RestUtils {
     }
   }
 
+  /**
+   * Gets grade codes.
+   *
+   * @return the grade codes
+   */
   public List<GradeCode> getGradeCodes() {
     Lock readLock = gradeLock.readLock();
     try {
@@ -121,6 +135,9 @@ public class RestUtils {
     log.info("reloading cache completed..");
   }
 
+  /**
+   * Sets gender codes map.
+   */
   public void setGenderCodesMap() {
     Lock writeLock = genderLock.writeLock();
     try {
@@ -139,6 +156,9 @@ public class RestUtils {
   }
 
 
+  /**
+   * Sets grade codes map.
+   */
   public void setGradeCodesMap() {
     Lock writeLock = gradeLock.writeLock();
     try {

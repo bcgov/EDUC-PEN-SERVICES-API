@@ -30,6 +30,7 @@ public class RulesConfig {
   /**
    * Legal last name rule rule.
    *
+   * @param penNameTextService the pen name text service
    * @return the rule
    */
   @Bean
@@ -42,6 +43,7 @@ public class RulesConfig {
   /**
    * Legal first name rule rule.
    *
+   * @param penNameTextService the pen name text service
    * @return the rule
    */
   @Bean
@@ -54,6 +56,7 @@ public class RulesConfig {
   /**
    * Legal middle name rule rule.
    *
+   * @param penNameTextService the pen name text service
    * @return the rule
    */
   @Bean
@@ -66,6 +69,7 @@ public class RulesConfig {
   /**
    * Usual first name rule rule.
    *
+   * @param penNameTextService the pen name text service
    * @return the rule
    */
   @Bean
@@ -78,6 +82,7 @@ public class RulesConfig {
   /**
    * Usual last name rule rule.
    *
+   * @param penNameTextService the pen name text service
    * @return the rule
    */
   @Bean
@@ -90,6 +95,7 @@ public class RulesConfig {
   /**
    * Usual middle name rule rule.
    *
+   * @param penNameTextService the pen name text service
    * @return the rule
    */
   @Bean
@@ -134,6 +140,12 @@ public class RulesConfig {
     return new BirthDateRule();
   }
 
+  /**
+   * Grade code rule rule.
+   *
+   * @param restUtils the rest utils
+   * @return the rule
+   */
   @Bean
   @Order(11)
   @Autowired

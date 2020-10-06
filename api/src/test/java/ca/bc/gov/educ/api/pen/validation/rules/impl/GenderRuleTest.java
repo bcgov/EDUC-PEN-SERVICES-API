@@ -22,16 +22,27 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+/**
+ * The type Gender rule test.
+ */
 @RunWith(JUnitParamsRunner.class)
 public class GenderRuleTest {
 
   private static GenderRule rule;
   private static List<GenderCode> genderCodes;
 
+  /**
+   * The constant restUtils.
+   */
   @Mock
   static RestUtils restUtils;
 
 
+  /**
+   * Sets .
+   *
+   * @throws IOException the io exception
+   */
   @Before
   public void setup() throws IOException {
     MockitoAnnotations.initMocks(this);
@@ -45,6 +56,12 @@ public class GenderRuleTest {
     }
   }
 
+  /**
+   * Test validate given different gender codes should return results.
+   *
+   * @param gender         the gender
+   * @param expectedErrors the expected errors
+   */
   @Test
   @Parameters({
       "null, 1",
