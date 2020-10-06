@@ -89,6 +89,7 @@ public class MessageSubscriber extends MessagePubSub {
             var eventString = new String(message.getData());
             var event = JsonUtil.getJsonObjectFromString(Event.class, eventString);
             eventHandlerService.handleValidateStudentDemogDataEvent(event);
+            log.debug("Event is :: {}", event);
           } catch (final Exception e) {
             log.error("Exception ", e);
           }
