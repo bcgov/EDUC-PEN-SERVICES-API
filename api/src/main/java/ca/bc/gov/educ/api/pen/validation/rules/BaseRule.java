@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValidationIs
 import ca.bc.gov.educ.api.pen.validation.model.PENNameText;
 import ca.bc.gov.educ.api.pen.validation.service.PENNameTextService;
 import ca.bc.gov.educ.api.pen.validation.struct.v1.PenRequestStudentValidationIssue;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 
@@ -22,15 +23,16 @@ import static ca.bc.gov.educ.api.pen.validation.constants.PenRequestStudentValid
 /**
  * The type Base rule.
  */
+@Slf4j
 public abstract class BaseRule implements Rule {
-  /**
-   * The constant SPACE.
-   */
-  protected static final String SPACE = " ";
   /**
    * The constant FC.
    */
   public static final String FC = "FC";
+  /**
+   * The constant SPACE.
+   */
+  protected static final String SPACE = " ";
   /**
    * The Not allowed chars.
    */
@@ -179,48 +181,58 @@ public abstract class BaseRule implements Rule {
    * @param penNameTexts  the pen name texts
    */
   protected void checkFieldValueExactMatchWithInvalidText(List<PenRequestStudentValidationIssue> results, String fieldValue, PenRequestStudentValidationFieldCode fieldCode, boolean isInteractive, List<PENNameText> penNameTexts) {
-    var filteredList = penNameTexts.stream().filter(el -> el.getEffectiveDate().isBefore(LocalDateTime.now()) && el.getExpiryDate().isAfter(LocalDateTime.now()) && fieldValue.equalsIgnoreCase(el.getInvalidText())).collect(Collectors.toList());
-    switch (fieldCode) {
-      case LEGAL_FIRST:
-        if (!filteredList.isEmpty()) {
-          boolean isError = filteredList.stream().anyMatch(el -> el.getLegalGivenCheck().equalsIgnoreCase(FC));
-          createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
-        }
-        break;
-      case LEGAL_LAST:
-        if (!filteredList.isEmpty()) {
-          boolean isError = filteredList.stream().anyMatch(el -> el.getLegalSurnameCheck().equalsIgnoreCase(FC));
-          createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
-        }
-        break;
-      case LEGAL_MID:
-        if (!filteredList.isEmpty()) {
-          boolean isError = filteredList.stream().anyMatch(el -> el.getLegalMiddleCheck().equalsIgnoreCase(FC));
-          createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
-        }
-        break;
-      case USUAL_LAST:
-        if (!filteredList.isEmpty()) {
-          boolean isError = filteredList.stream().anyMatch(el -> el.getUsualSurnameCheck().equalsIgnoreCase(FC));
-          createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
-        }
-        break;
-      case USUAL_FIRST:
-        if (!filteredList.isEmpty()) {
-          boolean isError = filteredList.stream().anyMatch(el -> el.getUsualGivenCheck().equalsIgnoreCase(FC));
-          createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
-        }
-        break;
-      case USUAL_MID:
-        if (!filteredList.isEmpty()) {
-          boolean isError = filteredList.stream().anyMatch(el -> el.getUsualMiddleCheck().equalsIgnoreCase(FC));
-          createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
-        }
-        break;
-      default:
-        break;
+    if (fieldValue != null && fieldCode != null && penNameTexts != null) {
+      var filteredList = penNameTexts.stream().filter(el ->
+          (el.getEffectiveDate() != null && el.getExpiryDate() != null
+              && el.getEffectiveDate().isBefore(LocalDateTime.now())
+              && el.getExpiryDate().isAfter(LocalDateTime.now())
+              && fieldValue.equalsIgnoreCase(el.getInvalidText())))
+          .collect(Collectors.toList());
+      switch (fieldCode) {
+        case LEGAL_FIRST:
+          if (!filteredList.isEmpty()) {
+            boolean isError = filteredList.stream().anyMatch(el -> FC.equalsIgnoreCase(el.getLegalGivenCheck()));
+            createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+          }
+          break;
+        case LEGAL_LAST:
+          if (!filteredList.isEmpty()) {
+            boolean isError = filteredList.stream().anyMatch(el -> FC.equalsIgnoreCase(el.getLegalSurnameCheck()));
+            createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+          }
+          break;
+        case LEGAL_MID:
+          if (!filteredList.isEmpty()) {
+            boolean isError = filteredList.stream().anyMatch(el -> FC.equalsIgnoreCase(el.getLegalMiddleCheck()));
+            createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+          }
+          break;
+        case USUAL_LAST:
+          if (!filteredList.isEmpty()) {
+            boolean isError = filteredList.stream().anyMatch(el -> FC.equalsIgnoreCase(el.getUsualSurnameCheck()));
+            createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+          }
+          break;
+        case USUAL_FIRST:
+          if (!filteredList.isEmpty()) {
+            boolean isError = filteredList.stream().anyMatch(el -> FC.equalsIgnoreCase(el.getUsualGivenCheck()));
+            createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+          }
+          break;
+        case USUAL_MID:
+          if (!filteredList.isEmpty()) {
+            boolean isError = filteredList.stream().anyMatch(el -> FC.equalsIgnoreCase(el.getUsualMiddleCheck()));
+            createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+          }
+          break;
+        default:
+          break;
+      }
+    } else {
+      if (log.isDebugEnabled()) {
+        log.debug("Skip this check as one of the values are null  fieldValue :: {}, fieldCode :: {} , penNameTexts :: {} ", fieldValue, fieldCode, penNameTexts);
+      }
     }
-
   }
 
   private void createValidationErrorForInteractiveAndBatch(List<PenRequestStudentValidationIssue> results, PenRequestStudentValidationFieldCode fieldCode, boolean isInteractive, boolean isError) {
