@@ -51,6 +51,7 @@ public class EventHandlerService {
       var result = getValidationService().validateStudentRecord(validationPayload);
       if (result.isEmpty()) {
         event.setEventOutcome(VALIDATION_SUCCESS_NO_ERROR_WARNING);
+        event.setEventPayload(""); // send a blank response.
       } else {
         var isError = result.stream().anyMatch(x -> x.getPenRequestBatchValidationIssueSeverityCode().equals(PenRequestStudentValidationIssueSeverityCode.ERROR.toString()));
         if (isError) {
