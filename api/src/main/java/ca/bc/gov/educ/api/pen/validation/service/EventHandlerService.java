@@ -60,6 +60,7 @@ public class EventHandlerService {
         }
         event.setEventPayload(JsonUtil.getJsonStringFromObject(result));
       }
+      log.debug("responding back :: {}", event);
       getMessagePublisher().dispatchMessage(event.getReplyTo(), JsonUtil.getJsonStringFromObject(event).getBytes());
     } catch (JsonProcessingException e) {
       log.error("JsonProcessingException for saga ::, {} , :: {}", event.getSagaId(), e);
