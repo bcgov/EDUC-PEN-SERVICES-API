@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @Slf4j
 @SuppressWarnings({"java:S112", "java:S100", "java:S1192","java:S2699"})
-public class PenValidationAPIControllerTest {
+public class PenServicesAPIControllerTest {
 
   private List<GenderCode> genderCodes;
   private List<GradeCode> gradeCodes;
@@ -51,7 +51,7 @@ public class PenValidationAPIControllerTest {
    * The Controller.
    */
   @Autowired
-  PenValidationAPIController controller;
+  PenServicesAPIController controller;
   /**
    * The Mock mvc.
    */
