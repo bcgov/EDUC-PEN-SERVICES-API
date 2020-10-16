@@ -47,4 +47,16 @@ public class ApplicationProperties {
    */
   @Value("${nats.streaming.server.clusterId}")
   private String natsClusterId;
+
+  /**
+   * The Environment.
+   */
+  @Value("${environment}")
+  private String environment;
+
+  /**
+   * The Redis url.
+   */
+  @Value("${url.redis}")
+  private String redisUrl;
 }

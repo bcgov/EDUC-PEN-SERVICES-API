@@ -1,26 +1,28 @@
 package ca.bc.gov.educ.api.pen.services.rest;
 
 import ca.bc.gov.educ.api.pen.services.properties.ApplicationProperties;
+import ca.bc.gov.educ.api.pen.services.struct.*;
 import ca.bc.gov.educ.api.pen.services.struct.v1.GenderCode;
 import ca.bc.gov.educ.api.pen.services.struct.v1.GradeCode;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -174,5 +176,46 @@ public class RestUtils {
     } finally {
       writeLock.unlock();
     }
+  }
+
+  /**
+   * Gets latest pen number from student api.
+   *
+   * @param transactionID the transactionID
+   * @return the latest pen number from student api
+   * @throws JsonProcessingException the json processing exception
+   */
+  @Retryable(value = {Exception.class}, backoff = @Backoff(multiplier = 2, delay = 2000))
+  public int getLatestPenNumberFromStudentAPI(String transactionID) throws JsonProcessingException {
+    RestTemplate restTemplate = getRestTemplate();
+    SearchCriteria criteria = SearchCriteria.builder().key("pen").operation(FilterOperation.STARTS_WITH).value("1").valueType(ValueType.STRING).build();
+    List<SearchCriteria> criteriaList = new ArrayList<>();
+    criteriaList.add(criteria);
+    List<Search> searches = new LinkedList<>();
+    searches.add(Search.builder().searchCriteriaList(criteriaList).build());
+    ObjectMapper objectMapper = new ObjectMapper();
+    String criteriaJSON = objectMapper.writeValueAsString(searches);
+    UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(props.getStudentApiURL() + "/paginated")
+        .queryParam("searchCriteriaList", criteriaJSON)
+        .queryParam("pageSize", 1)
+        .queryParam("sort", "{\"pen\":\"DESC\"}");
+
+    DefaultUriBuilderFactory defaultUriBuilderFactory = new DefaultUriBuilderFactory();
+    defaultUriBuilderFactory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
+    restTemplate.setUriTemplateHandler(defaultUriBuilderFactory);
+
+    ParameterizedTypeReference<RestPageImpl<Student>> responseType = new ParameterizedTypeReference<>() {
+    };
+    var url = builder.toUriString();
+    log.info("url is :: {}", url);
+    ResponseEntity<RestPageImpl<Student>> studentResponse = restTemplate.exchange(url, HttpMethod.GET, null, responseType);
+
+    var optionalStudent = Objects.requireNonNull(studentResponse.getBody()).getContent().stream().findFirst();
+    if (optionalStudent.isPresent()) {
+      var firstStudent = optionalStudent.get();
+      return Integer.parseInt(firstStudent.getPen().substring(0, 8));
+    }
+    log.warn("PEN could not be retrieved, returning 0 for transactionID :: {}", transactionID);
+    return 0;
   }
 }

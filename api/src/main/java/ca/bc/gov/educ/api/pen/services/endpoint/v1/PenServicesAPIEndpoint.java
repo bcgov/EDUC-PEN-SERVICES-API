@@ -9,21 +9,22 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * The interface Pen validation api endpoint.
  */
-@RequestMapping("/api/v1/pen-validation")
-@OpenAPIDefinition(info = @Info(title = "API for Pen Registry data Validation.", description = "This API is responsible for data validation of student requests .", version = "1"), security = {@SecurityRequirement(name = "OAUTH2", scopes = {"VALIDATE_STUDENT_DEMOGRAPHICS"})})
-public interface PenValidationAPIEndpoint {
+@RequestMapping("/api/v1/pen-services")
+@OpenAPIDefinition(info = @Info(title = "API to provide different miscellaneous services for Pen Registry.", description = "This API is responsible for providing different miscellaneous services.", version = "1"), security = {@SecurityRequirement(name = "OAUTH2", scopes = {"VALIDATE_STUDENT_DEMOGRAPHICS"})})
+public interface PenServicesAPIEndpoint {
 
   /**
    * Validate student data.
@@ -31,11 +32,18 @@ public interface PenValidationAPIEndpoint {
    * @param validationPayload the validation payload
    * @return the list
    */
-  @PostMapping("/student-request")
-  @PreAuthorize("#oauth2.hasAnyScope('VALIDATE_STUDENT_DEMOGRAPHICS')")
+  @PostMapping("/validation/student-request")
+  @PreAuthorize("#oauth2.hasScope('VALIDATE_STUDENT_DEMOGRAPHICS')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "400", description = "BAD REQUEST")})
   @Transactional
   @Tag(name = "Endpoint to validate student request.", description = "Endpoint to validate student request.")
   @Schema(name = "PenRequestStudentValidationIssue", implementation = PenRequestStudentValidationIssue.class)
   List<PenRequestStudentValidationIssue> validateStudentData(@Validated @RequestBody PenRequestStudentValidationPayload validationPayload);
+
+  @GetMapping("/next-pen-number")
+  @PreAuthorize("#oauth2.hasScope('GET_NEXT_PEN_NUMBER')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
+  @Transactional
+  @Tag(name = "Endpoint to generate a new PEN number and return the same.", description = "Endpoint to generate a new PEN number and return the same. The transaction ID is mandatory, so that for each unique transaction only one PEN is issued.")
+  CompletableFuture<String> getNextPenNumber(@RequestParam("transactionID") UUID transactionID);
 }

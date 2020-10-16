@@ -3,7 +3,6 @@ package ca.bc.gov.educ.api.pen.services;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,8 +34,6 @@ public class PenServicesApiResourceApplication {
    * @param args the input arguments
    */
   public static void main(String[] args) {
-    SpringApplication application = new SpringApplication(PenServicesApiResourceApplication.class);
-    application.setApplicationStartup(new BufferingApplicationStartup(1000));
     SpringApplication.run(PenServicesApiResourceApplication.class, args);
   }
 

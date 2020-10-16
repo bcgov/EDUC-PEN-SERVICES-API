@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.pen.services.rest.RestUtils;
 import ca.bc.gov.educ.api.pen.services.struct.v1.GenderCode;
 import ca.bc.gov.educ.api.pen.services.struct.v1.GradeCode;
 import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
+import ca.bc.gov.educ.api.pen.services.support.TestRedisConfiguration;
 import ca.bc.gov.educ.api.pen.services.support.WithMockOAuth2Scope;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -39,11 +40,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * The type Pen validation api controller test.
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = TestRedisConfiguration.class)
 @ActiveProfiles("test")
 @Slf4j
 @SuppressWarnings({"java:S112", "java:S100", "java:S1192","java:S2699"})
-public class PenValidationAPIControllerTest {
+public class PenServicesAPIControllerTest {
 
   private List<GenderCode> genderCodes;
   private List<GradeCode> gradeCodes;
@@ -51,7 +52,7 @@ public class PenValidationAPIControllerTest {
    * The Controller.
    */
   @Autowired
-  PenValidationAPIController controller;
+  PenServicesAPIController controller;
   /**
    * The Mock mvc.
    */
@@ -101,7 +102,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(payload))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
 
@@ -120,7 +121,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -139,7 +140,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -158,7 +159,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -177,7 +178,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -196,7 +197,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -215,7 +216,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -234,7 +235,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -253,7 +254,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -272,7 +273,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -291,7 +292,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -310,7 +311,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -329,7 +330,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -348,7 +349,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -367,7 +368,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -386,7 +387,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
 
@@ -405,7 +406,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
 
@@ -424,7 +425,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
 
@@ -443,7 +444,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
 
@@ -462,7 +463,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
 
@@ -482,7 +483,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -502,7 +503,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -521,7 +522,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -540,7 +541,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -559,7 +560,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -578,7 +579,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -597,7 +598,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -616,7 +617,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -635,7 +636,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -654,7 +655,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -673,7 +674,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
@@ -693,7 +694,7 @@ public class PenValidationAPIControllerTest {
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
     when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
     mockMvc
-        .perform(post("/api/v1/pen-validation/student-request")
+        .perform(post("/api/v1/pen-services/validation/student-request")
             .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
