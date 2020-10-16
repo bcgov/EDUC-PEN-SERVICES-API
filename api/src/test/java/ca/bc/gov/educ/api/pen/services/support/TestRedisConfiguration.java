@@ -12,7 +12,7 @@ public class TestRedisConfiguration {
     private final RedisServer redisServer;
  
     public TestRedisConfiguration() {
-        this.redisServer = new RedisServer();
+        this.redisServer = new RedisServer(6370);
     }
  
     @PostConstruct
