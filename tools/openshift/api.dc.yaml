@@ -120,7 +120,7 @@ objects:
   kind: Service
   metadata:
     annotations:
-      service.alpha.openshift.io/serving-cert-secret-name: "pen-validation-api-cert"
+      service.alpha.openshift.io/serving-cert-secret-name: "pen-services-api-cert"
     labels:
       app: "${APP_NAME}-${JOB_NAME}"
     name: "${APP_NAME}-${JOB_NAME}"
