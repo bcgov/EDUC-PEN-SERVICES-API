@@ -177,6 +177,13 @@
       <artifactId>redisson-spring-data-23</artifactId>
       <version>3.13.4</version>
     </dependency>
+    <dependency>
+      <groupId>it.ozimov</groupId>
+      <artifactId>embedded-redis</artifactId>
+      <version>0.7.2</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
