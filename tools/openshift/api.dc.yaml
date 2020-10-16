@@ -23,7 +23,7 @@ objects:
     template:
       metadata:
         annotations:
-          openshift.io/generated-by: penvalidationapi
+          openshift.io/generated-by: penservicesapi
           prometheus.io/path: /actuator/prometheus
           prometheus.io/port: '8080'
           prometheus.io/scrape: 'true'
@@ -107,7 +107,7 @@ objects:
         volumes:
         - name: tls-certs
           secret:
-            secretName: pen-validation-api-cert
+            secretName: pen-services-api-cert
         - name: log-storage
           emptyDir: {}
         - name: flb-sc-config-volume
