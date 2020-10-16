@@ -48,14 +48,15 @@ public class RedissonSpringDataConfig {
   @Bean(destroyMethod = "shutdown")
   public RedissonClient redisson() {
     RedissonClient redisson;
+    Config config = new Config();
     if ("local".equals(applicationProperties.getEnvironment())) {
-      redisson= Redisson.create();
+      config.useSingleServer()
+          .setAddress(applicationProperties.getRedisUrl());
     } else {
-      Config config = new Config();
       config.useClusterServers()
           .addNodeAddress(applicationProperties.getRedisUrl());
-      redisson = Redisson.create(config);
     }
+    redisson= Redisson.create(config);
     redisson.getConfig().setCodec(StringCodec.INSTANCE);
     return redisson;
   }

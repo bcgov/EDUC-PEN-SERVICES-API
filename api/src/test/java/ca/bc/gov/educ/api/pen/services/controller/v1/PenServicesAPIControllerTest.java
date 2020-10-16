@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.pen.services.rest.RestUtils;
 import ca.bc.gov.educ.api.pen.services.struct.v1.GenderCode;
 import ca.bc.gov.educ.api.pen.services.struct.v1.GradeCode;
 import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
+import ca.bc.gov.educ.api.pen.services.support.TestRedisConfiguration;
 import ca.bc.gov.educ.api.pen.services.support.WithMockOAuth2Scope;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -39,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * The type Pen validation api controller test.
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = TestRedisConfiguration.class)
 @ActiveProfiles("test")
 @Slf4j
 @SuppressWarnings({"java:S112", "java:S100", "java:S1192","java:S2699"})
