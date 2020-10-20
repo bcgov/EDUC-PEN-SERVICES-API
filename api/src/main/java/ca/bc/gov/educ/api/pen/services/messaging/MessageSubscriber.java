@@ -15,6 +15,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static ca.bc.gov.educ.api.pen.services.constants.TopicsEnum.PEN_SERVICES_API_TOPIC;
+
 /**
  * This listener uses durable queue groups of nats streaming client. A durable
  * queue group allows you to have all members leave but still maintain state.
@@ -35,8 +37,6 @@ import java.util.concurrent.TimeoutException;
 @SuppressWarnings({"java:S2142","java:S112"})
 public class MessageSubscriber extends MessagePubSub {
 
-
-  private static final String PEN_VALIDATION_API_TOPIC = "PEN_VALIDATION_API_TOPIC";
   private final EventHandlerService eventHandlerService;
 
   /**
@@ -65,12 +65,10 @@ public class MessageSubscriber extends MessagePubSub {
    */
   @PostConstruct
   public void subscribe() {
-
-
-    String queue = PEN_VALIDATION_API_TOPIC.replace("_", "-");
+    String queue = PEN_SERVICES_API_TOPIC.toString().replace("_", "-");
     SubscriptionOptions options = new SubscriptionOptions.Builder().durableName(queue + "-consumer").build();// ":" is not allowed in durable name by NATS.
     try {
-      connection.subscribe(PEN_VALIDATION_API_TOPIC, queue, onMessage(), options);
+      connection.subscribe(PEN_SERVICES_API_TOPIC.toString(), queue, onMessage(), options);
     } catch (IOException | InterruptedException | TimeoutException e) {
       throw new RuntimeException(e.getMessage());
     }
@@ -88,7 +86,7 @@ public class MessageSubscriber extends MessagePubSub {
           try {
             var eventString = new String(message.getData());
             var event = JsonUtil.getJsonObjectFromString(Event.class, eventString);
-            eventHandlerService.handleValidateStudentDemogDataEvent(event);
+            eventHandlerService.handleEvent(event);
             log.debug("Event is :: {}", event);
           } catch (final Exception e) {
             log.error("Exception ", e);

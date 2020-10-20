@@ -7,5 +7,10 @@ public enum EventType {
   /**
    * Validate student demographics event type.
    */
-  VALIDATE_STUDENT_DEMOGRAPHICS
+  VALIDATE_STUDENT_DEMOGRAPHICS,
+
+  /**
+   * Get the next PEN number.
+   */
+  GET_NEXT_PEN_NUMBER
 }

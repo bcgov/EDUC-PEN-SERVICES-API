@@ -15,5 +15,10 @@ public enum EventOutcome {
   /**
    * Validation success with only warning event outcome.
    */
-  VALIDATION_SUCCESS_WITH_ONLY_WARNING
+  VALIDATION_SUCCESS_WITH_ONLY_WARNING,
+
+  /**
+   * Get the next PEN number
+   */
+  NEXT_PEN_NUMBER_RETRIEVED
 }
