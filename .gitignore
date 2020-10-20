@@ -26,3 +26,6 @@ api/pen-validation-api.iml
 api/.idea
 api/src/main/resources/application-local.properties
 api/src/main/resources/*.http
+
+.idea
+*.iml
