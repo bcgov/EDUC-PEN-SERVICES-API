@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.pen.services.endpoint.v1;
 
-import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationIssue;
-import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
+import ca.bc.gov.educ.api.pen.services.struct.v1.*;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -46,4 +44,34 @@ public interface PenServicesAPIEndpoint {
   @Transactional
   @Tag(name = "Endpoint to generate a new PEN number and return the same.", description = "Endpoint to generate a new PEN number and return the same. The transaction ID is mandatory, so that for each unique transaction only one PEN is issued.")
   CompletableFuture<String> getNextPenNumber(@RequestParam("transactionID") UUID transactionID);
+
+  /**
+   * Gets list of pen request batch student validation field codes
+   *
+   * @return the list
+   */
+  @PreAuthorize("#oauth2.hasScope('READ_VALIDATION_CODES')")
+  @GetMapping("/validation/issue-field-code")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
+  List<PenRequestBatchStudentValidationFieldCode> getPrbStudentValidationIssueFieldCodes();
+
+  /**
+   * Gets list of pen request batch student validation severity codes
+   *
+   * @return the list
+   */
+  @PreAuthorize("#oauth2.hasScope('READ_VALIDATION_CODES')")
+  @GetMapping("/validation/issue-severity-code")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
+  List<PenRequestBatchStudentValidationIssueSeverityCode> getPrbStudentValidationIssueSeverityCodes();
+
+  /**
+   * Gets list of pen request batch student validation type codes
+   *
+   * @return the list
+   */
+  @PreAuthorize("#oauth2.hasScope('READ_VALIDATION_CODES')")
+  @GetMapping("/validation/issue-type-code")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
+  List<PenRequestBatchStudentValidationIssueTypeCode> getPrbStudentValidationIssueTypeCodes();
 }
