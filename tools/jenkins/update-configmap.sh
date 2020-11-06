@@ -57,6 +57,10 @@ $KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body
 
 #VALIDATE_STUDENT_DEMOGRAPHICS
 $KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body "{\"description\": \"get the next pen number\",\"id\": \"GET_NEXT_PEN_NUMBER\",\"name\": \"GET_NEXT_PEN_NUMBER\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
+#READ_VALIDATION_CODES
+$KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body "{\"description\": \"Scope to access validation issue codes\",\"id\": \"READ_VALIDATION_CODES\",\"name\": \"READ_VALIDATION_CODES\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
 ###########################################################
 #Setup for config-map
 ###########################################################
