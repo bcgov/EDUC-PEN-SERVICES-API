@@ -91,7 +91,7 @@ public class PenServicesAPIControllerTest {
    */
   @Before
   public void setUp() throws IOException {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     if (genderCodes == null) {
       final File file = new File(

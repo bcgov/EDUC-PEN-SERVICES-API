@@ -36,17 +36,6 @@ public class ApplicationProperties {
    */
   @Value("${url.api.student}")
   private String studentApiURL;
-  /**
-   * The Nats url.
-   */
-  @Value("${nats.streaming.server.url}")
-  private String natsUrl;
-
-  /**
-   * The Nats cluster id.
-   */
-  @Value("${nats.streaming.server.clusterId}")
-  private String natsClusterId;
 
   /**
    * The Environment.
