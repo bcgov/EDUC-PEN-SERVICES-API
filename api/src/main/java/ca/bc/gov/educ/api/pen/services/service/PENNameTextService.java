@@ -70,16 +70,10 @@ public class PENNameTextService {
    * @return the pen name texts
    */
   public List<PENNameText> getPenNameTexts() {
-    Lock readLock = penNameTextLock.readLock();
-    try {
-      readLock.lock();
-      if (this.penNameTextMap.get(PEN_NAME_TEXT) == null || this.penNameTextMap.get(PEN_NAME_TEXT).isEmpty()) {
-        this.setPenNameTexts();
-      }
-      return this.penNameTextMap.get(PEN_NAME_TEXT);
-    } finally {
-      readLock.unlock();
+    if (this.penNameTextMap.get(PEN_NAME_TEXT) == null || this.penNameTextMap.get(PEN_NAME_TEXT).isEmpty()) {
+      this.setPenNameTexts();
     }
+    return this.penNameTextMap.get(PEN_NAME_TEXT);
   }
 
   private void setPenNameTexts() {
