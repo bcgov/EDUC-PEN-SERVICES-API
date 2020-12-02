@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationFieldCode.POSTAL_CODE;
+import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode.ERROR;
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode.WARNING;
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueTypeCode.PC_ERR;
 
@@ -36,7 +37,7 @@ public class PostalCodeRule extends BaseRule {
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
     String postalCode = validationPayload.getPostalCode();
     if (StringUtils.isNotBlank(postalCode) && !pattern.matcher(postalCode).matches()) {
-      results.add(createValidationEntity(WARNING, PC_ERR, POSTAL_CODE));
+      results.add(createValidationEntity(ERROR, PC_ERR, POSTAL_CODE));
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
