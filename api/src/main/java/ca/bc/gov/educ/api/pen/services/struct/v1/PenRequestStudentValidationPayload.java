@@ -138,7 +138,7 @@ public class PenRequestStudentValidationPayload {
   /**
    * The Min code from PenRequestBatch
    */
-  String minCode;
+  String mincode;
 
   /**
    * The Submission number from PenRequestBatch
