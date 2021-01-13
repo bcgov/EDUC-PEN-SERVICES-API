@@ -129,7 +129,8 @@ public class RestUtils {
   /**
    * Reload cache.
    */
-  @Scheduled(cron = "0 0 0 * * *")
+  @Scheduled(cron = "@midnight")
+  @Retryable(value = {Exception.class}, maxAttempts = 20, backoff = @Backoff(multiplier = 2, delay = 2000))
   public void reloadCache() {
     log.info("started reloading cache..");
     setGenderCodesMap();
