@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Setter
 public class ApplicationProperties {
 
-
+  public static final String PEN_SERVICES_API = "PEN-SERVICES-API";
   /**
    * The Client id.
    */
