@@ -9,6 +9,7 @@ import ca.bc.gov.educ.api.pen.services.repository.StudentMergeDirectionCodeTable
 import ca.bc.gov.educ.api.pen.services.repository.StudentMergeRepository;
 import ca.bc.gov.educ.api.pen.services.repository.StudentMergeSourceCodeTableRepository;
 import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMerge;
+import ca.bc.gov.educ.api.pen.services.support.TestRedisConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
@@ -38,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
-@SpringBootTest(classes = PenServicesApiResourceApplication.class)
+@SpringBootTest(classes = {TestRedisConfiguration.class,PenServicesApiResourceApplication.class})
 @AutoConfigureMockMvc
 public class StudentMergeControllerTest {
 
@@ -95,7 +96,7 @@ public class StudentMergeControllerTest {
     this.mockMvc.perform(get(PEN_SERVICES +"/"+ fromStudentID + MERGES)
         .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_MERGE")))).andDo(print()).andExpect(status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.studentMergeDirectionCode=='FROM')].studentID").value(fromStudentID.toString()))
-        .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.studentMergeDirectionCode=='TO')].mergeStudentID").value(toStudentID.toString()));
+        .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.studentMergeDirectionCode=='TO')].studentID").value(toStudentID.toString()));
   }
 
   @Test
