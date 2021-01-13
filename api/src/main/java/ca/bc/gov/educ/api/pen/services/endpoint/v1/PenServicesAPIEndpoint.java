@@ -31,7 +31,7 @@ public interface PenServicesAPIEndpoint {
    * @return the list
    */
   @PostMapping("/validation/student-request")
-  @PreAuthorize("#oauth2.hasScope('VALIDATE_STUDENT_DEMOGRAPHICS')")
+  @PreAuthorize("hasAuthority('SCOPE_VALIDATE_STUDENT_DEMOGRAPHICS')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "400", description = "BAD REQUEST")})
   @Transactional
   @Tag(name = "Endpoint to validate student request.", description = "Endpoint to validate student request.")
@@ -39,7 +39,7 @@ public interface PenServicesAPIEndpoint {
   List<PenRequestStudentValidationIssue> validateStudentData(@Validated @RequestBody PenRequestStudentValidationPayload validationPayload);
 
   @GetMapping("/next-pen-number")
-  @PreAuthorize("#oauth2.hasScope('GET_NEXT_PEN_NUMBER')")
+  @PreAuthorize("hasAuthority('SCOPE_GET_NEXT_PEN_NUMBER')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   @Transactional
   @Tag(name = "Endpoint to generate a new PEN number and return the same.", description = "Endpoint to generate a new PEN number and return the same. The transaction ID is mandatory, so that for each unique transaction only one PEN is issued.")
@@ -50,7 +50,7 @@ public interface PenServicesAPIEndpoint {
    *
    * @return the list
    */
-  @PreAuthorize("#oauth2.hasScope('READ_VALIDATION_CODES')")
+  @PreAuthorize("hasAuthority('SCOPE_READ_VALIDATION_CODES')")
   @GetMapping("/validation/issue-field-code")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   List<PenRequestBatchStudentValidationFieldCode> getPrbStudentValidationIssueFieldCodes();
@@ -60,7 +60,7 @@ public interface PenServicesAPIEndpoint {
    *
    * @return the list
    */
-  @PreAuthorize("#oauth2.hasScope('READ_VALIDATION_CODES')")
+  @PreAuthorize("hasAuthority('SCOPE_READ_VALIDATION_CODES')")
   @GetMapping("/validation/issue-severity-code")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   List<PenRequestBatchStudentValidationIssueSeverityCode> getPrbStudentValidationIssueSeverityCodes();
@@ -70,7 +70,7 @@ public interface PenServicesAPIEndpoint {
    *
    * @return the list
    */
-  @PreAuthorize("#oauth2.hasScope('READ_VALIDATION_CODES')")
+  @PreAuthorize("hasAuthority('SCOPE_READ_VALIDATION_CODES')")
   @GetMapping("/validation/issue-type-code")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   List<PenRequestBatchStudentValidationIssueTypeCode> getPrbStudentValidationIssueTypeCodes();
