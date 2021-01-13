@@ -8,7 +8,6 @@ import ca.bc.gov.educ.api.pen.services.service.PenService;
 import ca.bc.gov.educ.api.pen.services.struct.v1.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
  * The type Pen validation api controller.
  */
 @RestController
-@EnableResourceServer
 @Slf4j
 public class PenServicesAPIController implements PenServicesAPIEndpoint {
   private final PenRequestStudentRecordValidationService service;

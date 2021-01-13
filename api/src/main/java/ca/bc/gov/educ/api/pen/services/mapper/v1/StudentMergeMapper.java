@@ -17,7 +17,6 @@ public interface StudentMergeMapper {
 
   StudentMergeEntity toModel(StudentMerge studentMerge);
 
-  @Mapping(source = "mergeStudent.studentID", target = "mergeStudentID")
   StudentMerge toStructure(StudentMergeEntity studentMergeEntity);
 
   @Mapping(target = "updateUser", ignore = true)

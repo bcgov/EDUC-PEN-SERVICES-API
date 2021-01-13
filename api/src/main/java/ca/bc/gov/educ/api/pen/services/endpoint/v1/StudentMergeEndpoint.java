@@ -17,17 +17,17 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequestMapping(PEN_SERVICES)
 public interface StudentMergeEndpoint {
   @GetMapping("/{studentID}" + MERGES)
-  @PreAuthorize("hasAuthority('SCOPE_READ_STUDENT')")
+  @PreAuthorize("hasAuthority('SCOPE_READ_STUDENT_MERGE')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
   List<StudentMerge> findStudentMerges(@PathVariable String studentID, @Param("mergeDirection") String mergeDirection);
 
   @PostMapping("/{studentID}" + MERGES)
-  @PreAuthorize("hasAuthority('SCOPE_WRITE_STUDENT')")
+  @PreAuthorize("hasAuthority('SCOPE_WRITE_STUDENT_MERGE')")
   @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "CREATED"), @ApiResponse(responseCode = "400", description = "BAD REQUEST")})
   @ResponseStatus(CREATED)
   StudentMerge createStudentMerge(@PathVariable String studentID, @Validated @RequestBody StudentMerge studentMerge);
 
-  @PreAuthorize("hasAuthority('SCOPE_READ_STUDENT_CODES')")
+  @PreAuthorize("hasAuthority('SCOPE_READ_STUDENT_MERGE_CODES')")
   @GetMapping(MERGE_SOURCE_CODES)
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   List<StudentMergeSourceCode> getStudentMergeSourceCodes();

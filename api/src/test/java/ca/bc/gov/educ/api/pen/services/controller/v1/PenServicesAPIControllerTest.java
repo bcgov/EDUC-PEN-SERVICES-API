@@ -12,7 +12,6 @@ import ca.bc.gov.educ.api.pen.services.struct.v1.GenderCode;
 import ca.bc.gov.educ.api.pen.services.struct.v1.GradeCode;
 import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
 import ca.bc.gov.educ.api.pen.services.support.TestRedisConfiguration;
-import ca.bc.gov.educ.api.pen.services.support.WithMockOAuth2Scope;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -129,7 +128,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenValidPayload_shouldReturnStatusOkWithBlankArray() throws Exception {
     String payload = validationPayloadAsJSONString(createValidationPayload());
     log.info(payload);
@@ -148,7 +146,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidSubmittedPEN_shouldReturnStatusOkWithValidationResults() throws Exception {
     var payload = createValidationPayload();
     payload.setSubmittedPen("120164446");
@@ -167,7 +164,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenBlankLegalSurname_shouldReturnStatusOkWithValidationResults() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalLastName("");
@@ -186,7 +182,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidLegalSurnameWhichMatchedTheBlockedName_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalLastName("AVAILABLE");
@@ -205,7 +200,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidLegalSurnameWhichMatchedTheBlockedName_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalLastName("BLANK");
@@ -224,7 +218,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenOneCharLegalSurname_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalLastName("B");
@@ -243,7 +236,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenBlankLegalFirstName_shouldReturnStatusOkWithIssueTypeCodeBlankField() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("");
@@ -262,7 +254,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenApostropheInLegalFirstName_shouldReturnStatusOkWithIssueTypeCodeApostrophe() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("'");
@@ -281,7 +272,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidLegalFirstNameWhichMatchedTheBlockedName_shouldReturnStatusOkWithIssueTypeCodeBlockedName() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("AVAILABLE");
@@ -300,7 +290,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidLegalFirstName_shouldReturnStatusOkWithValidationResultsAsWarningIssueTypeCodeBLANKINNAME() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("DS TAM");
@@ -319,7 +308,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenOneCharLegalFirstName_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("B");
@@ -338,7 +326,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("OK^");
@@ -357,7 +344,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName2_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("OK_");
@@ -376,7 +362,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName3_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("OK'");
@@ -395,7 +380,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName4_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("*OK");
@@ -414,7 +398,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName5_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("_O'");
@@ -433,7 +416,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName6_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("-OK'");
@@ -452,7 +434,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName7_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("\"OK'");
@@ -471,7 +452,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName8_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("XXOK'");
@@ -490,7 +470,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidCharInLegalFirstName9_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("ZZOK'");
@@ -509,7 +488,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenSameLegalMidAsLegalFirst_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalFirstName("MARCO");
@@ -529,7 +507,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenSameLegalMidAsLegalLast_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
     var payload = createValidationPayload();
     payload.setLegalLastName("MARCO");
@@ -549,7 +526,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidGenderCode_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setGenderCode("O");
@@ -568,7 +544,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenBlankGenderCode_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setGenderCode("");
@@ -587,7 +562,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidPostalCode_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
     var payload = createValidationPayload();
     payload.setPostalCode("123456");
@@ -606,7 +580,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenDOBInInvalidFormat_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setDob("2020-02-02"); // it expects to be YYYYMMDD
@@ -625,7 +598,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenBlankDOB_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setDob(""); // it expects to be YYYYMMDD
@@ -644,7 +616,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenDOBEarlierTo1900_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setDob("18990101"); // it expects to be YYYYMMDD
@@ -663,7 +634,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenDOBLaterThanCurrentDate_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setDob("29990101"); // it expects to be YYYYMMDD
@@ -682,7 +652,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInvalidGradeCode_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
     var payload = createValidationPayload();
     payload.setGradeCode("XX");
@@ -701,7 +670,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInappropriateAgeForGradeCode_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
     var payload = createValidationPayload();
     payload.setGradeCode("01");
@@ -720,7 +688,6 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  @WithMockOAuth2Scope(scope = "VALIDATE_STUDENT_DEMOGRAPHICS")
   public void testValidateStudentData_givenInappropriateAgeForGradeCode2_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
     var payload = createValidationPayload();
     payload.setDob(LocalDate.now().toString().replaceAll("-", ""));
@@ -735,21 +702,18 @@ public class PenServicesAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_VALIDATION_CODES")
   public void testGetValidationIssueFieldCodes_ShouldReturnCodes() throws Exception {
     this.mockMvc.perform(get("/api/v1/pen-services/validation/issue-field-code")).andDo(print()).andExpect(status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].code").value("LOCALID"));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_VALIDATION_CODES")
   public void testGetValidationIssueSeverityCodes_ShouldReturnCodes() throws Exception {
     this.mockMvc.perform(get("/api/v1/pen-services/validation/issue-severity-code")).andDo(print()).andExpect(status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].code").value("ERROR"));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_VALIDATION_CODES")
   public void testGetValidationIssueTypeCodes_ShouldReturnCodes() throws Exception {
     this.mockMvc.perform(get("/api/v1/pen-services/validation/issue-type-code")).andDo(print()).andExpect(status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].code").value("1CHARNAME"));

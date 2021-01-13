@@ -24,7 +24,7 @@ public class RequestUtil {
    */
   public static void setAuditColumnsForCreate(@NotNull BaseRequest baseRequest) {
     if (StringUtils.isBlank(baseRequest.getCreateUser())) {
-      baseRequest.setCreateUser(ApplicationProperties.STUDENT_API);
+      baseRequest.setCreateUser(ApplicationProperties.PEN_SERVICES_API);
     }
     baseRequest.setCreateDate(LocalDateTime.now().toString());
     setAuditColumnsForUpdate(baseRequest);
@@ -37,7 +37,7 @@ public class RequestUtil {
    */
   public static void setAuditColumnsForUpdate(@NotNull BaseRequest baseRequest) {
     if (StringUtils.isBlank(baseRequest.getUpdateUser())) {
-      baseRequest.setUpdateUser(ApplicationProperties.STUDENT_API);
+      baseRequest.setUpdateUser(ApplicationProperties.PEN_SERVICES_API);
     }
     baseRequest.setUpdateDate(LocalDateTime.now().toString());
   }

@@ -52,8 +52,7 @@ public class StudentMergeEntity {
   @PastOrPresent
   LocalDateTime updateDate;
 
-  @NotNull(message = "mergeStudent cannot be null")
-  @ManyToOne(optional = false, targetEntity = StudentEntity.class)
-  @JoinColumn(name = "MERGE_STUDENT_ID", referencedColumnName = "STUDENT_ID", updatable = false)
-  StudentEntity mergeStudent;
+  @NotNull(message = "mergeStudentID cannot be null")
+  @Column(name = "MERGE_STUDENT_ID")
+  UUID mergeStudentID;
 }
