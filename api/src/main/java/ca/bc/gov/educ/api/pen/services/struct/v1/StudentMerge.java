@@ -30,6 +30,4 @@ public class StudentMerge extends BaseRequest implements Serializable {
   String studentMergeDirectionCode;
   @NotNull(message = "Student Merge Source Code can not be null.")
   String studentMergeSourceCode;
-
-  Student mergeStudent;
 }

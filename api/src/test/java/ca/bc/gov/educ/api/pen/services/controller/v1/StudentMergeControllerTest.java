@@ -95,8 +95,7 @@ public class StudentMergeControllerTest {
 
     this.mockMvc.perform(get(PEN_SERVICES +"/"+ fromStudentID + MERGES)
         .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_MERGE")))).andDo(print()).andExpect(status().isOk())
-        .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.studentMergeDirectionCode=='FROM')].studentID").value(fromStudentID.toString()))
-        .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.studentMergeDirectionCode=='TO')].studentID").value(toStudentID.toString()));
+        .andExpect(MockMvcResultMatchers.jsonPath("$[?(@.studentMergeDirectionCode=='FROM')].studentID").value(fromStudentID.toString()));
   }
 
   @Test
@@ -129,7 +128,7 @@ public class StudentMergeControllerTest {
     StudentMergeEntity studentMergeFrom = new StudentMergeEntity();
     studentMergeFrom.setStudentID(fromStudentID);
     studentMergeFrom.setMergeStudentID(toStudentID);
-    studentMergeFrom.setStudentMergeDirectionCode("FROM");
+    studentMergeFrom.setStudentMergeDirectionCode("LEFT");
     studentMergeFrom.setStudentMergeSourceCode("MINISTRY");
 
     this.mockMvc.perform(post(PEN_SERVICES +"/"+ fromStudentID + MERGES)
@@ -153,13 +152,6 @@ public class StudentMergeControllerTest {
         .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRITE_STUDENT_MERGE")))
         .contentType(MediaType.APPLICATION_JSON)
         .accept(MediaType.APPLICATION_JSON).content(asJsonString(StudentMergeMapper.mapper.toStructure(studentMergeFrom)))).andDo(print()).andExpect(status().isBadRequest());
-  }
-
-  @Test
-  public void testGetStudentMergeSourceCodes_ShouldReturnCodes() throws Exception {
-    this.mockMvc.perform(get(PEN_SERVICES+MERGE_SOURCE_CODES)
-        .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_MERGE_CODES")))).andDo(print()).andExpect(status().isOk())
-        .andExpect(MockMvcResultMatchers.jsonPath("$[0].mergeSourceCode").value("MINISTRY"));
   }
 
   private StudentMergeDirectionCodeEntity createStudentMergeDirectionCodeData() {
