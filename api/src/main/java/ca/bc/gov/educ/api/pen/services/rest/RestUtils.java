@@ -9,16 +9,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -41,9 +38,9 @@ public class RestUtils {
    * The constant GENDER_CODES.
    */
   public static final String GENDER_CODES = "genderCodes";
+  public static final String CONTENT_TYPE = "Content-Type";
   private final Map<String, List<GenderCode>> genderCodesMap = new ConcurrentHashMap<>();
   private final Map<String, List<GradeCode>> gradeCodesMap = new ConcurrentHashMap<>();
-  private static final String PARAMETERS_ATTRIBUTE = "parameters";
   private final ReadWriteLock genderLock = new ReentrantReadWriteLock();
   private final ReadWriteLock gradeLock = new ReentrantReadWriteLock();
   private final ApplicationProperties props;
@@ -63,32 +60,6 @@ public class RestUtils {
     this.webClient = webClient;
   }
 
-  /**
-   * Gets rest template.
-   *
-   * @return the rest template
-   */
-//  public RestTemplate getRestTemplate() {
-//    return getRestTemplate(null);
-//  }
-
-//  /**
-//   * Gets rest template.
-//   *
-//   * @param scopes the scopes
-//   * @return the rest template
-//   */
-//  public RestTemplate getRestTemplate(List<String> scopes) {
-//    log.debug("Calling get token method");
-//    ClientCredentialsResourceDetails resourceDetails = new ClientCredentialsResourceDetails();
-//    resourceDetails.setClientId(props.getClientID());
-//    resourceDetails.setClientSecret(props.getClientSecret());
-//    resourceDetails.setAccessTokenUri(props.getTokenURL());
-//    if (scopes != null) {
-//      resourceDetails.setScope(scopes);
-//    }
-//    return new OAuth2RestTemplate(resourceDetails, new DefaultOAuth2ClientContext());
-//  }
 
   /**
    * Init.
@@ -150,7 +121,7 @@ public class RestUtils {
     try {
       writeLock.lock();
       this.genderCodesMap.clear();
-      List<GenderCode> genderCodes = webClient.get().uri(props.getStudentApiURL() + "/gender-codes").header("Content-Type", "application/json").retrieve().bodyToFlux(GenderCode.class).collectList().block();
+      List<GenderCode> genderCodes = webClient.get().uri(props.getStudentApiURL() + "/gender-codes").header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToFlux(GenderCode.class).collectList().block();
       this.genderCodesMap.put(GENDER_CODES, genderCodes);
     } finally {
       writeLock.unlock();
@@ -166,7 +137,7 @@ public class RestUtils {
     try {
       writeLock.lock();
       this.gradeCodesMap.clear();
-      List<GradeCode> gradeCodes = webClient.get().uri(props.getStudentApiURL() + "/grade-codes").header("Content-Type", "application/json").retrieve().bodyToFlux(GradeCode.class).collectList().block();
+      List<GradeCode> gradeCodes = webClient.get().uri(props.getStudentApiURL() + "/grade-codes").header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToFlux(GradeCode.class).collectList().block();
       this.gradeCodesMap.put(GRADE_CODES, gradeCodes);
     } finally {
       writeLock.unlock();
@@ -196,11 +167,12 @@ public class RestUtils {
 
     var url = builder.toUriString();
     log.info("url is :: {}", url);
-
-    List<Student> studentResponse = webClient.get().uri(url).header("Content-Type", "application/json").retrieve().bodyToFlux(Student.class).collectList().block();
-
-    if (!studentResponse.isEmpty()) {
-      Student firstStudent = studentResponse.get(0);
+    ParameterizedTypeReference<RestPageImpl<Student>> responseType = new ParameterizedTypeReference<>() {
+    };
+    var studentResponse = webClient.get().uri(url).header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToMono(responseType).block();
+    var optionalStudent = Objects.requireNonNull(studentResponse).getContent().stream().findFirst();
+    if (optionalStudent.isPresent()) {
+      var firstStudent = optionalStudent.get();
       return Integer.parseInt(firstStudent.getPen().substring(0, 8));
     }
     log.warn("PEN could not be retrieved, returning 0 for transactionID :: {}", transactionID);
