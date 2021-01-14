@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.client.registration.InMemoryReactiveC
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 /**
  * The type Rest web client.
@@ -53,7 +54,10 @@ public class RestWebClient {
         new AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager(clientRegistryRepo, clientService);
     val oauthFilter = new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
     oauthFilter.setDefaultClientRegistrationId(props.getClientID());
+    DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+    factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
     return WebClient.builder()
+        .uriBuilderFactory(factory)
         .filter(oauthFilter)
         .build();
   }
