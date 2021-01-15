@@ -61,6 +61,15 @@ $KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body
 #READ_VALIDATION_CODES
 $KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body "{\"description\": \"Scope to access validation issue codes\",\"id\": \"READ_VALIDATION_CODES\",\"name\": \"READ_VALIDATION_CODES\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
 
+#READ_STUDENT_MERGE
+$KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body "{\"description\": \"Scope to access student merges\",\"id\": \"READ_STUDENT_MERGE\",\"name\": \"READ_STUDENT_MERGE\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
+#WRITE_STUDENT_MERGE
+$KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body "{\"description\": \"Scope to access writing student merges\",\"id\": \"WRITE_STUDENT_MERGE\",\"name\": \"WRITE_STUDENT_MERGE\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
+#READ_STUDENT_MERGE_CODES
+$KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body "{\"description\": \"Scope to access merge codes\",\"id\": \"READ_STUDENT_MERGE_CODES\",\"name\": \"READ_STUDENT_MERGE_CODES\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
 ###########################################################
 #Setup for config-map
 ###########################################################
