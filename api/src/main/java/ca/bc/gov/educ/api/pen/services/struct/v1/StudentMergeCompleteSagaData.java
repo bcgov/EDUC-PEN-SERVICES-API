@@ -1,32 +1,37 @@
 package ca.bc.gov.educ.api.pen.services.struct.v1;
 
-import ca.bc.gov.educ.api.pen.services.struct.BaseRequest;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotNull;
-import java.io.Serializable;
+import javax.validation.constraints.Size;
+import java.util.UUID;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
 @SuperBuilder
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StudentMerge extends BaseRequest implements Serializable {
-  private static final long serialVersionUID = 1L;
+public class StudentMergeCompleteSagaData extends BaseStudentSagaData {
 
-  String studentMergeID;
-  @NotNull(message = "Student ID can not be null.")
-  String studentID;
+  /**
+   * The merge student id.
+   */
   @NotNull(message = "Merge Student ID can not be null.")
-  String mergeStudentID;
+  UUID mergeStudentID;
+
   @NotNull(message = "Student Merge Direction Code can not be null.")
   String studentMergeDirectionCode;
+
   @NotNull(message = "Student Merge Source Code can not be null.")
   String studentMergeSourceCode;
+
+  /**
+   * The request student id to identify which student is processed in merge saga.
+   */
+  UUID requestStudentID;
 }

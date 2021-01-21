@@ -1,19 +1,28 @@
 package ca.bc.gov.educ.api.pen.services.service;
 
 import ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode;
+import ca.bc.gov.educ.api.pen.services.mapper.v1.StudentMergeMapper;
 import ca.bc.gov.educ.api.pen.services.messaging.MessagePublisher;
+import ca.bc.gov.educ.api.pen.services.repository.StudentMergeRepository;
 import ca.bc.gov.educ.api.pen.services.struct.v1.Event;
 import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
+import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMerge;
 import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
+import ca.bc.gov.educ.api.pen.services.util.RequestUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.*;
 import static lombok.AccessLevel.PRIVATE;
+import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 /**
  * The type Event handler service.
@@ -23,10 +32,27 @@ import static lombok.AccessLevel.PRIVATE;
 public class EventHandlerService {
 
   public static final String PAYLOAD_LOG = "payload is :: {}";
+  public static final String EVENT_PAYLOAD = "event is :: {}";
+  /**
+   * The constant NO_RECORD_SAGA_ID_EVENT_TYPE.
+   */
+  public static final String NO_RECORD_SAGA_ID_EVENT_TYPE = "no record found for the saga id and event type combination, processing.";
+
+  /**
+   * The constant studentMapper.
+   */
+  @Getter(PRIVATE)
+  private static final StudentMergeMapper studentMergeMapper = StudentMergeMapper.mapper;
+
   @Getter(PRIVATE)
   private final PenRequestStudentRecordValidationService validationService;
+
   @Getter(PRIVATE)
   private final PenService penService;
+
+  @Getter(PRIVATE)
+  private final StudentMergeRepository studentMergeRepository;
+
   @Getter(PRIVATE)
   private final MessagePublisher messagePublisher;
 
@@ -37,10 +63,11 @@ public class EventHandlerService {
    * @param messagePublisher  the message publisher
    */
   @Autowired
-  public EventHandlerService(PenRequestStudentRecordValidationService validationService, MessagePublisher messagePublisher, PenService penService) {
+  public EventHandlerService(PenRequestStudentRecordValidationService validationService, MessagePublisher messagePublisher, PenService penService, StudentMergeRepository studentMergeRepository) {
     this.validationService = validationService;
     this.messagePublisher = messagePublisher;
     this.penService = penService;
+    this.studentMergeRepository = studentMergeRepository;
   }
 
   /**
@@ -61,6 +88,11 @@ public class EventHandlerService {
           log.info("received get next pen number event :: ");
           log.trace(PAYLOAD_LOG, event.getEventPayload());
           handleGetNextPenNumberEvent(event);
+          break;
+        case CREATE_MERGE:
+          log.info("received create merge data :: {}", event.getSagaId());
+          log.trace(PAYLOAD_LOG, event.getEventPayload());
+          handleCreateMergeEvent(event);
           break;
         default:
           log.info("silently ignoring other events.");
@@ -127,5 +159,36 @@ public class EventHandlerService {
 
   }
 
+  @Transactional(propagation = REQUIRES_NEW)
+  protected void handleCreateMergeEvent(Event event) {
+    try {
+      log.trace(EVENT_PAYLOAD, event);
+      List<StudentMerge> payload = new ArrayList<>();
 
+      // MergedToStudent
+      StudentMerge mergedToPEN = JsonUtil.getJsonObjectFromString(StudentMerge.class, event.getEventPayload());
+      RequestUtil.setAuditColumnsForCreate(mergedToPEN);
+      getStudentMergeRepository().save(studentMergeMapper.toModel(mergedToPEN));
+      payload.add(mergedToPEN);
+
+      // MergedFromStudent
+      StudentMerge mergedFromPEN = StudentMerge.builder().studentID(mergedToPEN.getMergeStudentID()).mergeStudentID(mergedToPEN.getStudentID())
+              .studentMergeDirectionCode("TO").studentMergeSourceCode(mergedToPEN.getStudentMergeSourceCode()).build();
+      RequestUtil.setAuditColumnsForCreate(mergedFromPEN);
+      getStudentMergeRepository().save(studentMergeMapper.toModel(mergedFromPEN));
+      payload.add(mergedFromPEN);
+
+      event.setEventOutcome(MERGE_CREATED);
+      event.setEventPayload(JsonUtil.getJsonStringFromObject(payload));
+
+      if (log.isDebugEnabled()) {
+        log.debug("responding back :: {}", event);
+      }
+      log.info("responding back with :: event outcome :: {}, for mergedToStudent ID :: {}", event.getEventOutcome().toString(), mergedToPEN.getStudentID());
+      getMessagePublisher().dispatchMessage(event.getReplyTo(), JsonUtil.getJsonStringFromObject(event).getBytes());
+    } catch (JsonProcessingException e) {
+      log.error("JsonProcessingException for saga ::, {} , :: {}", event.getSagaId(), e);
+    }
+
+  }
 }
