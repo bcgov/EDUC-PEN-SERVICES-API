@@ -23,11 +23,6 @@ public abstract class BaseUserActionsOrchestrator<T> extends BaseOrchestrator<T>
   protected static final StudentMergeCompleteSagaDataMapper STUDENT_MERGE_COMPLETE_SAGA_DATA_MAPPER = StudentMergeCompleteSagaDataMapper.mapper;
 
   /**
-   * The Ob mapper.
-   */
-  //protected final ObjectMapper obMapper = new ObjectMapper();
-
-  /**
    * Instantiates a new Base user actions orchestrator.
    *
    * @param sagaService      the saga service
@@ -39,16 +34,6 @@ public abstract class BaseUserActionsOrchestrator<T> extends BaseOrchestrator<T>
   protected BaseUserActionsOrchestrator(SagaService sagaService, MessagePublisher messagePublisher, Class<T> clazz, String sagaName, String topicToSubscribe) {
     super(sagaService, messagePublisher, clazz, sagaName, topicToSubscribe);
   }
-
-//  /**
-//   * Populate student update saga data for the Merged To/True PEN
-//   *
-//   * @param event the event
-//   * @param t     the t
-//   * @return the student update for the merged to/true pen
-//   * @throws JsonProcessingException the json processing exception
-//   */
-//  protected abstract StudentUpdateSagaData createStudentUpdateSagaData(Event event, T t) throws JsonProcessingException;
 
   /**
    *
