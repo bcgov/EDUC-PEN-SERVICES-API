@@ -1,11 +1,12 @@
 package ca.bc.gov.educ.api.pen.services.messaging;
 
-import ca.bc.gov.educ.api.pen.services.service.EventHandlerService;
+import ca.bc.gov.educ.api.pen.services.service.events.EventHandlerDelegatorService;
 import ca.bc.gov.educ.api.pen.services.struct.v1.Event;
 import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
 import io.nats.client.Connection;
 import io.nats.client.Message;
 import io.nats.client.MessageHandler;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,16 +14,24 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 
 import static ca.bc.gov.educ.api.pen.services.constants.TopicsEnum.PEN_SERVICES_API_TOPIC;
+import static lombok.AccessLevel.PRIVATE;
 
+/**
+ * The type Message subscriber.
+ */
 @Component
 @Slf4j
 public class MessageSubscriber extends MessagePubSub {
 
-  private final EventHandlerService eventHandlerService;
+  /**
+   * The Event handler delegator service.
+   */
+  @Getter(PRIVATE)
+  private final EventHandlerDelegatorService eventHandlerDelegatorService;
 
   @Autowired
-  public MessageSubscriber(final Connection con, EventHandlerService eventHandlerService) {
-    this.eventHandlerService = eventHandlerService;
+  public MessageSubscriber(final Connection con, EventHandlerDelegatorService eventHandlerDelegatorService) {
+    this.eventHandlerDelegatorService = eventHandlerDelegatorService;
     super.connection = con;
   }
 
@@ -49,7 +58,7 @@ public class MessageSubscriber extends MessagePubSub {
         try {
           var eventString = new String(message.getData());
           var event = JsonUtil.getJsonObjectFromString(Event.class, eventString);
-          eventHandlerService.handleEvent(event);
+          eventHandlerDelegatorService.handleEvent(event, message);
           log.debug("Event is :: {}", event);
         } catch (final Exception e) {
           log.error("Exception ", e);

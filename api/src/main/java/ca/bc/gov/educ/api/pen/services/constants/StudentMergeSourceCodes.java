@@ -3,6 +3,9 @@ package ca.bc.gov.educ.api.pen.services.constants;
 import lombok.Getter;
 
 public enum StudentMergeSourceCodes {
+  /**
+   * Ministry Identified
+   */
   MI("MI");
 
   /**

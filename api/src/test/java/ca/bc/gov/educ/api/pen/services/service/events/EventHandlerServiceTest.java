@@ -1,10 +1,13 @@
-package ca.bc.gov.educ.api.pen.services.service;
+package ca.bc.gov.educ.api.pen.services.service.events;
 
 import ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode;
-import ca.bc.gov.educ.api.pen.services.messaging.MessagePublisher;
-import ca.bc.gov.educ.api.pen.services.model.StudentMergeEntity;
 import ca.bc.gov.educ.api.pen.services.repository.StudentMergeRepository;
-import ca.bc.gov.educ.api.pen.services.struct.v1.*;
+import ca.bc.gov.educ.api.pen.services.service.PenRequestStudentRecordValidationService;
+import ca.bc.gov.educ.api.pen.services.service.PenService;
+import ca.bc.gov.educ.api.pen.services.struct.v1.Event;
+import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationIssue;
+import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
+import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMerge;
 import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
@@ -15,8 +18,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -25,16 +28,13 @@ import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.*;
 import static ca.bc.gov.educ.api.pen.services.constants.EventType.*;
 import static ca.bc.gov.educ.api.pen.services.constants.TopicsEnum.PEN_SERVICES_API_TOPIC;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventHandlerServiceTest {
 
   @Mock
   PenRequestStudentRecordValidationService validationService;
-
-  @Mock
-  MessagePublisher messagePublisher;
 
   @Mock
   PenService penService;
@@ -50,7 +50,7 @@ public class EventHandlerServiceTest {
 
   @Before
   public void setUp() {
-    eventHandlerServiceUnderTest = new EventHandlerService(validationService, messagePublisher, penService, studentMergeRepository);
+    eventHandlerServiceUnderTest = new EventHandlerService(validationService, penService, studentMergeRepository);
   }
 
   /**
@@ -67,19 +67,19 @@ public class EventHandlerServiceTest {
     var event = Event.builder().eventType(GET_NEXT_PEN_NUMBER).replyTo(PEN_SERVICES_API_TOPIC.toString()).eventPayload(transactionId).build();
 
     when(penService.getNextPenNumber(transactionId)).thenReturn("120164446");
-    eventHandlerServiceUnderTest.handleEvent(event);
-    assertThat(event.getEventOutcome()).isEqualTo(NEXT_PEN_NUMBER_RETRIEVED);
-    verify(messagePublisher).dispatchMessage(PEN_SERVICES_API_TOPIC.toString(), JsonUtil.getJsonStringFromObject(event).getBytes());
+    var rawResponse = eventHandlerServiceUnderTest.handleGetNextPenNumberEvent(event);
+    assertThat(rawResponse).hasSizeGreaterThan(0);
+    var response = JsonUtil.getJsonObjectFromString(Event.class, new String(rawResponse));
+    assertThat(response.getEventOutcome()).isEqualTo(NEXT_PEN_NUMBER_RETRIEVED);
   }
 
-  @Test
+  @Test(expected = RuntimeException.class)
   public void testHandleEvent_givenEventTypeGET_NEXT_PEN_NUMBER__whenCallFailed_shouldNotDispatchMessage() throws JsonProcessingException {
     var transactionId = UUID.randomUUID().toString();
     var event = Event.builder().eventType(GET_NEXT_PEN_NUMBER).replyTo(PEN_SERVICES_API_TOPIC.toString()).eventPayload(transactionId).build();
 
     when(penService.getNextPenNumber(transactionId)).thenThrow(RuntimeException.class);
-    eventHandlerServiceUnderTest.handleEvent(event);
-    verifyNoMoreInteractions(messagePublisher);
+    eventHandlerServiceUnderTest.handleGetNextPenNumberEvent(event);
   }
 
   @Test
@@ -88,9 +88,10 @@ public class EventHandlerServiceTest {
     var event = Event.builder().eventType(VALIDATE_STUDENT_DEMOGRAPHICS).replyTo(PEN_SERVICES_API_TOPIC.toString()).eventPayload(JsonUtil.getJsonStringFromObject(payload)).build();
 
     when(validationService.validateStudentRecord(payload)).thenReturn(Collections.emptyList());
-    eventHandlerServiceUnderTest.handleEvent(event);
-    assertThat(event.getEventOutcome()).isEqualTo(VALIDATION_SUCCESS_NO_ERROR_WARNING);
-    verify(messagePublisher).dispatchMessage(PEN_SERVICES_API_TOPIC.toString(), JsonUtil.getJsonStringFromObject(event).getBytes());
+    var rawResponse = eventHandlerServiceUnderTest.handleValidateStudentDemogDataEvent(event);
+    assertThat(rawResponse).hasSizeGreaterThan(0);
+    var response = JsonUtil.getJsonObjectFromString(Event.class, new String(rawResponse));
+    assertThat(response.getEventOutcome()).isEqualTo(VALIDATION_SUCCESS_NO_ERROR_WARNING);
   }
 
   @Test
@@ -100,9 +101,10 @@ public class EventHandlerServiceTest {
 
     var validationResult = List.of(PenRequestStudentValidationIssue.builder().penRequestBatchValidationIssueSeverityCode(PenRequestStudentValidationIssueSeverityCode.ERROR.toString()).build());
     when(validationService.validateStudentRecord(payload)).thenReturn(validationResult);
-    eventHandlerServiceUnderTest.handleEvent(event);
-    assertThat(event.getEventOutcome()).isEqualTo(VALIDATION_SUCCESS_WITH_ERROR);
-    verify(messagePublisher).dispatchMessage(PEN_SERVICES_API_TOPIC.toString(), JsonUtil.getJsonStringFromObject(event).getBytes());
+    var rawResponse = eventHandlerServiceUnderTest.handleValidateStudentDemogDataEvent(event);
+    assertThat(rawResponse).hasSizeGreaterThan(0);
+    var response = JsonUtil.getJsonObjectFromString(Event.class, new String(rawResponse));
+    assertThat(response.getEventOutcome()).isEqualTo(VALIDATION_SUCCESS_WITH_ERROR);
   }
 
   @Test
@@ -112,31 +114,34 @@ public class EventHandlerServiceTest {
 
     var validationResult = List.of(PenRequestStudentValidationIssue.builder().penRequestBatchValidationIssueSeverityCode(PenRequestStudentValidationIssueSeverityCode.WARNING.toString()).build());
     when(validationService.validateStudentRecord(payload)).thenReturn(validationResult);
-    eventHandlerServiceUnderTest.handleEvent(event);
-    assertThat(event.getEventOutcome()).isEqualTo(VALIDATION_SUCCESS_WITH_ONLY_WARNING);
-    verify(messagePublisher).dispatchMessage(PEN_SERVICES_API_TOPIC.toString(), JsonUtil.getJsonStringFromObject(event).getBytes());
+    var rawResponse = eventHandlerServiceUnderTest.handleValidateStudentDemogDataEvent(event);
+    assertThat(rawResponse).hasSizeGreaterThan(0);
+    var response = JsonUtil.getJsonObjectFromString(Event.class, new String(rawResponse));
+    assertThat(response.getEventOutcome()).isEqualTo(VALIDATION_SUCCESS_WITH_ONLY_WARNING);
   }
 
-  @Test
+  @Test(expected = JsonProcessingException.class)
   public void testHandleEvent_givenEventTypeVALIDATE_STUDENT_DEMOGRAPHICS__whenPayloadError_shouldNotDispatchMessage() throws JsonProcessingException {
     var payload = "Error";
     var event = Event.builder().eventType(VALIDATE_STUDENT_DEMOGRAPHICS).replyTo(PEN_SERVICES_API_TOPIC.toString()).eventPayload(JsonUtil.getJsonStringFromObject(payload)).build();
 
-    eventHandlerServiceUnderTest.handleEvent(event);
-    verifyNoMoreInteractions(messagePublisher);
+    var response = eventHandlerServiceUnderTest.handleValidateStudentDemogDataEvent(event);
+    //verifyNoMoreInteractions(messagePublisher);
   }
 
   @Test
-  public void testHandleCreateMergeEvent_givenStudentMergePayload_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_CREATED() throws JsonProcessingException {
+  public void testHandleCreateMergeEvent_givenStudentMergePayload_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_CREATED() throws JsonProcessingException, IOException {
     var payload = createStudentMergePayload();
     var event = Event.builder().eventType(CREATE_MERGE).replyTo(PEN_SERVICES_API_TOPIC.toString()).eventPayload(JsonUtil.getJsonStringFromObject(payload)).build();
 
-    eventHandlerServiceUnderTest.handleEvent(event);
-    assertThat(event.getEventOutcome()).isEqualTo(MERGE_CREATED);
+    var rawResponse = eventHandlerServiceUnderTest.handleCreateMergeEvent(event);
+    assertThat(rawResponse).hasSizeGreaterThan(0);
+    var response = JsonUtil.getJsonObjectFromString(Event.class, new String(rawResponse));
+    assertThat(response.getEventOutcome()).isEqualTo(MERGE_CREATED);
 
     ObjectMapper objectMapper = new ObjectMapper();
     JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, StudentMerge.class);
-    List<StudentMerge> addedStudentMerges = objectMapper.readValue(event.getEventPayload(), type);
+    List<StudentMerge> addedStudentMerges = objectMapper.readValue(response.getEventPayload(), type);
     assertThat(addedStudentMerges.size()).isEqualTo(2);
     addedStudentMerges.stream().forEach(i -> {
       if (i.getStudentMergeDirectionCode().equals("FROM")) {
@@ -149,7 +154,6 @@ public class EventHandlerServiceTest {
         assertThat(i.getMergeStudentID()).isEqualTo(studentID);
       }
     });
-    verify(messagePublisher).dispatchMessage(PEN_SERVICES_API_TOPIC.toString(), JsonUtil.getJsonStringFromObject(event).getBytes());
   }
 
   private PenRequestStudentValidationPayload createValidationPayload() {

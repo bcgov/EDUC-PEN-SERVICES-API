@@ -8,6 +8,18 @@ import lombok.Getter;
 @Getter
 public enum SexCodes {
   /**
+   * Male
+   */
+  M("M"),
+  /**
+   * Female
+   */
+  F("F"),
+  /**
+   * Intersex
+   */
+  I("I"),
+  /**
    * Unknown.
    */
   U("U");

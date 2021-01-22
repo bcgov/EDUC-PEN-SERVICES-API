@@ -8,9 +8,21 @@ import lombok.Getter;
 @Getter
 public enum GenderCodes {
   /**
+   * Gender Male
+   */
+  M("M"),
+  /**
+   * Gender Female
+   */
+  F("F"),
+  /**
    * Gender Diverse.
    */
-  X("X");
+  X("X"),
+  /**
+   * Gender Unknown
+   */
+  U("U");
 
   /**
    * The Code.
