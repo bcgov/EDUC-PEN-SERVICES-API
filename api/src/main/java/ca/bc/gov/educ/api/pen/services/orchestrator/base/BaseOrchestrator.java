@@ -4,7 +4,7 @@ import ca.bc.gov.educ.api.pen.services.constants.EventOutcome;
 import ca.bc.gov.educ.api.pen.services.constants.EventType;
 import ca.bc.gov.educ.api.pen.services.messaging.MessagePublisher;
 import ca.bc.gov.educ.api.pen.services.model.Saga;
-import ca.bc.gov.educ.api.pen.services.model.SagaEvent;
+import ca.bc.gov.educ.api.pen.services.model.SagaEventStates;
 import ca.bc.gov.educ.api.pen.services.service.SagaService;
 import ca.bc.gov.educ.api.pen.services.struct.v1.Event;
 import ca.bc.gov.educ.api.pen.services.struct.v1.NotificationEvent;
@@ -266,11 +266,11 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    * @param eventType    event type
    * @param eventOutcome outcome
    * @param eventPayload payload.
-   * @return {@link SagaEvent}
+   * @return {@link SagaEventStates}
    */
-  protected SagaEvent createEventState(@NotNull Saga saga, @NotNull EventType eventType, @NotNull EventOutcome eventOutcome, String eventPayload) {
+  protected SagaEventStates createEventState(@NotNull Saga saga, @NotNull EventType eventType, @NotNull EventOutcome eventOutcome, String eventPayload) {
     var user = sagaName.length() > 32 ? sagaName.substring(0, 32) : sagaName;
-    return SagaEvent.builder()
+    return SagaEventStates.builder()
         .createDate(LocalDateTime.now())
         .createUser(user)
         .updateDate(LocalDateTime.now())
@@ -302,11 +302,11 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
       postMessageToTopic(getTopicToSubscribe(), finalEvent);
     }
 
-    SagaEvent sagaEvent = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+    SagaEventStates sagaEventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(COMPLETED.toString());
     saga.setStatus(COMPLETED.toString());
     saga.setUpdateDate(LocalDateTime.now());
-    getSagaService().updateAttachedSagaWithEvents(saga, sagaEvent);
+    getSagaService().updateAttachedSagaWithEvents(saga, sagaEventStates);
 
   }
 
@@ -340,10 +340,10 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    * it finds the last event that was processed successfully for this saga.
    *
    * @param eventStates event states corresponding to the Saga.
-   * @return {@link SagaEvent} if found else null.
+   * @return {@link SagaEventStates} if found else null.
    */
-  protected Optional<SagaEvent> findTheLastEventOccurred(List<SagaEvent> eventStates) {
-    int step = eventStates.stream().map(SagaEvent::getSagaStepNumber).mapToInt(x -> x).max().orElse(0);
+  protected Optional<SagaEventStates> findTheLastEventOccurred(List<SagaEventStates> eventStates) {
+    int step = eventStates.stream().map(SagaEventStates::getSagaStepNumber).mapToInt(x -> x).max().orElse(0);
     return eventStates.stream().filter(element -> element.getSagaStepNumber() == step).findFirst();
   }
 
@@ -377,7 +377,7 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    * @throws TimeoutException     if connection to messaging system times out.
    * @throws IOException          if there is connectivity problem
    */
-  private void replayFromLastEvent(Saga saga, List<SagaEvent> eventStates, T t) throws InterruptedException, TimeoutException, IOException {
+  private void replayFromLastEvent(Saga saga, List<SagaEventStates> eventStates, T t) throws InterruptedException, TimeoutException, IOException {
     val sagaEventOptional = findTheLastEventOccurred(eventStates);
     if (sagaEventOptional.isPresent()) {
       val sagaEvent = sagaEventOptional.get();

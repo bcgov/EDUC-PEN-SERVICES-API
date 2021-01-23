@@ -1,7 +1,7 @@
 package ca.bc.gov.educ.api.pen.services.service;
 
 import ca.bc.gov.educ.api.pen.services.model.Saga;
-import ca.bc.gov.educ.api.pen.services.model.SagaEvent;
+import ca.bc.gov.educ.api.pen.services.model.SagaEventStates;
 import ca.bc.gov.educ.api.pen.services.repository.SagaEventRepository;
 import ca.bc.gov.educ.api.pen.services.repository.SagaRepository;
 import lombok.AccessLevel;
@@ -70,17 +70,17 @@ public class SagaService {
    * so dont remove this check. removing this check will lead to duplicate records in the child table.
    *
    * @param saga      the saga object.
-   * @param sagaEvent the saga event
+   * @param sagaEventStates the saga event
    */
   @Retryable(value = {Exception.class}, maxAttempts = 5, backoff = @Backoff(multiplier = 2, delay = 2000))
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void updateAttachedSagaWithEvents(Saga saga, SagaEvent sagaEvent) {
+  public void updateAttachedSagaWithEvents(Saga saga, SagaEventStates sagaEventStates) {
     saga.setUpdateDate(LocalDateTime.now());
     getSagaRepository().save(saga);
     val result = getSagaEventRepository()
-        .findBySagaAndSagaEventOutcomeAndSagaEventStateAndSagaStepNumber(saga, sagaEvent.getSagaEventOutcome(), sagaEvent.getSagaEventState(), sagaEvent.getSagaStepNumber() - 1); //check if the previous step was same and had same outcome, and it is due to replay.
+        .findBySagaAndSagaEventOutcomeAndSagaEventStateAndSagaStepNumber(saga, sagaEventStates.getSagaEventOutcome(), sagaEventStates.getSagaEventState(), sagaEventStates.getSagaStepNumber() - 1); //check if the previous step was same and had same outcome, and it is due to replay.
     if (result.isEmpty()) {
-      getSagaEventRepository().save(sagaEvent);
+      getSagaEventRepository().save(sagaEventStates);
     }
   }
 
@@ -100,7 +100,7 @@ public class SagaService {
    * @param saga the saga
    * @return the list
    */
-  public List<SagaEvent> findAllSagaStates(Saga saga) {
+  public List<SagaEventStates> findAllSagaStates(Saga saga) {
     return getSagaEventRepository().findBySaga(saga);
   }
 
@@ -128,7 +128,7 @@ public class SagaService {
   public List<Saga> findAllByStudentIDAndStatusIn(UUID studentID, String sagaName, List<String> statuses){
     return getSagaRepository().findAllByStudentIDAndSagaNameAndStatusIn(studentID, sagaName, statuses);
   }
-  
+
   @Retryable(value = {Exception.class}, maxAttempts = 5, backoff = @Backoff(multiplier = 2, delay = 2000))
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void updateAttachedEntityDuringSagaProcess(Saga saga){

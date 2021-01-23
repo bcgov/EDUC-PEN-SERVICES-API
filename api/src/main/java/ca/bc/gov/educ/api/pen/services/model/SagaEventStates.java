@@ -22,7 +22,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "PEN_SERVICES_SAGA_EVENT_STATES")
 @DynamicUpdate
-public class SagaEvent {
+public class SagaEventStates {
 
   /**
    * The Saga event id.
@@ -110,10 +110,10 @@ public class SagaEvent {
     setSagaEventResponseBytes(sagaEventResponse.getBytes(StandardCharsets.UTF_8));
   }
 
-  public static class SagaEventBuilder {
+  public static class SagaEventStatesBuilder {
     byte[] sagaEventResponseBytes;
 
-    public SagaEventBuilder sagaEventResponse(String sagaEventResponse) {
+    public SagaEventStatesBuilder sagaEventResponse(String sagaEventResponse) {
       this.sagaEventResponseBytes = sagaEventResponse.getBytes(StandardCharsets.UTF_8);
       return this;
     }

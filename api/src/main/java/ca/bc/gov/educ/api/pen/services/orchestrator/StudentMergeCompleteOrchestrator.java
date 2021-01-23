@@ -6,7 +6,7 @@ import ca.bc.gov.educ.api.pen.services.constants.StudentMergeSourceCodes;
 import ca.bc.gov.educ.api.pen.services.constants.StudentStatusCodes;
 import ca.bc.gov.educ.api.pen.services.messaging.MessagePublisher;
 import ca.bc.gov.educ.api.pen.services.model.Saga;
-import ca.bc.gov.educ.api.pen.services.model.SagaEvent;
+import ca.bc.gov.educ.api.pen.services.model.SagaEventStates;
 import ca.bc.gov.educ.api.pen.services.service.SagaService;
 import ca.bc.gov.educ.api.pen.services.struct.v1.*;
 import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
@@ -69,7 +69,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    * @throws JsonProcessingException the json processing exception
    */
   protected void updateMergedToStudent(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
-    SagaEvent eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(UPDATE_STUDENT.toString()); // set current event as saga state.
 
     StudentUpdateSagaData studentUpdate = STUDENT_MERGE_COMPLETE_SAGA_DATA_MAPPER.toMergedToStudent(studentMergeCompleteSagaData);
@@ -86,7 +86,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    * @throws JsonProcessingException the json processing exception
    */
   protected void updateMergedFromStudent(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
-    SagaEvent eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(UPDATE_STUDENT.toString()); // set current event as saga state.
     StudentUpdateSagaData studentUpdate = STUDENT_MERGE_COMPLETE_SAGA_DATA_MAPPER.toMergedFromStudent(studentMergeCompleteSagaData);
     studentUpdate.setStatusCode(StudentStatusCodes.Merge.getCode());
@@ -104,7 +104,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    * @throws JsonProcessingException the json processing exception
    */
   protected void createMerge(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
-    SagaEvent eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(CREATE_MERGE.toString()); // set current event as saga state.
 
     StudentMerge studentMerge = STUDENT_MERGE_COMPLETE_SAGA_DATA_MAPPER.toStudentMerge(studentMergeCompleteSagaData);
@@ -132,7 +132,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    * @throws JsonProcessingException the json processing exception
    */
   protected void readAuditHistory(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
-    SagaEvent eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(READ_AUDIT_EVENT.toString()); // set current event as saga state.
     getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
@@ -155,7 +155,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    * @throws JsonProcessingException          the json processing exception
    */
   protected void addAuditHistory(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
-    SagaEvent eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(ADD_AUDIT_EVENT.toString()); // set current event as saga state.
 
     ObjectMapper objectMapper = new ObjectMapper();
@@ -186,7 +186,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    * @throws JsonProcessingException          the json processing exception
    */
   protected void readPossibleMatches(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
-    SagaEvent eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(GET_POSSIBLE_MATCH.toString()); // set current event as saga state.
     getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
@@ -209,7 +209,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    * @throws JsonProcessingException the json processing exception
    */
   protected void deletePossibleMatches(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
-    SagaEvent eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(DELETE_POSSIBLE_MATCH.toString()); // set current event as saga state.
 
     ObjectMapper objectMapper = new ObjectMapper();
@@ -234,7 +234,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
     log.info("message sent to PEN_MATCH_API_TOPIC for DELETE_POSSIBLE_MATCH Event.");
   }
 
-  private void processStudentUpdate(Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData, SagaEvent eventStates, StudentUpdateSagaData studentUpdate) throws JsonProcessingException {
+  private void processStudentUpdate(Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData, SagaEventStates eventStates, StudentUpdateSagaData studentUpdate) throws JsonProcessingException {
     studentUpdate.setHistoryActivityCode(StudentHistoryActivityCodes.MERGE.getCode());
     studentMergeCompleteSagaData.setRequestStudentID(UUID.fromString(studentUpdate.getStudentID()));
     getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
