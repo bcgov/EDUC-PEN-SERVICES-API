@@ -29,13 +29,16 @@ import static lombok.AccessLevel.PRIVATE;
 public class MessageSubscriber extends MessagePubSub {
 
   /**
-   * The Event handler delegator service.
+   * The Event Handlers as orchestrator for SAGA
+   */
+  @Getter(PRIVATE)
+  private final Map<String, EventHandler> handlerMap = new HashMap<>();
+
+  /**
+   * The Event handler as delegator service for API
    */
   @Getter(PRIVATE)
   private final EventHandlerDelegatorService eventHandlerDelegatorService;
-
-  @Getter(PRIVATE)
-  private final Map<String, EventHandler> handlerMap = new HashMap<>();
 
   @Autowired
   public MessageSubscriber(final Connection con, EventHandlerDelegatorService eventHandlerDelegatorService, final List<EventHandler> eventHandlers) {
@@ -43,32 +46,58 @@ public class MessageSubscriber extends MessagePubSub {
     super.connection = con;
     eventHandlers.forEach(handler -> {
       handlerMap.put(handler.getTopicToSubscribe(), handler);
-      subscribe(handler.getTopicToSubscribe(), handler);
+      subscribeForSAGA(handler.getTopicToSubscribe(), handler);
     });
   }
 
-  private void subscribe(String topic, EventHandler eventHandler) {
+  /**
+   * Subscribe the topic on messages for SAGA
+   *
+   * @param topic         the topic name
+   * @param eventHandler  the orchestrator
+   */
+  private void subscribeForSAGA(String topic, EventHandler eventHandler) {
     if (!handlerMap.containsKey(topic)) {
       handlerMap.put(topic, eventHandler);
     }
     String queue = topic.replace("_", "-");
-    var dispatcher = connection.createDispatcher(onSagaMessage(eventHandler));
+    var dispatcher = connection.createDispatcher(onMessageForSAGA(eventHandler));
     dispatcher.subscribe(topic, queue);
   }
 
   /**
-   * This subscription will makes sure the messages are required to acknowledge manually to STAN.
-   * Subscribe.
+   * On message, event handler for SAGA
+   * 
+   * @param eventHandler  the orchestrator
+   * @return the message handler
+   */
+  private MessageHandler onMessageForSAGA(EventHandler eventHandler) {
+    return (Message message) -> {
+      if (message != null) {
+        log.info("Message received subject :: {},  replyTo :: {}, subscriptionID :: {}", message.getSubject(), message.getReplyTo(), message.getSID());
+        try {
+          var eventString = new String(message.getData());
+          var event = JsonUtil.getJsonObjectFromString(Event.class, eventString);
+          eventHandler.handleEvent(event);
+        } catch (final Exception e) {
+          log.error("Exception ", e);
+        }
+      }
+    };
+  }
+
+  /**
+   * Subscribe the topic on messages for API
    */
   @PostConstruct
-  public void subscribeForAPI() {
+  public void subscribe() {
     String queue = PEN_SERVICES_API_TOPIC.toString().replace("_", "-");
     var dispatcher = connection.createDispatcher(onMessage());
     dispatcher.subscribe(PEN_SERVICES_API_TOPIC.toString(), queue);
   }
 
   /**
-   * On message message handler.
+   * On message, event handler for API
    *
    * @return the message handler
    */
@@ -87,26 +116,4 @@ public class MessageSubscriber extends MessagePubSub {
       }
     };
   }
-
-  /**
-   * On message message handler.
-   *
-   * @return the message handler
-   */
-  public MessageHandler onSagaMessage(EventHandler eventHandler) {
-    return (Message message) -> {
-      if (message != null) {
-        log.info("Message received subject :: {},  replyTo :: {}, subscriptionID :: {}", message.getSubject(), message.getReplyTo(), message.getSID());
-        try {
-          var eventString = new String(message.getData());
-          var event = JsonUtil.getJsonObjectFromString(Event.class, eventString);
-          eventHandler.handleEvent(event);
-        } catch (final Exception e) {
-          log.error("Exception ", e);
-        }
-      }
-    };
-  }
-
-
 }
