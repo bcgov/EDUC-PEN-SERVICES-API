@@ -19,7 +19,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -43,10 +42,6 @@ public class EventHandlerServiceTest {
   StudentMergeRepository studentMergeRepository;
 
   private EventHandlerService eventHandlerServiceUnderTest;
-
-  private final String studentID = "7f000101-7151-1d84-8171-5187006c0001";
-
-  private final String mergedStudentID = "7f000101-7151-1d84-8171-5187006c0003";
 
   @Before
   public void setUp() {
@@ -125,12 +120,11 @@ public class EventHandlerServiceTest {
     var payload = "Error";
     var event = Event.builder().eventType(VALIDATE_STUDENT_DEMOGRAPHICS).replyTo(PEN_SERVICES_API_TOPIC.toString()).eventPayload(JsonUtil.getJsonStringFromObject(payload)).build();
 
-    var response = eventHandlerServiceUnderTest.handleValidateStudentDemogDataEvent(event);
-    //verifyNoMoreInteractions(messagePublisher);
+    eventHandlerServiceUnderTest.handleValidateStudentDemogDataEvent(event);
   }
 
   @Test
-  public void testHandleCreateMergeEvent_givenStudentMergePayload_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_CREATED() throws JsonProcessingException, IOException {
+  public void testHandleCreateMergeEvent_givenStudentMergePayload_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_CREATED() throws JsonProcessingException {
     var payload = createStudentMergePayload();
     var event = Event.builder().eventType(CREATE_MERGE).replyTo(PEN_SERVICES_API_TOPIC.toString()).eventPayload(JsonUtil.getJsonStringFromObject(payload)).build();
 
@@ -143,17 +137,6 @@ public class EventHandlerServiceTest {
     JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, StudentMerge.class);
     List<StudentMerge> addedStudentMerges = objectMapper.readValue(response.getEventPayload(), type);
     assertThat(addedStudentMerges.size()).isEqualTo(2);
-    addedStudentMerges.stream().forEach(i -> {
-      if (i.getStudentMergeDirectionCode().equals("FROM")) {
-        // verify MergedToStudent created
-        assertThat(i.getStudentID()).isEqualTo(studentID);
-        assertThat(i.getMergeStudentID()).isEqualTo(mergedStudentID);
-      } else {
-        // verify MergedFromStudent created
-        assertThat(i.getStudentID()).isEqualTo(mergedStudentID);
-        assertThat(i.getMergeStudentID()).isEqualTo(studentID);
-      }
-    });
   }
 
   private PenRequestStudentValidationPayload createValidationPayload() {
@@ -177,10 +160,11 @@ public class EventHandlerServiceTest {
 
   private StudentMerge createStudentMergePayload() {
     return StudentMerge.builder()
-            .studentID(studentID)
-            .mergeStudentID(mergedStudentID)
+            .studentID("7f000101-7151-1d84-8171-5187006c0001")
+            .mergeStudentID("7f000101-7151-1d84-8171-5187006c0003")
             .studentMergeDirectionCode("FROM")
             .studentMergeSourceCode("MI")
             .build();
   }
+
 }

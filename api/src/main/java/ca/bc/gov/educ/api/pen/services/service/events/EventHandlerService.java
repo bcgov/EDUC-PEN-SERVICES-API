@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.pen.services.service.events;
 import ca.bc.gov.educ.api.pen.services.constants.EventOutcome;
 import ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode;
 import ca.bc.gov.educ.api.pen.services.mapper.v1.StudentMergeMapper;
+import ca.bc.gov.educ.api.pen.services.model.StudentMergeEntity;
 import ca.bc.gov.educ.api.pen.services.repository.StudentMergeRepository;
 import ca.bc.gov.educ.api.pen.services.service.PenRequestStudentRecordValidationService;
 import ca.bc.gov.educ.api.pen.services.service.PenService;
@@ -22,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.*;
 import static lombok.AccessLevel.PRIVATE;
@@ -37,7 +40,6 @@ public class EventHandlerService {
   /**
    * The constant studentMapper.
    */
-  @Getter(PRIVATE)
   private static final StudentMergeMapper studentMergeMapper = StudentMergeMapper.mapper;
 
   @Getter(PRIVATE)
@@ -124,22 +126,25 @@ public class EventHandlerService {
     return obMapper.writeValueAsBytes(newEvent);
   }
 
+  /**
+   * Create student merges for two ways
+   *
+   * @param event   event with the payload for one student merge
+   * @return the list of two created student merges as two ways persistence
+   * @throws JsonProcessingException  the exception
+   */
   @Transactional(propagation = REQUIRES_NEW)
   public byte[] handleCreateMergeEvent(@NonNull Event event) throws JsonProcessingException {
     List<StudentMerge> payload = new ArrayList<>();
 
     // MergedToStudent
     StudentMerge mergedToPEN = JsonUtil.getJsonObjectFromString(StudentMerge.class, event.getEventPayload());
-    RequestUtil.setAuditColumnsForCreate(mergedToPEN);
-    getStudentMergeRepository().save(studentMergeMapper.toModel(mergedToPEN));
-    payload.add(mergedToPEN);
+    processStudentMerge(payload, mergedToPEN);
 
     // MergedFromStudent
     StudentMerge mergedFromPEN = StudentMerge.builder().studentID(mergedToPEN.getMergeStudentID()).mergeStudentID(mergedToPEN.getStudentID())
             .studentMergeDirectionCode("TO").studentMergeSourceCode(mergedToPEN.getStudentMergeSourceCode()).build();
-    RequestUtil.setAuditColumnsForCreate(mergedFromPEN);
-    getStudentMergeRepository().save(studentMergeMapper.toModel(mergedFromPEN));
-    payload.add(mergedFromPEN);
+    processStudentMerge(payload, mergedFromPEN);
 
     Event newEvent = Event.builder()
             .sagaId(event.getSagaId())
@@ -150,5 +155,23 @@ public class EventHandlerService {
       log.debug("responding back :: {}", newEvent);
     }
     return obMapper.writeValueAsBytes(newEvent);
+  }
+
+  /**
+   * Idempotent operation to persist a StudentMergeEntity
+   * @param payload       the list of student merge that will include the processed student merge
+   * @param studentMerge  the student merge to be processed
+   */
+  @Transactional
+  public void processStudentMerge(List<StudentMerge> payload, StudentMerge studentMerge) {
+    Optional<StudentMergeEntity> optional = getStudentMergeRepository()
+            .findStudentMergeEntityByStudentIDAndMergeStudentID(UUID.fromString(studentMerge.getStudentID()), UUID.fromString(studentMerge.getMergeStudentID()));
+    if (optional.isPresent()) {
+      payload.add(studentMergeMapper.toStructure(optional.get()));
+    } else {
+      RequestUtil.setAuditColumnsForCreate(studentMerge);
+      StudentMergeEntity merge = getStudentMergeRepository().save(studentMergeMapper.toModel(studentMerge));
+      payload.add(studentMergeMapper.toStructure(merge));
+    }
   }
 }
