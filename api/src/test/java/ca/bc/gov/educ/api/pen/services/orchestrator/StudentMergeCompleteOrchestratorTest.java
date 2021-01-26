@@ -381,14 +381,12 @@ public class StudentMergeCompleteOrchestratorTest {
     verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(PEN_MATCH_API_TOPIC.toString()), eventCaptor.capture());
     var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(eventCaptor.getValue()));
     assertThat(newEvent.getEventType()).isEqualTo(DELETE_POSSIBLE_MATCH);
-    List<Map<String, UUID>> payload = new ObjectMapper().readValue(newEvent.getEventPayload(), new TypeReference<>() {
+    List<PossibleMatch> payload = new ObjectMapper().readValue(newEvent.getEventPayload(), new TypeReference<>() {
     });
     assertThat(payload.size()).isEqualTo(2);
     payload.stream().forEach(m -> {
-      var possibleMatchStudentID = m.get("studentID");
-      var possibleMatchMatchedStudentID =m.get("matchedStudentID");
-      assertThat(possibleMatchStudentID.toString()).isIn(mergeStudentID, studentID);
-      assertThat(possibleMatchMatchedStudentID.toString()).isIn(mergeStudentID, studentID);
+      assertThat(m.getStudentID().toString()).isIn(mergeStudentID, studentID);
+      assertThat(m.getMatchedStudentID().toString()).isIn(mergeStudentID, studentID);
     });
 
     var sagaFromDB = sagaService.findSagaById(saga.getSagaId());
