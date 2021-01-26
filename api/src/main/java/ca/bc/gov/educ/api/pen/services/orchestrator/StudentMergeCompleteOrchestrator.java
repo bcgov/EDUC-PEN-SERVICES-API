@@ -216,19 +216,12 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
     JavaType type = objectMapper.getTypeFactory().
             constructCollectionType(List.class, PossibleMatch.class);
     List<PossibleMatch> possibleMatches = objectMapper.readValue(event.getEventPayload(), type);
-    List<Map<String, UUID>> payload = new ArrayList<>();
-    possibleMatches.stream().forEach(i -> {
-      Map<String, UUID> deletePossibleMatchMap = new HashMap<>();
-      deletePossibleMatchMap.put("studentID", UUID.fromString(i.getStudentID()));
-      deletePossibleMatchMap.put("matchedStudentID", UUID.fromString(i.getMatchedStudentID()));
-      payload.add(deletePossibleMatchMap);
-    });
     getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
     Event nextEvent = Event.builder().sagaId(saga.getSagaId())
             .eventType(DELETE_POSSIBLE_MATCH)
             .replyTo(getTopicToSubscribe())
-            .eventPayload(JsonUtil.getJsonStringFromObject(payload))
+            .eventPayload(JsonUtil.getJsonStringFromObject(possibleMatches))
             .build();
     postMessageToTopic(PEN_MATCH_API_TOPIC.toString(), nextEvent);
     log.info("message sent to PEN_MATCH_API_TOPIC for DELETE_POSSIBLE_MATCH Event.");
