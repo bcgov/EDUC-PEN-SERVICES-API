@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
@@ -16,7 +17,7 @@ import java.io.Serializable;
  * The type Student.
  */
 @Data
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -149,4 +150,6 @@ public class Student implements Serializable {
    */
   @Size(max = 32)
   String updateUser;
+
+  String trueStudentID;
 }

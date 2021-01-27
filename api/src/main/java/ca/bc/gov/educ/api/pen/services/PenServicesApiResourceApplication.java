@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.api.pen.services;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import ca.bc.gov.educ.api.pen.services.util.ThreadFactoryBuilder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -27,7 +27,6 @@ import java.util.concurrent.ThreadFactory;
 @EnableCaching
 @EnableScheduling
 @EnableRetry
-@EnableAsync
 public class PenServicesApiResourceApplication {
   /**
    * The entry point of application.
@@ -75,16 +74,5 @@ public class PenServicesApiResourceApplication {
               .anyRequest().authenticated().and()
               .oauth2ResourceServer().jwt();
     }
-  }
-  /**
-   * Thread pool task executor executor.
-   *
-   * @return the executor
-   */
-  @Bean(name = "subscriberExecutor")
-  public Executor threadPoolTaskExecutor() {
-    ThreadFactory namedThreadFactory =
-        new ThreadFactoryBuilder().setNameFormat("message-subscriber-%d").build();
-    return Executors.newFixedThreadPool(50, namedThreadFactory);
   }
 }

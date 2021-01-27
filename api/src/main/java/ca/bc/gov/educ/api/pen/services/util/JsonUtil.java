@@ -62,6 +62,10 @@ public class JsonUtil {
     return new ObjectMapper().readValue(payload,clazz);
   }
 
+  public static byte[] getJsonBytesFromObject(Object payload) throws JsonProcessingException {
+    return new ObjectMapper().writeValueAsBytes(payload);
+  }
+
   /**
    * Get json string optional.
    *

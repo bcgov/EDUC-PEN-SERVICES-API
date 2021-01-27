@@ -20,5 +20,46 @@ public enum EventOutcome {
   /**
    * Get the next PEN number
    */
-  NEXT_PEN_NUMBER_RETRIEVED
-}
+  NEXT_PEN_NUMBER_RETRIEVED,
+
+  /**
+   *
+   */
+  INITIATE_SUCCESS,
+  /**
+   *
+   */
+  STUDENT_FOUND,
+  /**
+   *
+   */
+  STUDENT_UPDATED,
+  /**
+   *
+   */
+  MERGE_CREATED,
+  /**
+   *
+   */
+  AUDIT_EVENT_FOUND,
+  /**
+   *
+   */
+  AUDIT_EVENT_ADDED,
+  /**
+   *
+   */
+  POSSIBLE_MATCHES_FOUND,
+  /**
+   *
+   */
+  POSSIBLE_MATCHES_NOT_FOUND,
+  /**
+   *
+   */
+  POSSIBLE_MATCHES_DELETED,
+  /**
+   *
+   */
+  SAGA_COMPLETED
+  }

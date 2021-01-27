@@ -70,6 +70,8 @@ $KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body
 #READ_STUDENT_MERGE_CODES
 $KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body "{\"description\": \"Scope to access merge codes\",\"id\": \"READ_STUDENT_MERGE_CODES\",\"name\": \"READ_STUDENT_MERGE_CODES\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
 
+#STUDENT_MERGE_COMPLETE_SAGA
+$KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body "{\"description\": \"Start Processing student merge complete saga\",\"id\": \"STUDENT_MERGE_COMPLETE_SAGA\",\"name\": \"STUDENT_MERGE_COMPLETE_SAGA\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
 ###########################################################
 #Setup for config-map
 ###########################################################
