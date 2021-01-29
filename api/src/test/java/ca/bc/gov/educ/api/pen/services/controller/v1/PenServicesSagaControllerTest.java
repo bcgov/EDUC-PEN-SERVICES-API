@@ -54,8 +54,9 @@ public class PenServicesSagaControllerTest {
   SagaService sagaService;
 
   private final String studentID = "7f000101-7151-1d84-8171-5187006c0001";
-
+  private final String mergedToPen = "123456789";
   private final String mergedStudentID = "7f000101-7151-1d84-8171-5187006c0003";
+  private final String mergedFromPen = "987654321";
 
   @Before
   public void setUp() {
@@ -113,6 +114,8 @@ public class PenServicesSagaControllerTest {
             "    \"updateUser\": \"test\",\n" +
             "    \"studentID\": \"" + studentID + "\",\n" +
             "    \"mergeStudentID\": \"" + mergedStudentID + "\",\n" +
+            "    \"mergedToPen\": \"" + mergedToPen + "\",\n" +
+            "    \"mergedFromPen\": \"" + mergedFromPen + "\",\n" +
             "    \"studentMergeDirectionCode\": \"From\",\n" +
             "    \"studentMergeSourceCode\": \"MI\",\n" +
             "    \"historyActivityCode\": \"MERGE\",\n" +

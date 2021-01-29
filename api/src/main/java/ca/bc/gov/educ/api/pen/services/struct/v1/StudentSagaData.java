@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StudentUpdateSagaData {
+public class StudentSagaData {
   private String studentID;
   private String pen;
   private String legalFirstName;

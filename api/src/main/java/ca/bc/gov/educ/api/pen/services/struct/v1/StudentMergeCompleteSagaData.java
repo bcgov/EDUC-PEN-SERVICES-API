@@ -19,6 +19,18 @@ import java.util.UUID;
 public class StudentMergeCompleteSagaData extends BaseStudentSagaData {
 
   /**
+   * MergeToPen: TruePEN.
+   */
+  @NotNull(message = "MergedToPen can not be null.")
+  String mergedToPen;
+
+  /**
+   * MergedFromPen.
+   */
+  @NotNull(message = "mergedFromPen can not be null.")
+  String mergedFromPen;
+
+  /**
    * The merge student id.
    */
   @NotNull(message = "Merge Student ID can not be null.")
