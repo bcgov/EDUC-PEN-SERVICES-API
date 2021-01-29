@@ -91,6 +91,9 @@ public class BaseStudentSagaData {
    */
   String updateUser;
 
+  /**
+   * The History activity code.
+   */
   @NotNull(message = "historyActivityCode can not be null.")
   String historyActivityCode;
 

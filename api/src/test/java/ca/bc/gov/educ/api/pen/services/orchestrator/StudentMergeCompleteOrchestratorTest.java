@@ -33,7 +33,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -91,7 +90,9 @@ public class StudentMergeCompleteOrchestratorTest {
   ArgumentCaptor<byte[]> eventCaptor;
 
   String studentID = UUID.randomUUID().toString();
+  String mergedToPen = "123456789";
   String mergeStudentID = UUID.randomUUID().toString();
+  String mergedFromPen = "987654321";
   String studentHistoryID = UUID.randomUUID().toString();
 
   /**
@@ -102,6 +103,8 @@ public class StudentMergeCompleteOrchestratorTest {
     MockitoAnnotations.openMocks(this);
     var payload = placeholderStudentMergeCompleteSagaData();
     sagaData = getStudentMergeCompleteSagaDataFromJsonString(payload);
+    sagaData.setMergedToPen("123456789");
+    sagaData.setMergedFromPen("987654321");
     sagaData.setLocalID("20345678");
     sagaData.setGradeCode("01");
     sagaData.setLegalFirstName("Jack");
@@ -122,7 +125,7 @@ public class StudentMergeCompleteOrchestratorTest {
   }
 
   @Test
-  public void testUpdateMergedToStudent_givenEventAndSagaData_shouldPostEventToStudentApi() throws IOException, InterruptedException, TimeoutException {
+  public void testGetMergedToStudent_givenEventAndSagaData_shouldPostEventToStudentApi() throws IOException, InterruptedException, TimeoutException {
     var invocations = mockingDetails(messagePublisher).getInvocations().size();
     var event = Event.builder()
             .eventType(EventType.INITIATED)
@@ -133,8 +136,44 @@ public class StudentMergeCompleteOrchestratorTest {
     orchestrator.handleEvent(event);
     verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(STUDENT_API_TOPIC.toString()), eventCaptor.capture());
     var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(eventCaptor.getValue()));
+    assertThat(newEvent.getEventType()).isEqualTo(GET_STUDENT);
+    var responsePen = newEvent.getEventPayload();
+    assertThat(mergedToPen).isEqualTo(responsePen);
+
+    var sagaFromDB = sagaService.findSagaById(saga.getSagaId());
+    assertThat(sagaFromDB).isPresent();
+    assertThat(sagaFromDB.get().getSagaState()).isEqualTo(GET_STUDENT.toString());
+    var sagaStates = sagaService.findAllSagaStates(saga);
+    assertThat(sagaStates.size()).isEqualTo(1);
+    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(EventType.INITIATED.toString());
+    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.INITIATE_SUCCESS.toString());
+  }
+
+  @Test
+  public void testUpdateMergedToStudent_givenEventAndSagaData_shouldPostEventToStudentApi() throws IOException, InterruptedException, TimeoutException {
+    var sagaFromDBtoUpdateOptional = sagaService.findSagaById(saga.getSagaId());
+    if (sagaFromDBtoUpdateOptional.isPresent()) {
+      var sagaFromDBtoUpdate = sagaFromDBtoUpdateOptional.get();
+      var payload = JsonUtil.getJsonObjectFromString(StudentMergeCompleteSagaData.class, sagaFromDBtoUpdate.getPayload());
+      payload.setRequestStudentID(UUID.fromString(studentID));
+      sagaFromDBtoUpdate.setPayload(JsonUtil.getJsonStringFromObject(payload));
+      sagaService.updateAttachedEntityDuringSagaProcess(sagaFromDBtoUpdate);
+      saga = sagaService.findSagaById(saga.getSagaId()).orElseThrow();
+    }
+    var studentPayload = Student.builder().studentID(studentID).legalFirstName("Jack").localID("20345678").statusCode("A").build();
+    var invocations = mockingDetails(messagePublisher).getInvocations().size();
+    var event = Event.builder()
+            .eventType(GET_STUDENT)
+            .eventOutcome(EventOutcome.STUDENT_FOUND)
+            .sagaId(saga.getSagaId())
+            .eventPayload(JsonUtil.getJsonStringFromObject(studentPayload))
+            .build();
+
+    orchestrator.handleEvent(event);
+    verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(STUDENT_API_TOPIC.toString()), eventCaptor.capture());
+    var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(eventCaptor.getValue()));
     assertThat(newEvent.getEventType()).isEqualTo(UPDATE_STUDENT);
-    var student = JsonUtil.getJsonObjectFromString(StudentUpdateSagaData.class, newEvent.getEventPayload());
+    var student = JsonUtil.getJsonObjectFromString(StudentSagaData.class, newEvent.getEventPayload());
     assertThat(student.getStudentID()).isEqualTo(studentID);
     assertThat(student.getLegalFirstName()).isEqualTo("Jack");
     assertThat(student.getLocalID()).isEqualTo("20345678");
@@ -145,8 +184,8 @@ public class StudentMergeCompleteOrchestratorTest {
     assertThat(sagaFromDB.get().getSagaState()).isEqualTo(UPDATE_STUDENT.toString());
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
-    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(EventType.INITIATED.toString());
-    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.INITIATE_SUCCESS.toString());
+    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(EventType.GET_STUDENT.toString());
+    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.STUDENT_FOUND.toString());
   }
 
   @Test
@@ -160,7 +199,7 @@ public class StudentMergeCompleteOrchestratorTest {
       sagaService.updateAttachedEntityDuringSagaProcess(sagaFromDBtoUpdate);
       saga = sagaService.findSagaById(saga.getSagaId()).orElseThrow();
     }
-    var studentPayload = Student.builder().studentID(studentID).legalFirstName("Jack").build();
+    var studentPayload = Student.builder().studentID(studentID).legalFirstName("Jack").localID("20345678").statusCode("A").build();
     var invocations = mockingDetails(messagePublisher).getInvocations().size();
     var event = Event.builder()
             .eventType(UPDATE_STUDENT)
@@ -190,6 +229,44 @@ public class StudentMergeCompleteOrchestratorTest {
   }
 
   @Test
+  public void testGetMergedFromStudent_givenEventAndSagaData_shouldPostEventToStudentApi() throws IOException, InterruptedException, TimeoutException {
+    var sagaFromDBtoUpdateOptional = sagaService.findSagaById(saga.getSagaId());
+    if (sagaFromDBtoUpdateOptional.isPresent()) {
+      var sagaFromDBtoUpdate = sagaFromDBtoUpdateOptional.get();
+      var payload = JsonUtil.getJsonObjectFromString(StudentMergeCompleteSagaData.class, sagaFromDBtoUpdate.getPayload());
+      payload.setRequestStudentID(UUID.fromString(mergeStudentID));
+      sagaFromDBtoUpdate.setPayload(JsonUtil.getJsonStringFromObject(payload));
+      sagaService.updateAttachedEntityDuringSagaProcess(sagaFromDBtoUpdate);
+      saga = sagaService.findSagaById(saga.getSagaId()).orElseThrow();
+    }
+    var studentMergePayload = StudentMerge.builder().studentID(studentID).mergeStudentID(mergeStudentID).studentMergeDirectionCode("FROM").studentMergeSourceCode("MI").build();
+    var invocations = mockingDetails(messagePublisher).getInvocations().size();
+    var event = Event.builder()
+            .eventType(CREATE_MERGE)
+            .eventOutcome(EventOutcome.MERGE_CREATED)
+            .sagaId(saga.getSagaId())
+            .eventPayload(JsonUtil.getJsonStringFromObject(studentMergePayload))
+            .build();
+    orchestrator.handleEvent(event);
+    verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(STUDENT_API_TOPIC.toString()), eventCaptor.capture());
+    var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(eventCaptor.getValue()));
+    assertThat(newEvent.getEventType()).isEqualTo(GET_STUDENT);
+    var responsePen = newEvent.getEventPayload();
+    assertThat(mergedFromPen).isEqualTo(responsePen);
+
+    var sagaFromDB = sagaService.findSagaById(saga.getSagaId());
+    assertThat(sagaFromDB).isPresent();
+    var currentSaga = sagaFromDB.get();
+    assertThat(currentSaga.getSagaState()).isEqualTo(GET_STUDENT.toString());
+    assertThat(getStudentMergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergeStudentID().toString()).isEqualTo(mergeStudentID);
+    assertThat(getStudentMergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID().toString()).isEqualTo(mergeStudentID);
+    var sagaStates = sagaService.findAllSagaStates(saga);
+    assertThat(sagaStates.size()).isEqualTo(1);
+    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(CREATE_MERGE.toString());
+    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.MERGE_CREATED.toString());
+  }
+
+  @Test
   public void testUpdateMergedFromStudent_givenEventAndSagaData_shouldPostEventToStudentApi() throws IOException, InterruptedException, TimeoutException {
     var sagaFromDBtoUpdateOptional = sagaService.findSagaById(saga.getSagaId());
     if (sagaFromDBtoUpdateOptional.isPresent()) {
@@ -200,11 +277,11 @@ public class StudentMergeCompleteOrchestratorTest {
       sagaService.updateAttachedEntityDuringSagaProcess(sagaFromDBtoUpdate);
       saga = sagaService.findSagaById(saga.getSagaId()).orElseThrow();
     }
-    var studentPayload = StudentUpdateSagaData.builder().studentID(studentID).legalFirstName("Jack").build();
+    var studentPayload = Student.builder().studentID(studentID).legalFirstName("Jack").localID("20345678").statusCode("A").build();
     var invocations = mockingDetails(messagePublisher).getInvocations().size();
     var event = Event.builder()
-            .eventType(CREATE_MERGE)
-            .eventOutcome(EventOutcome.MERGE_CREATED)
+            .eventType(GET_STUDENT)
+            .eventOutcome(EventOutcome.STUDENT_FOUND)
             .sagaId(saga.getSagaId())
             .eventPayload(JsonUtil.getJsonStringFromObject(studentPayload))
             .build();
@@ -212,9 +289,10 @@ public class StudentMergeCompleteOrchestratorTest {
     verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(STUDENT_API_TOPIC.toString()), eventCaptor.capture());
     var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(eventCaptor.getValue()));
     assertThat(newEvent.getEventType()).isEqualTo(UPDATE_STUDENT);
-    var student = JsonUtil.getJsonObjectFromString(StudentUpdateSagaData.class, newEvent.getEventPayload());
-    assertThat(student.getStudentID()).isEqualTo(mergeStudentID);
-    assertThat(student.getHistoryActivityCode()).isEqualTo("MERGE");
+    var student = JsonUtil.getJsonObjectFromString(StudentSagaData.class, newEvent.getEventPayload());
+    assertThat(student.getStudentID()).isEqualTo(studentID);
+    assertThat(student.getLegalFirstName()).isEqualTo("Jack");
+    assertThat(student.getLocalID()).isEqualTo("20345678");
     assertThat(student.getStatusCode()).isEqualTo("M");
 
     var sagaFromDB = sagaService.findSagaById(saga.getSagaId());
@@ -225,8 +303,8 @@ public class StudentMergeCompleteOrchestratorTest {
     assertThat(getStudentMergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID().toString()).isEqualTo(mergeStudentID);
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
-    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(CREATE_MERGE.toString());
-    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.MERGE_CREATED.toString());
+    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(GET_STUDENT.toString());
+    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.STUDENT_FOUND.toString());
   }
 
   @Test
