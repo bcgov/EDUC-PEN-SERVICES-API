@@ -277,7 +277,7 @@ public class StudentMergeCompleteOrchestratorTest {
       sagaService.updateAttachedEntityDuringSagaProcess(sagaFromDBtoUpdate);
       saga = sagaService.findSagaById(saga.getSagaId()).orElseThrow();
     }
-    var studentPayload = Student.builder().studentID(studentID).legalFirstName("Jack").localID("20345678").statusCode("A").build();
+    var studentPayload = Student.builder().studentID(mergeStudentID).legalFirstName("Jack").localID("20345678").statusCode("A").build();
     var invocations = mockingDetails(messagePublisher).getInvocations().size();
     var event = Event.builder()
             .eventType(GET_STUDENT)
@@ -290,7 +290,7 @@ public class StudentMergeCompleteOrchestratorTest {
     var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(eventCaptor.getValue()));
     assertThat(newEvent.getEventType()).isEqualTo(UPDATE_STUDENT);
     var student = JsonUtil.getJsonObjectFromString(StudentSagaData.class, newEvent.getEventPayload());
-    assertThat(student.getStudentID()).isEqualTo(studentID);
+    assertThat(student.getStudentID()).isEqualTo(mergeStudentID);
     assertThat(student.getLegalFirstName()).isEqualTo("Jack");
     assertThat(student.getLocalID()).isEqualTo("20345678");
     assertThat(student.getStatusCode()).isEqualTo("M");

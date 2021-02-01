@@ -68,6 +68,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
     saga.setStatus(IN_PROGRESS.toString());
     saga.setSagaState(GET_STUDENT.toString()); // set current event as saga state.
     studentMergeCompleteSagaData.setRequestStudentID(studentMergeCompleteSagaData.getStudentID());
+    saga.setPayload(JsonUtil.getJsonStringFromObject(studentMergeCompleteSagaData));
     getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
     Event nextEvent = Event.builder().sagaId(saga.getSagaId())
             .eventType(GET_STUDENT)
@@ -83,6 +84,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
     eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(GET_STUDENT.toString()); // set current event as saga state.
     studentMergeCompleteSagaData.setRequestStudentID(studentMergeCompleteSagaData.getMergeStudentID());
+    saga.setPayload(JsonUtil.getJsonStringFromObject(studentMergeCompleteSagaData));
     getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
     Event nextEvent = Event.builder().sagaId(saga.getSagaId())
             .eventType(GET_STUDENT)
@@ -288,6 +290,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
   private void processStudentUpdate(Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData, SagaEventStates eventStates, StudentSagaData studentUpdate) throws JsonProcessingException {
     studentUpdate.setHistoryActivityCode(StudentHistoryActivityCodes.MERGE.getCode());
     studentMergeCompleteSagaData.setRequestStudentID(UUID.fromString(studentUpdate.getStudentID()));
+    saga.setPayload(JsonUtil.getJsonStringFromObject(studentMergeCompleteSagaData));
     getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
     Event nextEvent = Event.builder().sagaId(saga.getSagaId())
