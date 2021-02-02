@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.pen.services.support;
 
 import ca.bc.gov.educ.api.pen.services.messaging.MessagePublisher;
 import ca.bc.gov.educ.api.pen.services.messaging.MessageSubscriber;
+import ca.bc.gov.educ.api.pen.services.messaging.NatsConnection;
 import ca.bc.gov.educ.api.pen.services.rest.RestUtils;
 import io.nats.client.Connection;
 import org.mockito.Mockito;
@@ -53,5 +54,11 @@ public class MockConfiguration {
   @Primary
   public Connection connection() {
     return Mockito.mock(Connection.class);
+  }
+
+  @Bean
+  @Primary
+  public NatsConnection natsConnection() {
+    return Mockito.mock(NatsConnection.class);
   }
 }
