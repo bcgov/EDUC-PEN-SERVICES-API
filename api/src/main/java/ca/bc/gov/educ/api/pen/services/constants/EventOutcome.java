@@ -41,11 +41,11 @@ public enum EventOutcome {
   /**
    *
    */
-  AUDIT_EVENT_FOUND,
+  STUDENT_HISTORY_FOUND,
   /**
    *
    */
-  AUDIT_EVENT_ADDED,
+  STUDENT_HISTORY_CREATED,
   /**
    *
    */
