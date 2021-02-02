@@ -1,7 +1,5 @@
 package ca.bc.gov.educ.api.pen.services.health;
 
-import ca.bc.gov.educ.api.pen.services.PenServicesApiResourceApplication;
-import ca.bc.gov.educ.api.pen.services.support.TestRedisConfiguration;
 import io.nats.client.Connection;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,7 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = {TestRedisConfiguration.class, PenServicesApiResourceApplication.class})
+@SpringBootTest()
 @ActiveProfiles("test")
 @RunWith(SpringRunner.class)
 public class PenServicesAPICustomHealthCheckTest {
