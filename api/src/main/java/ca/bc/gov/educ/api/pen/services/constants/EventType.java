@@ -37,12 +37,12 @@ public enum EventType {
   /**
    * Read Audit History from student.
    */
-  READ_AUDIT_EVENT,
+  GET_STUDENT_HISTORY,
 
   /**
    * Add Audit History into student.
    */
-  ADD_AUDIT_EVENT,
+  CREATE_STUDENT_HISTORY,
 
   GET_POSSIBLE_MATCH,
 

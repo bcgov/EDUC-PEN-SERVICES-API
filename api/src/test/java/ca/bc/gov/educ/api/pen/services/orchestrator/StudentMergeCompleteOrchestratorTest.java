@@ -329,14 +329,14 @@ public class StudentMergeCompleteOrchestratorTest {
     orchestrator.handleEvent(event);
     verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(STUDENT_API_TOPIC.toString()), eventCaptor.capture());
     var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(eventCaptor.getValue()));
-    assertThat(newEvent.getEventType()).isEqualTo(READ_AUDIT_EVENT);
+    assertThat(newEvent.getEventType()).isEqualTo(GET_STUDENT_HISTORY);
     var mergedFromStudentID = newEvent.getEventPayload();
     assertThat(mergedFromStudentID).isEqualTo(mergeStudentID);
 
     var sagaFromDB = sagaService.findSagaById(saga.getSagaId());
     assertThat(sagaFromDB).isPresent();
     var currentSaga = sagaFromDB.get();
-    assertThat(currentSaga.getSagaState()).isEqualTo(READ_AUDIT_EVENT.toString());
+    assertThat(currentSaga.getSagaState()).isEqualTo(GET_STUDENT_HISTORY.toString());
     assertThat(getStudentMergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getStudentID().toString()).isEqualTo(studentID);
     assertThat(getStudentMergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergeStudentID().toString()).isEqualTo(mergeStudentID);
     assertThat(getStudentMergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID().toString()).isEqualTo(mergeStudentID);
@@ -362,15 +362,15 @@ public class StudentMergeCompleteOrchestratorTest {
     readHistoryList.add(studentHistoryPayload);
     var invocations = mockingDetails(messagePublisher).getInvocations().size();
     var event = Event.builder()
-            .eventType(READ_AUDIT_EVENT)
-            .eventOutcome(EventOutcome.AUDIT_EVENT_FOUND)
+            .eventType(GET_STUDENT_HISTORY)
+            .eventOutcome(EventOutcome.STUDENT_HISTORY_FOUND)
             .sagaId(saga.getSagaId())
             .eventPayload(JsonUtil.getJsonStringFromObject(readHistoryList))
             .build();
     orchestrator.handleEvent(event);
     verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(STUDENT_API_TOPIC.toString()), eventCaptor.capture());
     var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(eventCaptor.getValue()));
-    assertThat(newEvent.getEventType()).isEqualTo(ADD_AUDIT_EVENT);
+    assertThat(newEvent.getEventType()).isEqualTo(CREATE_STUDENT_HISTORY);
     ObjectMapper objectMapper = new ObjectMapper();
     JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, StudentHistory.class);
     List<StudentHistory> copyHistoryList = objectMapper.readValue(newEvent.getEventPayload(), type);
@@ -381,14 +381,14 @@ public class StudentMergeCompleteOrchestratorTest {
     var sagaFromDB = sagaService.findSagaById(saga.getSagaId());
     assertThat(sagaFromDB).isPresent();
     var currentSaga = sagaFromDB.get();
-    assertThat(currentSaga.getSagaState()).isEqualTo(ADD_AUDIT_EVENT.toString());
+    assertThat(currentSaga.getSagaState()).isEqualTo(CREATE_STUDENT_HISTORY.toString());
     assertThat(getStudentMergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getStudentID().toString()).isEqualTo(studentID);
     assertThat(getStudentMergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergeStudentID().toString()).isEqualTo(mergeStudentID);
     assertThat(getStudentMergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID().toString()).isEqualTo(mergeStudentID);
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
-    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(READ_AUDIT_EVENT.toString());
-    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.AUDIT_EVENT_FOUND.toString());
+    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(GET_STUDENT_HISTORY.toString());
+    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.STUDENT_HISTORY_FOUND.toString());
   }
 
   @Test
@@ -407,8 +407,8 @@ public class StudentMergeCompleteOrchestratorTest {
     copiedHistoryList.add(studentHistoryPayload);
     var invocations = mockingDetails(messagePublisher).getInvocations().size();
     var event = Event.builder()
-            .eventType(ADD_AUDIT_EVENT)
-            .eventOutcome(EventOutcome.AUDIT_EVENT_ADDED)
+            .eventType(CREATE_STUDENT_HISTORY)
+            .eventOutcome(EventOutcome.STUDENT_HISTORY_CREATED)
             .sagaId(saga.getSagaId())
             .eventPayload(JsonUtil.getJsonStringFromObject(copiedHistoryList))
             .build();
@@ -428,8 +428,8 @@ public class StudentMergeCompleteOrchestratorTest {
     assertThat(getStudentMergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID().toString()).isEqualTo(mergeStudentID);
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
-    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(ADD_AUDIT_EVENT.toString());
-    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.AUDIT_EVENT_ADDED.toString());
+    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(CREATE_STUDENT_HISTORY.toString());
+    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.STUDENT_HISTORY_CREATED.toString());
   }
 
   @Test

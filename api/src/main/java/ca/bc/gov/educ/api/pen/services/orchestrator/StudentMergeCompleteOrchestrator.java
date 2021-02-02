@@ -54,9 +54,9 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
             .step(UPDATE_STUDENT, STUDENT_UPDATED, this::isStepForMergedToPEN, CREATE_MERGE, this::createMerge)
             .step(CREATE_MERGE, MERGE_CREATED, GET_STUDENT, this::getStudentByMergedFromPen)
             .step(GET_STUDENT, STUDENT_FOUND, this::isStepForMergedFromPEN, UPDATE_STUDENT, this::updateMergedFromStudent)
-            .step(UPDATE_STUDENT, STUDENT_UPDATED, this::isStepForMergedFromPEN, READ_AUDIT_EVENT, this::readAuditHistory)
-            .step(READ_AUDIT_EVENT, AUDIT_EVENT_FOUND, ADD_AUDIT_EVENT, this::addAuditHistory)
-            .step(ADD_AUDIT_EVENT, AUDIT_EVENT_ADDED, GET_POSSIBLE_MATCH, this::readPossibleMatches)
+            .step(UPDATE_STUDENT, STUDENT_UPDATED, this::isStepForMergedFromPEN, GET_STUDENT_HISTORY, this::readAuditHistory)
+            .step(GET_STUDENT_HISTORY, STUDENT_HISTORY_FOUND, CREATE_STUDENT_HISTORY, this::addAuditHistory)
+            .step(CREATE_STUDENT_HISTORY, STUDENT_HISTORY_CREATED, GET_POSSIBLE_MATCH, this::readPossibleMatches)
             .step(GET_POSSIBLE_MATCH, POSSIBLE_MATCHES_FOUND, DELETE_POSSIBLE_MATCH, this::deletePossibleMatches)
             .step(GET_POSSIBLE_MATCH, POSSIBLE_MATCHES_NOT_FOUND, MARK_SAGA_COMPLETE, this::markSagaComplete)
             .step(DELETE_POSSIBLE_MATCH, POSSIBLE_MATCHES_DELETED, MARK_SAGA_COMPLETE, this::markSagaComplete);
@@ -170,7 +170,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
     StudentMerge studentMerge = STUDENT_MERGE_COMPLETE_SAGA_DATA_MAPPER.toStudentMerge(studentMergeCompleteSagaData);
     studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.FROM.getCode());
     studentMerge.setStudentMergeSourceCode(StudentMergeSourceCodes.MI.getCode());
-    studentMergeCompleteSagaData.setStudentID(UUID.fromString(studentMerge.getStudentID()));
+    studentMergeCompleteSagaData.setRequestStudentID(studentMergeCompleteSagaData.getMergeStudentID());
     getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
     Event nextEvent = Event.builder().sagaId(saga.getSagaId())
@@ -193,11 +193,11 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    */
   protected void readAuditHistory(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
     SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
-    saga.setSagaState(READ_AUDIT_EVENT.toString()); // set current event as saga state.
+    saga.setSagaState(GET_STUDENT_HISTORY.toString()); // set current event as saga state.
     getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
     Event nextEvent = Event.builder().sagaId(saga.getSagaId())
-            .eventType(READ_AUDIT_EVENT)
+            .eventType(GET_STUDENT_HISTORY)
             .replyTo(getTopicToSubscribe())
             .eventPayload(studentMergeCompleteSagaData.getMergeStudentID().toString())
             .build();
@@ -216,7 +216,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    */
   protected void addAuditHistory(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
     SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
-    saga.setSagaState(ADD_AUDIT_EVENT.toString()); // set current event as saga state.
+    saga.setSagaState(CREATE_STUDENT_HISTORY.toString()); // set current event as saga state.
 
     ObjectMapper objectMapper = new ObjectMapper();
     JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, StudentHistory.class);
@@ -228,7 +228,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
     getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
     Event nextEvent = Event.builder().sagaId(saga.getSagaId())
-            .eventType(ADD_AUDIT_EVENT)
+            .eventType(CREATE_STUDENT_HISTORY)
             .replyTo(getTopicToSubscribe())
             .eventPayload(JsonUtil.getJsonStringFromObject(historyList))
             .build();
