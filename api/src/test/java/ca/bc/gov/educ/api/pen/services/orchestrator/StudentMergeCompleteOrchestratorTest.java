@@ -451,7 +451,7 @@ public class StudentMergeCompleteOrchestratorTest {
     var invocations = mockingDetails(messagePublisher).getInvocations().size();
     var event = Event.builder()
             .eventType(GET_POSSIBLE_MATCH)
-            .eventOutcome(EventOutcome.POSSIBLE_MATCHES_FOUND)
+            .eventOutcome(EventOutcome.POSSIBLE_MATCH_FOUND)
             .sagaId(saga.getSagaId())
             .eventPayload(JsonUtil.getJsonStringFromObject(possibleMatches))
             .build();
@@ -477,7 +477,7 @@ public class StudentMergeCompleteOrchestratorTest {
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
     assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(GET_POSSIBLE_MATCH.toString());
-    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.POSSIBLE_MATCHES_FOUND.toString());
+    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.POSSIBLE_MATCH_FOUND.toString());
   }
 
   @Test
@@ -496,7 +496,7 @@ public class StudentMergeCompleteOrchestratorTest {
     var invocations = mockingDetails(messagePublisher).getInvocations().size();
     var event = Event.builder()
             .eventType(GET_POSSIBLE_MATCH)
-            .eventOutcome(EventOutcome.POSSIBLE_MATCHES_NOT_FOUND)
+            .eventOutcome(EventOutcome.POSSIBLE_MATCH_NOT_FOUND)
             .sagaId(saga.getSagaId())
             .eventPayload(JsonUtil.getJsonStringFromObject(possibleMatches))
             .build();
@@ -515,7 +515,7 @@ public class StudentMergeCompleteOrchestratorTest {
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
     assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(GET_POSSIBLE_MATCH.toString());
-    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.POSSIBLE_MATCHES_NOT_FOUND.toString());
+    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.POSSIBLE_MATCH_NOT_FOUND.toString());
   }
 
   /**

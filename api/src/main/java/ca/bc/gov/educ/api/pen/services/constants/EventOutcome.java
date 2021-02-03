@@ -49,15 +49,15 @@ public enum EventOutcome {
   /**
    *
    */
-  POSSIBLE_MATCHES_FOUND,
+  POSSIBLE_MATCH_FOUND,
   /**
    *
    */
-  POSSIBLE_MATCHES_NOT_FOUND,
+  POSSIBLE_MATCH_NOT_FOUND,
   /**
    *
    */
-  POSSIBLE_MATCHES_DELETED,
+  POSSIBLE_MATCH_DELETED,
   /**
    *
    */
