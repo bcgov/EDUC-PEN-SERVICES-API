@@ -45,8 +45,7 @@ public class PenServicesSagaController implements PenServicesSagaEndpoint {
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
       }
       String payload = JsonUtil.getJsonStringFromObject(studentMergeCompleteSagaData);
-      final Saga saga = getSagaService().createSagaRecordInDB(STUDENT_MERGE_COMPLETE_SAGA.toString(), studentMergeCompleteSagaData.getCreateUser(), payload, studentID);
-      getStudentMergeCompleteOrchestrator().startSaga(payload, studentID, studentMergeCompleteSagaData.getCreateUser());
+      final Saga saga = getStudentMergeCompleteOrchestrator().startSaga(payload, studentID, studentMergeCompleteSagaData.getCreateUser());
       return ResponseEntity.ok(saga.getSagaId().toString());
     } catch (final Exception e) {
       Thread.currentThread().interrupt();
