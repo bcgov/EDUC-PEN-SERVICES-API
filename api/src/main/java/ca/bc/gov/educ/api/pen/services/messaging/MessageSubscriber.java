@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,7 @@ import static lombok.AccessLevel.PRIVATE;
  */
 @Component
 @Slf4j
-public class MessageSubscriber extends MessagePubSub {
+public class MessageSubscriber {
 
   /**
    * The Event Handlers as orchestrator for SAGA
@@ -39,11 +38,12 @@ public class MessageSubscriber extends MessagePubSub {
    */
   @Getter(PRIVATE)
   private final EventHandlerDelegatorService eventHandlerDelegatorService;
+  private final Connection connection;
 
   @Autowired
   public MessageSubscriber(final Connection con, EventHandlerDelegatorService eventHandlerDelegatorService, final List<EventHandler> eventHandlers) {
     this.eventHandlerDelegatorService = eventHandlerDelegatorService;
-    super.connection = con;
+    this.connection = con;
     eventHandlers.forEach(handler -> {
       handlerMap.put(handler.getTopicToSubscribe(), handler);
       subscribeForSAGA(handler.getTopicToSubscribe(), handler);
