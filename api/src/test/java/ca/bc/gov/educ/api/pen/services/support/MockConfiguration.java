@@ -2,9 +2,12 @@ package ca.bc.gov.educ.api.pen.services.support;
 
 import ca.bc.gov.educ.api.pen.services.messaging.MessagePublisher;
 import ca.bc.gov.educ.api.pen.services.messaging.MessageSubscriber;
+import ca.bc.gov.educ.api.pen.services.messaging.NatsConnection;
 import ca.bc.gov.educ.api.pen.services.rest.RestUtils;
 import io.nats.client.Connection;
 import org.mockito.Mockito;
+import org.redisson.api.RedissonClient;
+import org.redisson.spring.data.connection.RedissonConnectionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -53,5 +56,17 @@ public class MockConfiguration {
   @Primary
   public Connection connection() {
     return Mockito.mock(Connection.class);
+  }
+
+  @Bean
+  @Primary
+  public NatsConnection natsConnection() {
+    return Mockito.mock(NatsConnection.class);
+  }
+
+  @Bean
+  @Primary
+  public RedissonClient redisson() {
+    return Mockito.mock(RedissonClient.class);
   }
 }
