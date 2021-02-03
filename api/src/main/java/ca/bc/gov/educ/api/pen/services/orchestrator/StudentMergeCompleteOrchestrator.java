@@ -57,9 +57,9 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
             .step(UPDATE_STUDENT, STUDENT_UPDATED, this::isStepForMergedFromPEN, GET_STUDENT_HISTORY, this::readAuditHistory)
             .step(GET_STUDENT_HISTORY, STUDENT_HISTORY_FOUND, CREATE_STUDENT_HISTORY, this::addAuditHistory)
             .step(CREATE_STUDENT_HISTORY, STUDENT_HISTORY_CREATED, GET_POSSIBLE_MATCH, this::readPossibleMatches)
-            .step(GET_POSSIBLE_MATCH, POSSIBLE_MATCHES_FOUND, DELETE_POSSIBLE_MATCH, this::deletePossibleMatches)
-            .step(GET_POSSIBLE_MATCH, POSSIBLE_MATCHES_NOT_FOUND, MARK_SAGA_COMPLETE, this::markSagaComplete)
-            .step(DELETE_POSSIBLE_MATCH, POSSIBLE_MATCHES_DELETED, MARK_SAGA_COMPLETE, this::markSagaComplete);
+            .step(GET_POSSIBLE_MATCH, POSSIBLE_MATCH_FOUND, DELETE_POSSIBLE_MATCH, this::deletePossibleMatches)
+            .step(GET_POSSIBLE_MATCH, POSSIBLE_MATCH_NOT_FOUND, MARK_SAGA_COMPLETE, this::markSagaComplete)
+            .step(DELETE_POSSIBLE_MATCH, POSSIBLE_MATCH_DELETED, MARK_SAGA_COMPLETE, this::markSagaComplete);
   }
 
   protected void getStudentByMergedToPen(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws IOException, InterruptedException, TimeoutException {
@@ -202,7 +202,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
             .eventPayload(studentMergeCompleteSagaData.getMergeStudentID().toString())
             .build();
     postMessageToTopic(STUDENT_API_TOPIC.toString(), nextEvent);
-    log.info("message sent to STUDENT_API_TOPIC for READ_AUDIT_EVENT Event.");
+    log.info("message sent to STUDENT_API_TOPIC for GET_STUDENT_HISTORY Event.");
   }
 
   /**
@@ -233,7 +233,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
             .eventPayload(JsonUtil.getJsonStringFromObject(historyList))
             .build();
     postMessageToTopic(STUDENT_API_TOPIC.toString(), nextEvent);
-    log.info("message sent to STUDENT_API_TOPIC for ADD_AUDIT_EVENT Event.");
+    log.info("message sent to STUDENT_API_TOPIC for CREATE_STUDENT_HISTORY Event.");
   }
 
   /**
