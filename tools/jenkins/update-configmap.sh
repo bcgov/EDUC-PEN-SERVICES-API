@@ -72,6 +72,9 @@ $KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body
 
 #STUDENT_MERGE_COMPLETE_SAGA
 $KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body "{\"description\": \"Start Processing student merge complete saga\",\"id\": \"STUDENT_MERGE_COMPLETE_SAGA\",\"name\": \"STUDENT_MERGE_COMPLETE_SAGA\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
+#READ_SAGA
+"$KCADM_FILE_BIN_FOLDER"/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body "{\"description\": \"Scope to READ a SAGA record by its ID\",\"id\": \"PEN_SERVICES_READ_SAGA\",\"name\": \"PEN_SERVICES_READ_SAGA\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
 ###########################################################
 #Setup for config-map
 ###########################################################

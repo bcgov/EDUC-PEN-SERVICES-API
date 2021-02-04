@@ -21,9 +21,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
-import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.STUDENT_MERGE_COMPLETE_SAGA;
+import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA;
 import static ca.bc.gov.educ.api.pen.services.constants.v1.URL.PEN_SERVICES;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -70,6 +71,26 @@ public class PenServicesSagaControllerTest {
   }
 
   @Test
+  public void testProcessStudentMerge_GivenInValidID_ShouldReturnStatusNotFound() throws Exception {
+    this.mockMvc.perform(get(PEN_SERVICES + "/saga/" + UUID.randomUUID().toString())
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "PEN_SERVICES_READ_SAGA")))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andDo(print()).andExpect(status().isNotFound());
+  }
+  @Test
+  public void testProcessStudentMerge_GivenValidID_ShouldReturnStatusOK() throws Exception {
+    var payload = placeholderStudentMergeCompleteSagaData();
+    var sagaFromDB = sagaService.createSagaRecordInDB(PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA.toString(), "Test", payload, UUID.fromString(studentID));
+
+    this.mockMvc.perform(get(PEN_SERVICES + "/saga/" + sagaFromDB.getSagaId().toString())
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "PEN_SERVICES_READ_SAGA")))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andDo(print()).andExpect(status().isOk());
+  }
+
+  @Test
   public void testProcessStudentMerge_GivenInvalidPayload_ShouldReturnStatusBadRequest() throws Exception {
     this.mockMvc.perform(post(PEN_SERVICES + "/student-merge-complete-saga")
             .with(jwt().jwt((jwt) -> jwt.claim("scope", "STUDENT_MERGE_COMPLETE_SAGA")))
@@ -92,7 +113,7 @@ public class PenServicesSagaControllerTest {
   @Test
   public void testProcessStudentMerge_GivenValidPayload_ShouldReturnStatusConflict() throws Exception {
     var payload = placeholderStudentMergeCompleteSagaData();
-    sagaService.createSagaRecordInDB(STUDENT_MERGE_COMPLETE_SAGA.toString(), "Test", payload, UUID.fromString(studentID));
+    sagaService.createSagaRecordInDB(PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA.toString(), "Test", payload, UUID.fromString(studentID));
     this.mockMvc.perform(post(PEN_SERVICES + "/student-merge-complete-saga")
             .with(jwt().jwt((jwt) -> jwt.claim("scope", "STUDENT_MERGE_COMPLETE_SAGA")))
             .contentType(MediaType.APPLICATION_JSON)

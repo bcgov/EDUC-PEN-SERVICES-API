@@ -23,7 +23,7 @@ import java.util.concurrent.TimeoutException;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.*;
 import static ca.bc.gov.educ.api.pen.services.constants.EventType.*;
-import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.STUDENT_MERGE_COMPLETE_SAGA;
+import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA;
 import static ca.bc.gov.educ.api.pen.services.constants.SagaStatusEnum.IN_PROGRESS;
 import static ca.bc.gov.educ.api.pen.services.constants.TopicsEnum.*;
 
@@ -40,7 +40,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    * @param messagePublisher the message publisher
    */
   public StudentMergeCompleteOrchestrator(SagaService sagaService, MessagePublisher messagePublisher) {
-    super(sagaService, messagePublisher, StudentMergeCompleteSagaData.class, STUDENT_MERGE_COMPLETE_SAGA.toString(), MERGE_STUDENTS_SAGA_TOPIC.toString());
+    super(sagaService, messagePublisher, StudentMergeCompleteSagaData.class, PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA.toString(), PEN_SERVICES_MERGE_STUDENTS_SAGA_TOPIC.toString());
   }
 
   /**

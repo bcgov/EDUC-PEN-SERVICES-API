@@ -7,5 +7,5 @@ public enum SagaEnum {
   /**
    * Merge students sata enum.
    */
-  STUDENT_MERGE_COMPLETE_SAGA,
+  PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA,
 }

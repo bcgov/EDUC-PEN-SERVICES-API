@@ -37,7 +37,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventType.*;
-import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.STUDENT_MERGE_COMPLETE_SAGA;
+import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA;
 import static ca.bc.gov.educ.api.pen.services.constants.SagaStatusEnum.COMPLETED;
 import static ca.bc.gov.educ.api.pen.services.constants.TopicsEnum.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -111,7 +111,7 @@ public class StudentMergeCompleteOrchestratorTest {
     sagaData.setLegalLastName("Saga");
     sagaData.setGenderCode("M");
     sagaData.setStatusCode("A");
-    saga = sagaService.createSagaRecordInDB(STUDENT_MERGE_COMPLETE_SAGA.toString(), "Test",
+    saga = sagaService.createSagaRecordInDB(PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA.toString(), "Test",
             JsonUtil.getJsonStringFromObject(sagaData), UUID.fromString(studentID));
   }
 
@@ -501,7 +501,7 @@ public class StudentMergeCompleteOrchestratorTest {
             .eventPayload(JsonUtil.getJsonStringFromObject(possibleMatches))
             .build();
     orchestrator.handleEvent(event);
-    verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(MERGE_STUDENTS_SAGA_TOPIC.toString()), eventCaptor.capture());
+    verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(PEN_SERVICES_MERGE_STUDENTS_SAGA_TOPIC.toString()), eventCaptor.capture());
     var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(eventCaptor.getValue()));
     assertThat(newEvent.getEventType()).isEqualTo(MARK_SAGA_COMPLETE);
 
