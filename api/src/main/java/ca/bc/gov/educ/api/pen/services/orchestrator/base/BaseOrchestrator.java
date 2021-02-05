@@ -298,7 +298,9 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
       finalEvent.setEventType(MARK_SAGA_COMPLETE);
       finalEvent.setEventOutcome(SAGA_COMPLETED);
       finalEvent.setSagaStatus(COMPLETED.toString());
+      finalEvent.setStudentID(saga.getStudentID().toString());
       finalEvent.setSagaName(getSagaName());
+      finalEvent.setEventPayload(""); // no need to send payload as it is not required by the subscribers.
       postMessageToTopic(getTopicToSubscribe(), finalEvent);
     }
 
