@@ -22,7 +22,7 @@
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
-    <shedlock.version>4.15.1</shedlock.version>
+    <shedlock.version>4.20.0</shedlock.version>
     <springdoc.version>1.4.8</springdoc.version>
     <lombok.version>1.18.12</lombok.version>
   </properties>
@@ -198,6 +198,17 @@
           <artifactId>hamcrest-core</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>net.javacrumbs.shedlock</groupId>
+      <artifactId>shedlock-spring</artifactId>
+      <version>${shedlock.version}</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/net.javacrumbs.shedlock/shedlock-provider-jdbc-template -->
+    <dependency>
+      <groupId>net.javacrumbs.shedlock</groupId>
+      <artifactId>shedlock-provider-jdbc-template</artifactId>
+      <version>${shedlock.version}</version>
     </dependency>
   </dependencies>
 

@@ -357,7 +357,6 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    * @throws InterruptedException if thread is interrupted.
    * @throws TimeoutException     if connection to messaging system times out.
    */
-  @Async
   @Transactional
   public void replaySaga(Saga saga) throws IOException, InterruptedException, TimeoutException {
     var eventStates = getSagaService().findAllSagaStates(saga);
