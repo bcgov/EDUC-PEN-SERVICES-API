@@ -41,6 +41,10 @@ public enum EventOutcome {
   /**
    *
    */
+  MERGE_DELETED,
+  /**
+   *
+   */
   STUDENT_HISTORY_FOUND,
   /**
    *
@@ -54,6 +58,10 @@ public enum EventOutcome {
    *
    */
   POSSIBLE_MATCH_NOT_FOUND,
+  /**
+   *
+   */
+  POSSIBLE_MATCH_ADDED,
   /**
    *
    */

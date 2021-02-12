@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.pen.services.endpoint.v1;
 
 import ca.bc.gov.educ.api.pen.services.struct.v1.Saga;
+import ca.bc.gov.educ.api.pen.services.struct.v1.StudentDemergeCompleteSagaData;
 import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMergeCompleteSagaData;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -29,5 +30,10 @@ public interface PenServicesSagaEndpoint {
   @PreAuthorize("hasAuthority('SCOPE_STUDENT_MERGE_COMPLETE_SAGA')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK.")})
   ResponseEntity<String> completeStudentMerge(@Validated @RequestBody StudentMergeCompleteSagaData studentMergeCompleteSagaData);
+
+  @PostMapping("/student-demerge-complete-saga")
+  @PreAuthorize("hasAuthority('SCOPE_STUDENT_DEMERGE_COMPLETE_SAGA')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK.")})
+  ResponseEntity<String> completeStudentDemerge(@Validated @RequestBody StudentDemergeCompleteSagaData studentDemergeCompleteSagaData);
 
 }

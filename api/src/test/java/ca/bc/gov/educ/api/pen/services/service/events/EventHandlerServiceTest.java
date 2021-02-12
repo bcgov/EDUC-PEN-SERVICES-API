@@ -139,6 +139,22 @@ public class EventHandlerServiceTest {
     assertThat(addedStudentMerges.size()).isEqualTo(2);
   }
 
+  @Test
+  public void testHandleDeleteMergeEvent_givenStudentMergePayload_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_DELETED() throws JsonProcessingException {
+    var payload = createStudentMergePayload();
+    var event = Event.builder().eventType(DELETE_MERGE).replyTo(PEN_SERVICES_API_TOPIC.toString()).eventPayload(JsonUtil.getJsonStringFromObject(payload)).build();
+
+    var rawResponse = eventHandlerServiceUnderTest.handleDeleteMergeEvent(event);
+    assertThat(rawResponse).hasSizeGreaterThan(0);
+    var response = JsonUtil.getJsonObjectFromString(Event.class, new String(rawResponse));
+    assertThat(response.getEventOutcome()).isEqualTo(MERGE_DELETED);
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, String.class);
+    List<String> deletedIDs = objectMapper.readValue(response.getEventPayload(), type);
+    assertThat(deletedIDs.size()).isEqualTo(0);
+  }
+
   private PenRequestStudentValidationPayload createValidationPayload() {
     return PenRequestStudentValidationPayload.builder()
       .isInteractive(false)

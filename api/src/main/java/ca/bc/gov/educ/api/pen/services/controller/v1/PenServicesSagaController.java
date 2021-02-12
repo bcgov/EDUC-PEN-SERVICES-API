@@ -4,9 +4,11 @@ import ca.bc.gov.educ.api.pen.services.constants.SagaStatusEnum;
 import ca.bc.gov.educ.api.pen.services.endpoint.v1.PenServicesSagaEndpoint;
 import ca.bc.gov.educ.api.pen.services.exception.SagaRuntimeException;
 import ca.bc.gov.educ.api.pen.services.mapper.SagaMapper;
+import ca.bc.gov.educ.api.pen.services.orchestrator.StudentDemergeCompleteOrchestrator;
 import ca.bc.gov.educ.api.pen.services.orchestrator.StudentMergeCompleteOrchestrator;
 import ca.bc.gov.educ.api.pen.services.service.SagaService;
 import ca.bc.gov.educ.api.pen.services.struct.v1.Saga;
+import ca.bc.gov.educ.api.pen.services.struct.v1.StudentDemergeCompleteSagaData;
 import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMergeCompleteSagaData;
 import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
 import lombok.Getter;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_STUDENT_DEMERGE_COMPLETE_SAGA;
 import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA;
 import static lombok.AccessLevel.PRIVATE;
 
@@ -32,12 +35,16 @@ public class PenServicesSagaController implements PenServicesSagaEndpoint {
   @Getter(PRIVATE)
   private final StudentMergeCompleteOrchestrator studentMergeCompleteOrchestrator;
 
+  @Getter(PRIVATE)
+  private final StudentDemergeCompleteOrchestrator studentDemergeCompleteOrchestrator;
+
   private static final SagaMapper sagaMapper = SagaMapper.mapper;
 
   @Autowired
-  public PenServicesSagaController(final SagaService sagaService, StudentMergeCompleteOrchestrator studentMergeCompleteOrchestrator) {
+  public PenServicesSagaController(final SagaService sagaService, StudentMergeCompleteOrchestrator studentMergeCompleteOrchestrator, StudentDemergeCompleteOrchestrator studentDemergeCompleteOrchestrator) {
     this.sagaService = sagaService;
     this.studentMergeCompleteOrchestrator = studentMergeCompleteOrchestrator;
+    this.studentDemergeCompleteOrchestrator = studentDemergeCompleteOrchestrator;
   }
 
   @Override
@@ -58,6 +65,23 @@ public class PenServicesSagaController implements PenServicesSagaEndpoint {
       }
       String payload = JsonUtil.getJsonStringFromObject(studentMergeCompleteSagaData);
       var saga = getStudentMergeCompleteOrchestrator().startSaga(payload, studentID, studentMergeCompleteSagaData.getCreateUser());
+      return ResponseEntity.ok(saga.getSagaId().toString());
+    } catch (final Exception e) {
+      Thread.currentThread().interrupt();
+      throw new SagaRuntimeException(e.getMessage());
+    }
+  }
+
+  @Override
+  public ResponseEntity<String> completeStudentDemerge(StudentDemergeCompleteSagaData studentDemergeCompleteSagaData) {
+    try {
+      var studentID = studentDemergeCompleteSagaData.getStudentID();
+      var sagaInProgress = getSagaService().findAllByStudentIDAndStatusIn(studentID, PEN_SERVICES_STUDENT_DEMERGE_COMPLETE_SAGA.toString(), getStatusesFilter());
+      if (!sagaInProgress.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+      }
+      String payload = JsonUtil.getJsonStringFromObject(studentDemergeCompleteSagaData);
+      var saga = getStudentDemergeCompleteOrchestrator().startSaga(payload, studentID, studentDemergeCompleteSagaData.getCreateUser());
       return ResponseEntity.ok(saga.getSagaId().toString());
     } catch (final Exception e) {
       Thread.currentThread().interrupt();

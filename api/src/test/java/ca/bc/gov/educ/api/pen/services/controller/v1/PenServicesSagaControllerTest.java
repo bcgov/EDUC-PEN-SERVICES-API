@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
+import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_STUDENT_DEMERGE_COMPLETE_SAGA;
 import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA;
 import static ca.bc.gov.educ.api.pen.services.constants.v1.URL.PEN_SERVICES;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -78,6 +79,8 @@ public class PenServicesSagaControllerTest {
             .accept(MediaType.APPLICATION_JSON))
             .andDo(print()).andExpect(status().isNotFound());
   }
+
+  // Merge
   @Test
   public void testProcessStudentMerge_GivenValidID_ShouldReturnStatusOK() throws Exception {
     var payload = placeholderStudentMergeCompleteSagaData();
@@ -96,7 +99,7 @@ public class PenServicesSagaControllerTest {
             .with(jwt().jwt((jwt) -> jwt.claim("scope", "STUDENT_MERGE_COMPLETE_SAGA")))
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
-            .content(placeholderInvalidStudentMergeCompleteSagaData()))
+            .content(placeholderInvalidSagaData()))
             .andDo(print()).andExpect(status().isBadRequest());
   }
 
@@ -122,7 +125,53 @@ public class PenServicesSagaControllerTest {
             .andDo(print()).andExpect(status().isConflict());
   }
 
-  protected String placeholderInvalidStudentMergeCompleteSagaData() {
+  // Demerge
+  @Test
+  public void testProcessStudentDemerge_GivenValidID_ShouldReturnStatusOK() throws Exception {
+    var payload = placeholderStudentMergeCompleteSagaData();
+    var sagaFromDB = sagaService.createSagaRecordInDB(PEN_SERVICES_STUDENT_DEMERGE_COMPLETE_SAGA.toString(), "Test", payload, UUID.fromString(studentID));
+
+    this.mockMvc.perform(get(PEN_SERVICES + "/saga/" + sagaFromDB.getSagaId().toString())
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "PEN_SERVICES_READ_SAGA")))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andDo(print()).andExpect(status().isOk());
+  }
+
+  @Test
+  public void testProcessStudentDemerge_GivenInvalidPayload_ShouldReturnStatusBadRequest() throws Exception {
+    this.mockMvc.perform(post(PEN_SERVICES + "/student-demerge-complete-saga")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "STUDENT_DEMERGE_COMPLETE_SAGA")))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(placeholderInvalidSagaData()))
+            .andDo(print()).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void testProcessStudentDemerge_GivenValidPayload_ShouldReturnStatusOk() throws Exception {
+    this.mockMvc.perform(post(PEN_SERVICES + "/student-demerge-complete-saga")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "STUDENT_DEMERGE_COMPLETE_SAGA")))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(placeholderStudentDemergeCompleteSagaData()))
+            .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$").exists());
+  }
+
+  @Test
+  public void testProcessStudentDemerge_GivenValidPayload_ShouldReturnStatusConflict() throws Exception {
+    var payload = placeholderStudentDemergeCompleteSagaData();
+    sagaService.createSagaRecordInDB(PEN_SERVICES_STUDENT_DEMERGE_COMPLETE_SAGA.toString(), "Test", payload, UUID.fromString(studentID));
+    this.mockMvc.perform(post(PEN_SERVICES + "/student-demerge-complete-saga")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "STUDENT_DEMERGE_COMPLETE_SAGA")))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .content(payload))
+            .andDo(print()).andExpect(status().isConflict());
+  }
+
+
+  protected String placeholderInvalidSagaData() {
     return " {\n" +
             "    \"createUser\": \"test\",\n" +
             "    \"updateUser\": \"test\",\n" +
@@ -141,6 +190,19 @@ public class PenServicesSagaControllerTest {
             "    \"studentMergeSourceCode\": \"MI\",\n" +
             "    \"historyActivityCode\": \"MERGE\",\n" +
             "    \"legalFirstName\": \"Jack\"\n" +
+            "  }";
+  }
+
+  protected String placeholderStudentDemergeCompleteSagaData() {
+    return " {\n" +
+            "    \"createUser\": \"test\",\n" +
+            "    \"updateUser\": \"test\",\n" +
+            "    \"studentID\": \"" + studentID + "\",\n" +
+            "    \"mergedToStudentID\": \"" + studentID + "\",\n" +
+            "    \"mergedFromStudentID\": \"" + mergedStudentID + "\",\n" +
+            "    \"mergedToPen\": \"" + mergedToPen + "\",\n" +
+            "    \"mergedFromPen\": \"" + mergedFromPen + "\",\n" +
+            "    \"historyActivityCode\": \"DEMERGE\"\n" +
             "  }";
   }
 

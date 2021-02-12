@@ -127,6 +127,37 @@ public class EventHandlerService {
   }
 
   /**
+   * Delete student merges for two ways
+   *
+   * @param event   event with the payload for one student merge
+   * @return the list of two created student merges as two ways persistence
+   * @throws JsonProcessingException  the exception
+   */
+  @Transactional(propagation = REQUIRES_NEW)
+  public byte[] handleDeleteMergeEvent(@NonNull Event event) throws JsonProcessingException {
+    List<String> payload = new ArrayList<>();
+
+    // MergedToStudent
+    StudentMerge mergedToPEN = JsonUtil.getJsonObjectFromString(StudentMerge.class, event.getEventPayload());
+    deleteStudentMerge(payload, mergedToPEN);
+
+    // MergedFromStudent
+    StudentMerge mergedFromPEN = StudentMerge.builder().studentID(mergedToPEN.getMergeStudentID()).mergeStudentID(mergedToPEN.getStudentID())
+            .studentMergeDirectionCode("TO").studentMergeSourceCode(mergedToPEN.getStudentMergeSourceCode()).build();
+    deleteStudentMerge(payload, mergedFromPEN);
+
+    Event newEvent = Event.builder()
+            .sagaId(event.getSagaId())
+            .eventType(event.getEventType())
+            .eventOutcome(MERGE_DELETED)
+            .eventPayload(JsonUtil.getJsonStringFromObject(payload)).build();
+    if (log.isDebugEnabled()) {
+      log.debug("responding back :: {}", newEvent);
+    }
+    return obMapper.writeValueAsBytes(newEvent);
+  }
+
+  /**
    * Create student merges for two ways
    *
    * @param event   event with the payload for one student merge
@@ -139,12 +170,12 @@ public class EventHandlerService {
 
     // MergedToStudent
     StudentMerge mergedToPEN = JsonUtil.getJsonObjectFromString(StudentMerge.class, event.getEventPayload());
-    processStudentMerge(payload, mergedToPEN);
+    createStudentMerge(payload, mergedToPEN);
 
     // MergedFromStudent
     StudentMerge mergedFromPEN = StudentMerge.builder().studentID(mergedToPEN.getMergeStudentID()).mergeStudentID(mergedToPEN.getStudentID())
             .studentMergeDirectionCode("TO").studentMergeSourceCode(mergedToPEN.getStudentMergeSourceCode()).build();
-    processStudentMerge(payload, mergedFromPEN);
+    createStudentMerge(payload, mergedFromPEN);
 
     Event newEvent = Event.builder()
             .sagaId(event.getSagaId())
@@ -163,7 +194,7 @@ public class EventHandlerService {
    * @param studentMerge  the student merge to be processed
    */
   @Transactional
-  public void processStudentMerge(List<StudentMerge> payload, StudentMerge studentMerge) {
+  public void createStudentMerge(List<StudentMerge> payload, StudentMerge studentMerge) {
     Optional<StudentMergeEntity> optional = getStudentMergeRepository()
             .findStudentMergeEntityByStudentIDAndMergeStudentID(UUID.fromString(studentMerge.getStudentID()), UUID.fromString(studentMerge.getMergeStudentID()));
     if (optional.isPresent()) {
@@ -172,6 +203,22 @@ public class EventHandlerService {
       RequestUtil.setAuditColumnsForCreate(studentMerge);
       StudentMergeEntity merge = getStudentMergeRepository().save(studentMergeMapper.toModel(studentMerge));
       payload.add(studentMergeMapper.toStructure(merge));
+    }
+  }
+
+  /**
+   * Idempotent operation to delete a StudentMergeEntity
+   * @param payload       the list of student merge that will include the processed student merge
+   * @param studentMerge  the student merge to be processed
+   */
+  @Transactional
+  public void deleteStudentMerge(List<String> payload, StudentMerge studentMerge) {
+    Optional<StudentMergeEntity> optional = getStudentMergeRepository()
+            .findStudentMergeEntityByStudentIDAndMergeStudentID(UUID.fromString(studentMerge.getStudentID()), UUID.fromString(studentMerge.getMergeStudentID()));
+    if (optional.isPresent()) {
+      // delete
+      getStudentMergeRepository().delete(optional.get());
+      payload.add(studentMerge.getStudentID());
     }
   }
 }
