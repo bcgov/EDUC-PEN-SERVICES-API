@@ -41,9 +41,4 @@ public class StudentMergeCompleteSagaData extends BaseStudentSagaData {
 
   @NotNull(message = "Student Merge Source Code can not be null.")
   String studentMergeSourceCode;
-
-  /**
-   * The request student id to identify which student is processed in merge saga.
-   */
-  UUID requestStudentID;
 }

@@ -87,6 +87,16 @@ public class EventHandlerDelegatorService {
             getMessagePublisher().dispatchMessage(event.getReplyTo(), response);
           }
           break;
+        case DELETE_MERGE:
+          log.info("received delete merge data :: {}", event.getSagaId());
+          log.trace(PAYLOAD_LOG, event.getEventPayload());
+          response = getEventHandlerService().handleDeleteMergeEvent(event);
+          if (isSynchronous) { // this is for synchronous request/reply pattern.
+            getMessagePublisher().dispatchMessage(message.getReplyTo(), response);
+          } else { // this is for async.
+            getMessagePublisher().dispatchMessage(event.getReplyTo(), response);
+          }
+          break;
         default:
           log.info("silently ignoring other event :: {}", event);
           break;

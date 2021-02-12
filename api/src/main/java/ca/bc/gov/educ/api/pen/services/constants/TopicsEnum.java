@@ -8,4 +8,5 @@ public enum TopicsEnum {
 
   // Saga - should start with PEN_SERVICES
   PEN_SERVICES_MERGE_STUDENTS_SAGA_TOPIC,
+  PEN_SERVICES_DEMERGE_STUDENTS_SAGA_TOPIC,
 }

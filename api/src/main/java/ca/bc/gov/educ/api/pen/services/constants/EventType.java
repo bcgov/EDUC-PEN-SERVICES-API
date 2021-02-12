@@ -35,6 +35,11 @@ public enum EventType {
   CREATE_MERGE,
 
   /**
+   * Delete Merge Data.
+   */
+  DELETE_MERGE,
+
+  /**
    * Read Audit History from student.
    */
   GET_STUDENT_HISTORY,
@@ -45,6 +50,8 @@ public enum EventType {
   CREATE_STUDENT_HISTORY,
 
   GET_POSSIBLE_MATCH,
+
+  ADD_POSSIBLE_MATCH,
 
   DELETE_POSSIBLE_MATCH,
 

@@ -97,4 +97,8 @@ public class BaseStudentSagaData {
   @NotNull(message = "historyActivityCode can not be null.")
   String historyActivityCode;
 
+  /**
+   * The request student id to identify which student is processed in merge saga.
+   */
+  UUID requestStudentID;
 }

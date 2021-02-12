@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import javax.validation.constraints.Null;
 import java.io.Serializable;
 
 @EqualsAndHashCode(callSuper = true)
@@ -20,5 +21,10 @@ public class StudentHistory extends Student implements Serializable {
 
   String studentHistoryID;
   String historyActivityCode;
+
+  /**
+   * The Update date.
+   */
+  public String updateDate;
 
 }
