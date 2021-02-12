@@ -186,19 +186,6 @@ public class StudentDemergeCompleteOrchestrator extends BaseUserActionsOrchestra
     SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
 
     StudentSagaData studentDataFromEventResponse = JsonUtil.getJsonObjectFromString(StudentSagaData.class, event.getEventPayload());
-//    studentDataFromEventResponse.setLegalFirstName(studentDemergeCompleteSagaData.getLegalFirstName());
-//    studentDataFromEventResponse.setLegalLastName(studentDemergeCompleteSagaData.getLegalLastName());
-//    studentDataFromEventResponse.setLegalMiddleNames(studentDemergeCompleteSagaData.getLegalMiddleNames());
-//    studentDataFromEventResponse.setUsualFirstName(studentDemergeCompleteSagaData.getUsualFirstName());
-//    studentDataFromEventResponse.setUsualLastName(studentDemergeCompleteSagaData.getUsualLastName());
-//    studentDataFromEventResponse.setUsualMiddleNames(studentDemergeCompleteSagaData.getUsualMiddleNames());
-//    studentDataFromEventResponse.setDob(studentDemergeCompleteSagaData.getDob());
-//    studentDataFromEventResponse.setGenderCode(studentDemergeCompleteSagaData.getGenderCode());
-//    studentDataFromEventResponse.setSexCode(CodeUtil.getSexCodeFromGenderCode(studentDemergeCompleteSagaData.getGenderCode()));
-//    studentDataFromEventResponse.setMincode(studentDemergeCompleteSagaData.getMincode());
-//    studentDataFromEventResponse.setLocalID(studentDemergeCompleteSagaData.getLocalID());
-//    studentDataFromEventResponse.setPostalCode(studentDemergeCompleteSagaData.getPostalCode());
-//    studentDataFromEventResponse.setMemo(studentDemergeCompleteSagaData.getMemo());
     studentDataFromEventResponse.setHistoryActivityCode(StudentHistoryActivityCodes.DEMERGE.getCode());
 
     processStudentUpdate(saga, studentDemergeCompleteSagaData, eventStates, studentDataFromEventResponse);
