@@ -461,7 +461,7 @@ public class StudentMergeCompleteOrchestratorTest {
     assertThat(newEvent.getEventType()).isEqualTo(DELETE_POSSIBLE_MATCH);
     List<PossibleMatch> payload = new ObjectMapper().readValue(newEvent.getEventPayload(), new TypeReference<>() {
     });
-    assertThat(payload.size()).isEqualTo(2);
+    assertThat(payload.size()).isEqualTo(1);
     payload.stream().forEach(m -> {
       assertThat(m.getStudentID().toString()).isIn(mergeStudentID, studentID);
       assertThat(m.getMatchedStudentID().toString()).isIn(mergeStudentID, studentID);

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.*;
 import static ca.bc.gov.educ.api.pen.services.constants.EventType.*;
@@ -255,7 +256,11 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
     ObjectMapper objectMapper = new ObjectMapper();
     JavaType type = objectMapper.getTypeFactory().
             constructCollectionType(List.class, PossibleMatch.class);
-    List<PossibleMatch> possibleMatches = objectMapper.readValue(event.getEventPayload(), type);
+    List<PossibleMatch> allPossibleMatches = objectMapper.readValue(event.getEventPayload(), type);
+    List<PossibleMatch> possibleMatches = allPossibleMatches.stream()
+            .filter(item-> item.getMatchedStudentID().equals(studentMergeCompleteSagaData.getMergeStudentID().toString()))
+            .collect(Collectors.toList());
+
     getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
     Event nextEvent = Event.builder().sagaId(saga.getSagaId())
