@@ -417,7 +417,7 @@ public class StudentMergeCompleteOrchestratorTest {
     var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(eventCaptor.getValue()));
     assertThat(newEvent.getEventType()).isEqualTo(GET_POSSIBLE_MATCH);
     var possibleMatchStudentID = newEvent.getEventPayload();
-    assertThat(possibleMatchStudentID).isEqualTo(mergeStudentID);
+    assertThat(possibleMatchStudentID).isEqualTo(studentID);
 
     var sagaFromDB = sagaService.findSagaById(saga.getSagaId());
     assertThat(sagaFromDB).isPresent();

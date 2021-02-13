@@ -234,7 +234,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
     Event nextEvent = Event.builder().sagaId(saga.getSagaId())
             .eventType(GET_POSSIBLE_MATCH)
             .replyTo(getTopicToSubscribe())
-            .eventPayload(studentMergeCompleteSagaData.getMergeStudentID().toString())
+            .eventPayload(studentMergeCompleteSagaData.getStudentID().toString())
             .build();
     postMessageToTopic(PEN_MATCH_API_TOPIC.toString(), nextEvent);
     log.info("message sent to PEN_MATCH_API_TOPIC for GET_POSSIBLE_MATCH Event.");
