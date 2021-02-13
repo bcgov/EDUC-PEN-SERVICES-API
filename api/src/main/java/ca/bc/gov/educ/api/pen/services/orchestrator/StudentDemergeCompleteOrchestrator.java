@@ -239,6 +239,7 @@ public class StudentDemergeCompleteOrchestrator extends BaseUserActionsOrchestra
     possibleMatch.setStudentID(studentDemergeCompleteSagaData.getMergedToStudentID().toString());
     possibleMatch.setMatchedStudentID(studentDemergeCompleteSagaData.getMergedFromStudentID().toString());
     possibleMatch.setMatchReasonCode(MatchReasonCodes.DEMERGE);
+    possibleMatch.setCreateUser(studentDemergeCompleteSagaData.getCreateUser());
     possibleMatch.setUpdateUser(studentDemergeCompleteSagaData.getUpdateUser());
 
     Event nextEvent = Event.builder().sagaId(saga.getSagaId())

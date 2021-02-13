@@ -148,6 +148,8 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
     StudentMerge studentMerge = STUDENT_MERGE_COMPLETE_SAGA_DATA_MAPPER.toStudentMerge(studentMergeCompleteSagaData);
     studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.FROM.getCode());
     studentMerge.setStudentMergeSourceCode(StudentMergeSourceCodes.MI.getCode());
+    studentMerge.setCreateUser(studentMergeCompleteSagaData.getCreateUser());
+    studentMerge.setUpdateUser(studentMergeCompleteSagaData.getUpdateUser());
     studentMergeCompleteSagaData.setRequestStudentID(studentMergeCompleteSagaData.getMergeStudentID());
     getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 

@@ -174,7 +174,8 @@ public class EventHandlerService {
 
     // MergedFromStudent
     StudentMerge mergedFromPEN = StudentMerge.builder().studentID(mergedToPEN.getMergeStudentID()).mergeStudentID(mergedToPEN.getStudentID())
-            .studentMergeDirectionCode("TO").studentMergeSourceCode(mergedToPEN.getStudentMergeSourceCode()).build();
+            .studentMergeDirectionCode("TO").studentMergeSourceCode(mergedToPEN.getStudentMergeSourceCode())
+            .createUser(mergedToPEN.getCreateUser()).updateUser(mergedToPEN.getUpdateUser()).build();
     createStudentMerge(payload, mergedFromPEN);
 
     Event newEvent = Event.builder()
