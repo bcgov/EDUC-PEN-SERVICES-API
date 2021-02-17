@@ -10,6 +10,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import java.time.Duration;
 import java.util.concurrent.Executor;
 
+/**
+ * The type Async configuration.
+ */
 @Configuration
 @EnableAsync
 @Profile("!test")
@@ -22,10 +25,10 @@ public class AsyncConfiguration {
   @Bean(name = "subscriberExecutor")
   public Executor threadPoolTaskExecutor() {
     return new EnhancedQueueExecutor.Builder().setThreadFactory(new ThreadFactoryBuilder().withNameFormat("message-subscriber-%d").get())
-            .setCorePoolSize(10)
-            .setMaximumPoolSize(10)
-            .setKeepAliveTime(Duration.ofSeconds(60))
-            .build();
+        .setCorePoolSize(10)
+        .setMaximumPoolSize(10)
+        .setKeepAliveTime(Duration.ofSeconds(60))
+        .build();
   }
 
   /**
@@ -36,9 +39,9 @@ public class AsyncConfiguration {
   @Bean(name = "taskExecutor")
   public Executor controllerTaskExecutor() {
     return new EnhancedQueueExecutor.Builder().setThreadFactory(new ThreadFactoryBuilder().withNameFormat("async-executor-%d").get())
-            .setCorePoolSize(10)
-            .setMaximumPoolSize(10)
-            .setKeepAliveTime(Duration.ofSeconds(60))
-            .build();
+        .setCorePoolSize(10)
+        .setMaximumPoolSize(10)
+        .setKeepAliveTime(Duration.ofSeconds(60))
+        .build();
   }
 }

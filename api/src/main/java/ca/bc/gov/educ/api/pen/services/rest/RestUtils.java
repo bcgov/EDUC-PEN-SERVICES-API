@@ -38,11 +38,29 @@ public class RestUtils {
    * The constant GENDER_CODES.
    */
   public static final String GENDER_CODES = "genderCodes";
+  /**
+   * The constant CONTENT_TYPE.
+   */
   public static final String CONTENT_TYPE = "Content-Type";
+  /**
+   * The Gender codes map.
+   */
   private final Map<String, List<GenderCode>> genderCodesMap = new ConcurrentHashMap<>();
+  /**
+   * The Grade codes map.
+   */
   private final Map<String, List<GradeCode>> gradeCodesMap = new ConcurrentHashMap<>();
+  /**
+   * The Gender lock.
+   */
   private final ReadWriteLock genderLock = new ReentrantReadWriteLock();
+  /**
+   * The Grade lock.
+   */
   private final ReadWriteLock gradeLock = new ReentrantReadWriteLock();
+  /**
+   * The Props.
+   */
   private final ApplicationProperties props;
 
   /**
@@ -53,7 +71,8 @@ public class RestUtils {
   /**
    * Instantiates a new Rest utils.
    *
-   * @param props the props
+   * @param props     the props
+   * @param webClient the web client
    */
   public RestUtils(@Autowired final ApplicationProperties props, final WebClient webClient) {
     this.props = props;

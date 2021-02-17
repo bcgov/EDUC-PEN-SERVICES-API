@@ -102,18 +102,40 @@ public class SagaEventStates {
   @Column(name = "UPDATE_DATE")
   LocalDateTime updateDate;
 
+  /**
+   * Gets saga event response.
+   *
+   * @return the saga event response
+   */
   public String getSagaEventResponse() {
-    return new String(getSagaEventResponseBytes(), StandardCharsets.UTF_8);
+    return new String(this.getSagaEventResponseBytes(), StandardCharsets.UTF_8);
   }
 
-  public void setSagaEventResponse(String sagaEventResponse) {
-    setSagaEventResponseBytes(sagaEventResponse.getBytes(StandardCharsets.UTF_8));
+  /**
+   * Sets saga event response.
+   *
+   * @param sagaEventResponse the saga event response
+   */
+  public void setSagaEventResponse(final String sagaEventResponse) {
+    this.setSagaEventResponseBytes(sagaEventResponse.getBytes(StandardCharsets.UTF_8));
   }
 
+  /**
+   * The type Saga event states builder.
+   */
   public static class SagaEventStatesBuilder {
+    /**
+     * The Saga event response bytes.
+     */
     byte[] sagaEventResponseBytes;
 
-    public SagaEventStatesBuilder sagaEventResponse(String sagaEventResponse) {
+    /**
+     * Saga event response saga event states builder.
+     *
+     * @param sagaEventResponse the saga event response
+     * @return the saga event states builder
+     */
+    public SagaEventStatesBuilder sagaEventResponse(final String sagaEventResponse) {
       this.sagaEventResponseBytes = sagaEventResponse.getBytes(StandardCharsets.UTF_8);
       return this;
     }

@@ -39,17 +39,29 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 @Slf4j
 public class EventHandlerService {
 
+  /**
+   * The constant RESPONDING_BACK.
+   */
   public static final String RESPONDING_BACK = "responding back :: {}";
   /**
    * The constant studentMapper.
    */
   private static final StudentMergeMapper studentMergeMapper = StudentMergeMapper.mapper;
+  /**
+   * The Validation service.
+   */
   @Getter(PRIVATE)
   private final PenRequestStudentRecordValidationService validationService;
 
+  /**
+   * The Pen service.
+   */
   @Getter(PRIVATE)
   private final PenService penService;
 
+  /**
+   * The Student merge service.
+   */
   @Getter(PRIVATE)
   private final StudentMergeService studentMergeService;
 
@@ -76,6 +88,8 @@ public class EventHandlerService {
    * Handle validate student demog data event.
    *
    * @param event the event
+   * @return the byte [ ]
+   * @throws JsonProcessingException the json processing exception
    */
   @Transactional(propagation = REQUIRES_NEW)
   public byte[] handleValidateStudentDemogDataEvent(@NonNull final Event event) throws JsonProcessingException {
@@ -111,6 +125,8 @@ public class EventHandlerService {
    * Handle get next PEN number event.
    *
    * @param event the event
+   * @return the byte [ ]
+   * @throws JsonProcessingException the json processing exception
    */
   @Transactional(propagation = REQUIRES_NEW)
   public byte[] handleGetNextPenNumberEvent(@NonNull final Event event) throws JsonProcessingException {

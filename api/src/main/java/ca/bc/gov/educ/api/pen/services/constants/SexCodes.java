@@ -34,7 +34,7 @@ public enum SexCodes {
    *
    * @param code the code
    */
-  SexCodes(String code) {
+  SexCodes(final String code) {
     this.code = code;
   }
 }

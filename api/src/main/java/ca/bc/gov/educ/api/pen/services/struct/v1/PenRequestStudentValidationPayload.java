@@ -19,28 +19,10 @@ import java.util.List;
 public class PenRequestStudentValidationPayload {
 
   /**
-   * Gets issue list.
-   *
-   * @return the issue list
-   */
-  public List<PenRequestStudentValidationIssue> getIssueList() {
-    if(this.issueList == null){
-      this.issueList = new LinkedList<>();
-    }
-    return issueList;
-  }
-
-  /**
-   * The Issue list.
-   */
-
-  private List<PenRequestStudentValidationIssue> issueList;
-  /**
    * The Is interactive.
    */
   @NotNull
   Boolean isInteractive;
-
   /**
    * The Transaction id.
    */
@@ -114,34 +96,44 @@ public class PenRequestStudentValidationPayload {
    * The Student id.
    */
   String studentID;
-
   /**
    * The Create user.
    */
   String createUser;
-
   /**
    * The Update user.
    */
   String updateUser;
-
   /**
    * The Record number.
    */
   Integer recordNumber;
-
   /**
    * The best match pen.
    */
   String bestMatchPEN;
-
   /**
    * The Min code from PenRequestBatch
    */
   String mincode;
-
   /**
    * The Submission number from PenRequestBatch
    */
   String submissionNumber;
+  /**
+   * The Issue list.
+   */
+  private List<PenRequestStudentValidationIssue> issueList;
+
+  /**
+   * Gets issue list.
+   *
+   * @return the issue list
+   */
+  public List<PenRequestStudentValidationIssue> getIssueList() {
+    if (this.issueList == null) {
+      this.issueList = new LinkedList<>();
+    }
+    return this.issueList;
+  }
 }

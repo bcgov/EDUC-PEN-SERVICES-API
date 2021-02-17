@@ -38,8 +38,18 @@ public class MessageSubscriber {
    */
   @Getter(PRIVATE)
   private final EventHandlerDelegatorService eventHandlerDelegatorService;
+  /**
+   * The Connection.
+   */
   private final Connection connection;
 
+  /**
+   * Instantiates a new Message subscriber.
+   *
+   * @param con                          the con
+   * @param eventHandlerDelegatorService the event handler delegator service
+   * @param eventHandlers                the event handlers
+   */
   @Autowired
   public MessageSubscriber(final Connection con, final EventHandlerDelegatorService eventHandlerDelegatorService, final List<EventHandler> eventHandlers) {
     this.eventHandlerDelegatorService = eventHandlerDelegatorService;

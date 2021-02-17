@@ -40,10 +40,10 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
    * @return the response entity
    */
   @Override
-  protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-    String error = "Malformed JSON request";
+  protected ResponseEntity<Object> handleHttpMessageNotReadable(final HttpMessageNotReadableException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+    final String error = "Malformed JSON request";
     log.error("{} ", error, ex);
-    return buildResponseEntity(new ApiError(BAD_REQUEST, error, ex));
+    return this.buildResponseEntity(new ApiError(BAD_REQUEST, error, ex));
   }
 
   /**
@@ -52,7 +52,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
    * @param apiError the api error
    * @return the response entity
    */
-  private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
+  private ResponseEntity<Object> buildResponseEntity(final ApiError apiError) {
     return new ResponseEntity<>(apiError, apiError.getStatus());
   }
 
@@ -64,11 +64,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
    */
   @ExceptionHandler(EntityNotFoundException.class)
   protected ResponseEntity<Object> handleEntityNotFound(
-      EntityNotFoundException ex) {
-    ApiError apiError = new ApiError(NOT_FOUND);
+      final EntityNotFoundException ex) {
+    final ApiError apiError = new ApiError(NOT_FOUND);
     apiError.setMessage(ex.getMessage());
     log.error("{} ", apiError.getMessage(), ex);
-    return buildResponseEntity(apiError);
+    return this.buildResponseEntity(apiError);
   }
 
   /**
@@ -78,11 +78,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
    * @return the ApiError object
    */
   @ExceptionHandler(IllegalArgumentException.class)
-  protected ResponseEntity<Object> handleInvalidParameter(IllegalArgumentException ex) {
-    ApiError apiError = new ApiError(BAD_REQUEST);
+  protected ResponseEntity<Object> handleInvalidParameter(final IllegalArgumentException ex) {
+    final ApiError apiError = new ApiError(BAD_REQUEST);
     apiError.setMessage(ex.getMessage());
     log.error("{} ", apiError.getMessage(), ex);
-    return buildResponseEntity(apiError);
+    return this.buildResponseEntity(apiError);
   }
 
   /**
@@ -92,11 +92,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
    * @return the ApiError object
    */
   @ExceptionHandler(InvalidParameterException.class)
-  protected ResponseEntity<Object> handleInvalidParameter(InvalidParameterException ex) {
-    ApiError apiError = new ApiError(BAD_REQUEST);
+  protected ResponseEntity<Object> handleInvalidParameter(final InvalidParameterException ex) {
+    final ApiError apiError = new ApiError(BAD_REQUEST);
     apiError.setMessage(ex.getMessage());
     log.error("{} ", apiError.getMessage(), ex);
-    return buildResponseEntity(apiError);
+    return this.buildResponseEntity(apiError);
   }
 
   /**
@@ -110,16 +110,16 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
    */
   @Override
   protected ResponseEntity<Object> handleMethodArgumentNotValid(
-      MethodArgumentNotValidException ex,
-      HttpHeaders headers,
-      HttpStatus status,
-      WebRequest request) {
-    ApiError apiError = new ApiError(BAD_REQUEST);
+      final MethodArgumentNotValidException ex,
+      final HttpHeaders headers,
+      final HttpStatus status,
+      final WebRequest request) {
+    final ApiError apiError = new ApiError(BAD_REQUEST);
     apiError.setMessage("Validation error");
     apiError.addValidationErrors(ex.getBindingResult().getFieldErrors());
     apiError.addValidationError(ex.getBindingResult().getGlobalErrors());
     log.error("{} ", apiError.getMessage(), ex);
-    return buildResponseEntity(apiError);
+    return this.buildResponseEntity(apiError);
   }
 
   /**
@@ -130,9 +130,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
    */
   @ExceptionHandler(InvalidPayloadException.class)
   protected ResponseEntity<Object> handleInvalidPayload(
-      InvalidPayloadException ex) {
+      final InvalidPayloadException ex) {
     log.error("", ex);
-    return buildResponseEntity(ex.getError());
+    return this.buildResponseEntity(ex.getError());
   }
 
 }

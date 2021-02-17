@@ -29,8 +29,8 @@ public class JsonUtil {
    * @return the json string from object
    * @throws JsonProcessingException the json processing exception
    */
-  public static String getJsonStringFromObject(Object payload) throws JsonProcessingException {
-    var mapper = new ObjectMapper();
+  public static String getJsonStringFromObject(final Object payload) throws JsonProcessingException {
+    final var mapper = new ObjectMapper();
     mapper.registerModule(new JavaTimeModule());
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     return mapper.writeValueAsString(payload);
@@ -45,8 +45,8 @@ public class JsonUtil {
    * @return the json object from string
    * @throws JsonProcessingException the json processing exception
    */
-  public static <T> T getJsonObjectFromString(Class<T> clazz,  String payload) throws JsonProcessingException {
-    return new ObjectMapper().readValue(payload,clazz);
+  public static <T> T getJsonObjectFromString(final Class<T> clazz, final String payload) throws JsonProcessingException {
+    return new ObjectMapper().readValue(payload, clazz);
   }
 
   /**
@@ -58,11 +58,18 @@ public class JsonUtil {
    * @return the json object from string
    * @throws IOException the io exception
    */
-  public static <T> T getJsonObjectFromByteArray(Class<T> clazz,  byte[] payload) throws IOException {
-    return new ObjectMapper().readValue(payload,clazz);
+  public static <T> T getJsonObjectFromByteArray(final Class<T> clazz, final byte[] payload) throws IOException {
+    return new ObjectMapper().readValue(payload, clazz);
   }
 
-  public static byte[] getJsonBytesFromObject(Object payload) throws JsonProcessingException {
+  /**
+   * Get json bytes from object byte [ ].
+   *
+   * @param payload the payload
+   * @return the byte [ ]
+   * @throws JsonProcessingException the json processing exception
+   */
+  public static byte[] getJsonBytesFromObject(final Object payload) throws JsonProcessingException {
     return new ObjectMapper().writeValueAsBytes(payload);
   }
 
@@ -72,10 +79,10 @@ public class JsonUtil {
    * @param payload the payload
    * @return the optional
    */
-  public static Optional<String> getJsonString(Object payload){
-    try{
+  public static Optional<String> getJsonString(final Object payload) {
+    try {
       return Optional.ofNullable(new ObjectMapper().writeValueAsString(payload));
-    }catch (final Exception ex){
+    } catch (final Exception ex) {
       log.error("Exception while converting object to JSON String :: {}", payload);
     }
     return Optional.empty();

@@ -19,6 +19,9 @@ import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidat
  */
 @Slf4j
 public class UsualLastNameRule extends BaseRule {
+  /**
+   * The Pen name text service.
+   */
   private final PENNameTextService penNameTextService;
 
   /**

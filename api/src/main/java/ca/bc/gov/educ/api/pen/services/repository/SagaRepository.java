@@ -27,13 +27,14 @@ public interface SagaRepository extends CrudRepository<Saga, UUID> {
    *
    * @return the list
    */
+  @Override
   List<Saga> findAll();
 
   /**
    * Find by student id optional.
    *
-   * @param studentID      the student id
-   * @param sagaName       the saga name
+   * @param studentID the student id
+   * @param sagaName  the saga name
    * @return the optional Saga
    */
   Optional<Saga> findByStudentIDAndSagaName(UUID studentID, String sagaName);
@@ -41,12 +42,18 @@ public interface SagaRepository extends CrudRepository<Saga, UUID> {
   /**
    * ind by pen request batch student id and status
    *
-   * @param studentID       the student id
-   * @param sagaName        the saga name
-   * @param statuses        the statuses
+   * @param studentID the student id
+   * @param sagaName  the saga name
+   * @param statuses  the statuses
    * @return the list
    */
   List<Saga> findAllByStudentIDAndSagaNameAndStatusIn(UUID studentID, String sagaName, List<String> statuses);
 
+  /**
+   * Find all by create date before list.
+   *
+   * @param createDate the create date
+   * @return the list
+   */
   List<Saga> findAllByCreateDateBefore(LocalDateTime createDate);
 }

@@ -37,9 +37,18 @@ import static lombok.AccessLevel.PRIVATE;
 @Slf4j
 public class GradeCodeRule extends BaseRule {
 
+  /**
+   * The Grade age range map.
+   */
   private final Map<String, GradeAgeRange> gradeAgeRangeMap = new ConcurrentHashMap<>();
+  /**
+   * The Rest utils.
+   */
   @Getter(PRIVATE)
   private final RestUtils restUtils;
+  /**
+   * The Current date.
+   */
   private LocalDate currentDate;
 
   /**
@@ -221,6 +230,12 @@ public class GradeCodeRule extends BaseRule {
     return schoolYear;
   }
 
+  /**
+   * No dob error reported boolean.
+   *
+   * @param issueList the issue list
+   * @return the boolean
+   */
   private boolean noDOBErrorReported(final List<PenRequestStudentValidationIssue> issueList) {
     final var result = issueList.stream().filter(element -> element.getPenRequestBatchValidationFieldCode().equals(BIRTH_DATE.getCode())).collect(Collectors.toList());
     return result.isEmpty();

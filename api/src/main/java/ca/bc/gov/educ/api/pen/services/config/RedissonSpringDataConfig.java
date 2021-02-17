@@ -25,7 +25,7 @@ public class RedissonSpringDataConfig {
    *
    * @param applicationProperties the application properties
    */
-  public RedissonSpringDataConfig(ApplicationProperties applicationProperties) {
+  public RedissonSpringDataConfig(final ApplicationProperties applicationProperties) {
     this.applicationProperties = applicationProperties;
   }
 
@@ -36,7 +36,7 @@ public class RedissonSpringDataConfig {
    * @return the redisson connection factory
    */
   @Bean
-  public RedissonConnectionFactory redissonConnectionFactory(RedissonClient redisson) {
+  public RedissonConnectionFactory redissonConnectionFactory(final RedissonClient redisson) {
     return new RedissonConnectionFactory(redisson);
   }
 
@@ -47,16 +47,16 @@ public class RedissonSpringDataConfig {
    */
   @Bean(destroyMethod = "shutdown")
   public RedissonClient redisson() {
-    RedissonClient redisson;
-    Config config = new Config();
-    if ("local".equals(applicationProperties.getEnvironment())) {
+    final RedissonClient redisson;
+    final Config config = new Config();
+    if ("local".equals(this.applicationProperties.getEnvironment())) {
       config.useSingleServer()
-          .setAddress(applicationProperties.getRedisUrl());
+          .setAddress(this.applicationProperties.getRedisUrl());
     } else {
       config.useClusterServers().setMasterConnectionMinimumIdleSize(5).setSlaveConnectionMinimumIdleSize(5)
-          .addNodeAddress(applicationProperties.getRedisUrl());
+          .addNodeAddress(this.applicationProperties.getRedisUrl());
     }
-    redisson= Redisson.create(config);
+    redisson = Redisson.create(config);
     redisson.getConfig().setCodec(StringCodec.INSTANCE);
     return redisson;
   }

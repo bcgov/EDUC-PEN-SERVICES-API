@@ -72,8 +72,23 @@ public enum FilterOperation {
    *
    * @param value the value
    */
-  FilterOperation(String value) {
+  FilterOperation(final String value) {
     this.value = value;
+  }
+
+  /**
+   * From value optional.
+   *
+   * @param value the value
+   * @return the optional
+   */
+  public static Optional<FilterOperation> fromValue(final String value) {
+    for (final FilterOperation op : FilterOperation.values()) {
+      if (String.valueOf(op.value).equalsIgnoreCase(value)) {
+        return Optional.of(op);
+      }
+    }
+    return Optional.empty();
   }
 
   /**
@@ -84,22 +99,7 @@ public enum FilterOperation {
   @Override
   @JsonValue
   public String toString() {
-    return String.valueOf(value);
-  }
-
-  /**
-   * From value optional.
-   *
-   * @param value the value
-   * @return the optional
-   */
-  public static Optional<FilterOperation> fromValue(String value) {
-    for (FilterOperation op : FilterOperation.values()) {
-      if (String.valueOf(op.value).equalsIgnoreCase(value)) {
-        return Optional.of(op);
-      }
-    }
-    return Optional.empty();
+    return String.valueOf(this.value);
   }
 
 }

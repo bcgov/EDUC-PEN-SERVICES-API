@@ -14,7 +14,7 @@ public class LocalDateTimeMapper {
    * @param dateTime the date time
    * @return the string
    */
-  public String map(LocalDateTime dateTime) {
+  public String map(final LocalDateTime dateTime) {
     if (dateTime == null) {
       return null;
     }
@@ -27,7 +27,7 @@ public class LocalDateTimeMapper {
    * @param dateTime the date time
    * @return the local date time
    */
-  public LocalDateTime map(String dateTime) {
+  public LocalDateTime map(final String dateTime) {
     if (dateTime == null) {
       return null;
     }

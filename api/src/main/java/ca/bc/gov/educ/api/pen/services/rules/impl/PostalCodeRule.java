@@ -22,6 +22,9 @@ import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidat
 @Slf4j
 public class PostalCodeRule extends BaseRule {
 
+  /**
+   * The constant pattern.
+   */
   private static final Pattern pattern = Pattern.compile("^([A-Z]\\d[A-Z]\\d[A-Z]\\d|)$");
 
   /**

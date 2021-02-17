@@ -6,7 +6,11 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * The interface Student merge direction code table repository.
+ */
 @Repository
 public interface StudentMergeDirectionCodeTableRepository extends CrudRepository<StudentMergeDirectionCodeEntity, Long> {
-    List<StudentMergeDirectionCodeEntity> findAll();
+  @Override
+  List<StudentMergeDirectionCodeEntity> findAll();
 }

@@ -30,8 +30,17 @@ public class PENNameTextService {
    * The constant PEN_NAME_TEXT.
    */
   public static final String PEN_NAME_TEXT = "PEN_NAME_TEXT";
+  /**
+   * The Pen name text map.
+   */
   private final Map<String, List<PENNameText>> penNameTextMap = new ConcurrentHashMap<>();
+  /**
+   * The Pen name text lock.
+   */
   private final ReadWriteLock penNameTextLock = new ReentrantReadWriteLock();
+  /**
+   * The Pen name text repository.
+   */
   @Getter(PRIVATE)
   private final PenNameTextRepository penNameTextRepository;
 
@@ -51,7 +60,7 @@ public class PENNameTextService {
   @PostConstruct
   public void init() {
     this.setPenNameTexts();
-    log.info("loaded {} entries into pen name text map ", penNameTextMap.values().size());
+    log.info("loaded {} entries into pen name text map ", this.penNameTextMap.values().size());
   }
 
   /**
@@ -76,13 +85,16 @@ public class PENNameTextService {
     return this.penNameTextMap.get(PEN_NAME_TEXT);
   }
 
+  /**
+   * Sets pen name texts.
+   */
   private void setPenNameTexts() {
-    Lock writeLock = penNameTextLock.writeLock();
+    final Lock writeLock = this.penNameTextLock.writeLock();
     try {
       writeLock.lock();
-      this.penNameTextMap.put(PEN_NAME_TEXT, getPenNameTextRepository().findAll().stream()
+      this.penNameTextMap.put(PEN_NAME_TEXT, this.getPenNameTextRepository().findAll().stream()
           .peek(x -> x.setInvalidText(x.getInvalidText() == null ? "" : x.getInvalidText().trim())).collect(Collectors.toList()));
-      log.info("loaded {} entries into pen name text map ", penNameTextMap.values().size());
+      log.info("loaded {} entries into pen name text map ", this.penNameTextMap.values().size());
     } finally {
       writeLock.unlock();
     }

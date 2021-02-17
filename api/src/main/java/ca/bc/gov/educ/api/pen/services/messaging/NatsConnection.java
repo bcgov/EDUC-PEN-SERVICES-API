@@ -22,6 +22,9 @@ import java.time.Duration;
 @Component
 @Slf4j
 public class NatsConnection implements Closeable {
+  /**
+   * The Nats con.
+   */
   @Getter
   private final Connection natsCon;
 
@@ -37,10 +40,26 @@ public class NatsConnection implements Closeable {
     this.natsCon = NatsConnection.connectToNats(applicationProperties.getServer(), applicationProperties.getMaxReconnect(), applicationProperties.getConnectionName());
   }
 
+  /**
+   * Connection listener.
+   *
+   * @param connection the connection
+   * @param events     the events
+   */
   private static void connectionListener(final Connection connection, final ConnectionListener.Events events) {
     log.info("NATS -> {}", events.toString());
   }
 
+  /**
+   * Connect to nats connection.
+   *
+   * @param serverUrl      the server url
+   * @param maxReconnect   the max reconnect
+   * @param connectionName the connection name
+   * @return the connection
+   * @throws IOException          the io exception
+   * @throws InterruptedException the interrupted exception
+   */
   private static Connection connectToNats(final String serverUrl, final int maxReconnect, final String connectionName) throws IOException, InterruptedException {
     final io.nats.client.Options natsOptions = new io.nats.client.Options.Builder()
         .connectionListener(NatsConnection::connectionListener)
@@ -72,6 +91,11 @@ public class NatsConnection implements Closeable {
     }
   }
 
+  /**
+   * Gets connection.
+   *
+   * @return the connection
+   */
   @Bean
   public Connection getConnection() {
     return this.natsCon;

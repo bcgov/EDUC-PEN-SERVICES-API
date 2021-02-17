@@ -2,6 +2,9 @@ package ca.bc.gov.educ.api.pen.services.constants;
 
 import lombok.Getter;
 
+/**
+ * The enum Student history activity codes.
+ */
 public enum StudentHistoryActivityCodes {
   /**
    * Record was merged
@@ -27,7 +30,7 @@ public enum StudentHistoryActivityCodes {
    *
    * @param code the code
    */
-  StudentHistoryActivityCodes(String code) {
+  StudentHistoryActivityCodes(final String code) {
     this.code = code;
   }
 }

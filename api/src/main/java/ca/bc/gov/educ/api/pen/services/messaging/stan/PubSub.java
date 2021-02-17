@@ -8,9 +8,17 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * The type Pub sub.
+ */
 @Slf4j
 public abstract class PubSub {
 
+  /**
+   * Close.
+   *
+   * @param connection the connection
+   */
   protected void close(final StreamingConnection connection) {
     if (connection != null) {
       log.info("closing stan connection...");
@@ -24,6 +32,12 @@ public abstract class PubSub {
     }
   }
 
+  /**
+   * Back off.
+   *
+   * @param numOfRetries the num of retries
+   * @param ex           the ex
+   */
   protected void backOff(final int numOfRetries, final Exception ex) {
     log.error("exception occurred", ex);
     try {
@@ -37,6 +51,9 @@ public abstract class PubSub {
 
   /**
    * This method will keep retrying for a connection.
+   *
+   * @param connectionFactory the connection factory
+   * @return the streaming connection
    */
   protected StreamingConnection connectionLostHandler(final StreamingConnectionFactory connectionFactory) {
     StreamingConnection streamingConnection = null;

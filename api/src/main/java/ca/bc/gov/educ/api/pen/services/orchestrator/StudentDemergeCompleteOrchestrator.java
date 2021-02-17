@@ -85,6 +85,14 @@ public class StudentDemergeCompleteOrchestrator extends BaseUserActionsOrchestra
     log.info("message sent to STUDENT_API_TOPIC for GET_STUDENT_HISTORY Event.");
   }
 
+  /**
+   * Gets student by merged from pen.
+   *
+   * @param event                          the event
+   * @param saga                           the saga
+   * @param studentDemergeCompleteSagaData the student demerge complete saga data
+   * @throws IOException the io exception
+   */
   protected void getStudentByMergedFromPen(final Event event, final Saga saga, final StudentDemergeCompleteSagaData studentDemergeCompleteSagaData) throws IOException {
     final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
 
@@ -150,13 +158,21 @@ public class StudentDemergeCompleteOrchestrator extends BaseUserActionsOrchestra
     studentDataFromEventResponse.setPostalCode(studentDemergeCompleteSagaData.getPostalCode());
 
     // Student update for demerge
-    studentDataFromEventResponse.setStatusCode(StudentStatusCodes.Active.getCode());
+    studentDataFromEventResponse.setStatusCode(StudentStatusCodes.ACTIVE.getCode());
     studentDataFromEventResponse.setTrueStudentID(null);
     studentDataFromEventResponse.setHistoryActivityCode(StudentHistoryActivityCodes.DEMERGE.getCode());
 
     this.processStudentUpdate(saga, studentDemergeCompleteSagaData, eventStates, studentDataFromEventResponse);
   }
 
+  /**
+   * Gets student by merged to pen.
+   *
+   * @param event                          the event
+   * @param saga                           the saga
+   * @param studentDemergeCompleteSagaData the student demerge complete saga data
+   * @throws IOException the io exception
+   */
   protected void getStudentByMergedToPen(final Event event, final Saga saga, final StudentDemergeCompleteSagaData studentDemergeCompleteSagaData) throws IOException {
     final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     studentDemergeCompleteSagaData.setRequestStudentID(studentDemergeCompleteSagaData.getMergedToStudentID());
@@ -244,10 +260,22 @@ public class StudentDemergeCompleteOrchestrator extends BaseUserActionsOrchestra
     log.info("message sent to PEN_MATCH_API_TOPIC for CREATE_POSSIBLE_MATCH Event.");
   }
 
+  /**
+   * Is step for merged to pen boolean.
+   *
+   * @param studentDemergeCompleteSagaData the student demerge complete saga data
+   * @return the boolean
+   */
   private boolean isStepForMergedToPEN(final StudentDemergeCompleteSagaData studentDemergeCompleteSagaData) {
     return studentDemergeCompleteSagaData.getRequestStudentID().equals(studentDemergeCompleteSagaData.getMergedToStudentID());
   }
 
+  /**
+   * Is step for merged from pen boolean.
+   *
+   * @param studentDemergeCompleteSagaData the student demerge complete saga data
+   * @return the boolean
+   */
   private boolean isStepForMergedFromPEN(final StudentDemergeCompleteSagaData studentDemergeCompleteSagaData) {
     return studentDemergeCompleteSagaData.getRequestStudentID().equals(studentDemergeCompleteSagaData.getMergedFromStudentID());
   }

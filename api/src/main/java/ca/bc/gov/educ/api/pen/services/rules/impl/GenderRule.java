@@ -25,6 +25,9 @@ import static lombok.AccessLevel.PRIVATE;
 @Slf4j
 public class GenderRule extends BaseRule {
 
+  /**
+   * The Rest utils.
+   */
   @Getter(PRIVATE)
   private final RestUtils restUtils;
 

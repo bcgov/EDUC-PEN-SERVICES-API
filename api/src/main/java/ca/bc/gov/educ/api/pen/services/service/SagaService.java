@@ -48,7 +48,7 @@ public class SagaService {
    * @param sagaEventRepository the saga event repository
    */
   @Autowired
-  public SagaService(final SagaRepository sagaRepository, SagaEventRepository sagaEventRepository) {
+  public SagaService(final SagaRepository sagaRepository, final SagaEventRepository sagaEventRepository) {
     this.sagaRepository = sagaRepository;
     this.sagaEventRepository = sagaEventRepository;
   }
@@ -60,8 +60,8 @@ public class SagaService {
    * @param saga the saga
    * @return the saga
    */
-  public Saga createSagaRecord(Saga saga) {
-    return getSagaRepository().save(saga);
+  public Saga createSagaRecord(final Saga saga) {
+    return this.getSagaRepository().save(saga);
   }
 
   /**
@@ -69,18 +69,18 @@ public class SagaService {
    * first find the child record, if exist do not add. this scenario may occur in replay process,
    * so dont remove this check. removing this check will lead to duplicate records in the child table.
    *
-   * @param saga      the saga object.
+   * @param saga            the saga object.
    * @param sagaEventStates the saga event
    */
   @Retryable(value = {Exception.class}, maxAttempts = 5, backoff = @Backoff(multiplier = 2, delay = 2000))
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void updateAttachedSagaWithEvents(Saga saga, SagaEventStates sagaEventStates) {
+  public void updateAttachedSagaWithEvents(final Saga saga, final SagaEventStates sagaEventStates) {
     saga.setUpdateDate(LocalDateTime.now());
-    getSagaRepository().save(saga);
-    val result = getSagaEventRepository()
+    this.getSagaRepository().save(saga);
+    val result = this.getSagaEventRepository()
         .findBySagaAndSagaEventOutcomeAndSagaEventStateAndSagaStepNumber(saga, sagaEventStates.getSagaEventOutcome(), sagaEventStates.getSagaEventState(), sagaEventStates.getSagaStepNumber() - 1); //check if the previous step was same and had same outcome, and it is due to replay.
     if (result.isEmpty()) {
-      getSagaEventRepository().save(sagaEventStates);
+      this.getSagaEventRepository().save(sagaEventStates);
     }
   }
 
@@ -90,8 +90,8 @@ public class SagaService {
    * @param sagaId the saga id
    * @return the optional
    */
-  public Optional<Saga> findSagaById(UUID sagaId) {
-    return getSagaRepository().findById(sagaId);
+  public Optional<Saga> findSagaById(final UUID sagaId) {
+    return this.getSagaRepository().findById(sagaId);
   }
 
   /**
@@ -100,8 +100,8 @@ public class SagaService {
    * @param saga the saga
    * @return the list
    */
-  public List<SagaEventStates> findAllSagaStates(Saga saga) {
-    return getSagaEventRepository().findBySaga(saga);
+  public List<SagaEventStates> findAllSagaStates(final Saga saga) {
+    return this.getSagaEventRepository().findBySaga(saga);
   }
 
 
@@ -111,53 +111,67 @@ public class SagaService {
    * @param saga the saga
    */
   @Transactional(propagation = Propagation.MANDATORY)
-  public void updateSagaRecord(Saga saga) { // saga here MUST be an attached entity
-    getSagaRepository().save(saga);
+  public void updateSagaRecord(final Saga saga) { // saga here MUST be an attached entity
+    this.getSagaRepository().save(saga);
   }
 
   /**
    * Find by student id optional.
    *
-   * @param studentID     the student id
+   * @param studentID the student id
+   * @param sagaName  the saga name
    * @return the list
    */
-  public Optional<Saga> findByStudentIDAndSagaName(UUID studentID, String sagaName){
-    return getSagaRepository().findByStudentIDAndSagaName(studentID, sagaName);
+  public Optional<Saga> findByStudentIDAndSagaName(final UUID studentID, final String sagaName) {
+    return this.getSagaRepository().findByStudentIDAndSagaName(studentID, sagaName);
   }
 
-  public List<Saga> findAllByStudentIDAndStatusIn(UUID studentID, String sagaName, List<String> statuses){
-    return getSagaRepository().findAllByStudentIDAndSagaNameAndStatusIn(studentID, sagaName, statuses);
+  /**
+   * Find all by student id and status in list.
+   *
+   * @param studentID the student id
+   * @param sagaName  the saga name
+   * @param statuses  the statuses
+   * @return the list
+   */
+  public List<Saga> findAllByStudentIDAndStatusIn(final UUID studentID, final String sagaName, final List<String> statuses) {
+    return this.getSagaRepository().findAllByStudentIDAndSagaNameAndStatusIn(studentID, sagaName, statuses);
   }
 
+  /**
+   * Update attached entity during saga process.
+   *
+   * @param saga the saga
+   */
   @Retryable(value = {Exception.class}, maxAttempts = 5, backoff = @Backoff(multiplier = 2, delay = 2000))
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void updateAttachedEntityDuringSagaProcess(Saga saga){
-    getSagaRepository().save(saga);
+  public void updateAttachedEntityDuringSagaProcess(final Saga saga) {
+    this.getSagaRepository().save(saga);
   }
 
   /**
    * Create saga record in db saga.
    *
-   * @param sagaName            the saga name
-   * @param userName            the user name
-   * @param payload             the payload
-   * @param studentID           the student id
+   * @param sagaName  the saga name
+   * @param userName  the user name
+   * @param payload   the payload
+   * @param studentID the student id
    * @return the saga
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public Saga createSagaRecordInDB(String sagaName, String userName, String payload, UUID studentID) {
-    var saga = Saga
-      .builder()
-      .payload(payload)
-      .studentID(studentID)
-      .sagaName(sagaName)
-      .status(STARTED.toString())
-      .sagaState(INITIATED.toString())
-      .createDate(LocalDateTime.now())
-      .createUser(userName)
-      .updateUser(userName)
-      .updateDate(LocalDateTime.now())
-      .build();
-    return createSagaRecord(saga);
+  public Saga createSagaRecordInDB(final String sagaName, final String userName, final String payload, final UUID studentID) {
+    final var saga = Saga
+        .builder()
+        .payload(payload)
+        .studentID(studentID)
+        .sagaName(sagaName)
+        .status(STARTED.toString())
+        .sagaState(INITIATED.toString())
+        .createDate(LocalDateTime.now())
+        .createUser(userName)
+        .updateUser(userName)
+        .updateDate(LocalDateTime.now())
+        .build();
+    return this.createSagaRecord(saga);
   }
 }

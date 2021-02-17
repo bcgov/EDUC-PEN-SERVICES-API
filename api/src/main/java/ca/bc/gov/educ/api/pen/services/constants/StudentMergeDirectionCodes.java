@@ -2,6 +2,9 @@ package ca.bc.gov.educ.api.pen.services.constants;
 
 import lombok.Getter;
 
+/**
+ * The enum Student merge direction codes.
+ */
 public enum StudentMergeDirectionCodes {
   /**
    * Merged from
@@ -25,7 +28,7 @@ public enum StudentMergeDirectionCodes {
    *
    * @param code the code
    */
-  StudentMergeDirectionCodes(String code) {
+  StudentMergeDirectionCodes(final String code) {
     this.code = code;
   }
 }

@@ -26,8 +26,17 @@ import static ca.bc.gov.educ.api.pen.services.constants.TopicsEnum.PEN_SERVICES_
 @Component
 @Slf4j
 public class Subscriber extends PubSub implements Closeable {
+  /**
+   * The Connection factory.
+   */
   private final StreamingConnectionFactory connectionFactory;
+  /**
+   * The Stan event handler service.
+   */
   private final STANEventHandlerService stanEventHandlerService;
+  /**
+   * The Connection.
+   */
   private StreamingConnection connection;
 
   /**
@@ -89,6 +98,9 @@ public class Subscriber extends PubSub implements Closeable {
   }
 
 
+  /**
+   * Retry subscription.
+   */
   private void retrySubscription() {
     int numOfRetries = 0;
     while (true) {
@@ -106,6 +118,9 @@ public class Subscriber extends PubSub implements Closeable {
 
   /**
    * This method will keep retrying for a connection.
+   *
+   * @param streamingConnection the streaming connection
+   * @param e                   the e
    */
   private void connectionLostHandler(final StreamingConnection streamingConnection, final Exception e) {
     this.connection = super.connectionLostHandler(this.connectionFactory);

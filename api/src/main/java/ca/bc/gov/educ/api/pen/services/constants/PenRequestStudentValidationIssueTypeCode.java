@@ -91,10 +91,18 @@ public enum PenRequestStudentValidationIssueTypeCode {
    */
   BLOCKED_NAME("BLOCKEDNAME");
 
+  /**
+   * The Code.
+   */
   @Getter
   private final String code;
 
-  PenRequestStudentValidationIssueTypeCode(String code) {
+  /**
+   * Instantiates a new Pen request student validation issue type code.
+   *
+   * @param code the code
+   */
+  PenRequestStudentValidationIssueTypeCode(final String code) {
     this.code = code;
   }
 }

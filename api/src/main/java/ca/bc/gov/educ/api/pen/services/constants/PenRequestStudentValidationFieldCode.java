@@ -55,10 +55,18 @@ public enum PenRequestStudentValidationFieldCode {
    */
   GENDER("GENDER");
 
+  /**
+   * The Code.
+   */
   @Getter
   private final String code;
 
-  PenRequestStudentValidationFieldCode(String code) {
+  /**
+   * Instantiates a new Pen request student validation field code.
+   *
+   * @param code the code
+   */
+  PenRequestStudentValidationFieldCode(final String code) {
     this.code = code;
   }
 }

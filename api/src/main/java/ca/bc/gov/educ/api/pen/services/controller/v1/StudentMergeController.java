@@ -22,26 +22,42 @@ import java.util.stream.Collectors;
  *
  * @author Mingwei
  */
-
 @RestController
 @Slf4j
 public class StudentMergeController implements StudentMergeEndpoint {
+  /**
+   * The constant mapper.
+   */
   private static final StudentMergeMapper mapper = StudentMergeMapper.mapper;
+  /**
+   * The Service.
+   */
   @Getter(AccessLevel.PRIVATE)
   private final StudentMergeService service;
+  /**
+   * The Payload validator.
+   */
   @Getter(AccessLevel.PRIVATE)
   private final StudentMergePayloadValidator payloadValidator;
 
+  /**
+   * Instantiates a new Student merge controller.
+   *
+   * @param studentMergeService the student merge service
+   * @param payloadValidator    the payload validator
+   */
   @Autowired
   StudentMergeController(final StudentMergeService studentMergeService, final StudentMergePayloadValidator payloadValidator) {
     this.service = studentMergeService;
     this.payloadValidator = payloadValidator;
   }
 
+  @Override
   public List<StudentMerge> findStudentMerges(final String studentID, final String mergeDirection) {
     return this.getService().findStudentMerges(UUID.fromString(studentID), mergeDirection).stream().map(mapper::toStructure).collect(Collectors.toList());
   }
 
+  @Override
   public List<StudentMergeSourceCode> getStudentMergeSourceCodes() {
     return this.getService().getStudentMergeSourceCodesList().stream().map(mapper::toStructure).collect(Collectors.toList());
   }

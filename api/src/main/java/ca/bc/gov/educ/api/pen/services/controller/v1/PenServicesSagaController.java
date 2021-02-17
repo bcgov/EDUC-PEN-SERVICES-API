@@ -25,11 +25,20 @@ import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_ST
 import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA;
 import static lombok.AccessLevel.PRIVATE;
 
+/**
+ * The type Pen services saga controller.
+ */
 @RestController
 @Slf4j
 public class PenServicesSagaController implements PenServicesSagaEndpoint {
 
+  /**
+   * The constant sagaMapper.
+   */
   private static final SagaMapper sagaMapper = SagaMapper.mapper;
+  /**
+   * The Saga service.
+   */
   @Getter(PRIVATE)
   private final SagaService sagaService;
   /**
@@ -38,6 +47,12 @@ public class PenServicesSagaController implements PenServicesSagaEndpoint {
   @Getter(PRIVATE)
   private final Map<String, Orchestrator> orchestratorMap = new HashMap<>();
 
+  /**
+   * Instantiates a new Pen services saga controller.
+   *
+   * @param sagaService   the saga service
+   * @param orchestrators the orchestrators
+   */
   @Autowired
   public PenServicesSagaController(final SagaService sagaService, final List<Orchestrator> orchestrators) {
     this.sagaService = sagaService;
@@ -63,6 +78,13 @@ public class PenServicesSagaController implements PenServicesSagaEndpoint {
     return this.processServicesSaga(PEN_SERVICES_STUDENT_DEMERGE_COMPLETE_SAGA, studentDemergeCompleteSagaData);
   }
 
+  /**
+   * Process services saga response entity.
+   *
+   * @param sagaName the saga name
+   * @param sagaData the saga data
+   * @return the response entity
+   */
   private ResponseEntity<String> processServicesSaga(final SagaEnum sagaName, final BaseStudentSagaData sagaData) {
     try {
       final var studentID = sagaData.getStudentID();
@@ -81,6 +103,11 @@ public class PenServicesSagaController implements PenServicesSagaEndpoint {
     }
   }
 
+  /**
+   * Gets statuses filter.
+   *
+   * @return the statuses filter
+   */
   protected List<String> getStatusesFilter() {
     final var statuses = new ArrayList<String>();
     statuses.add(SagaStatusEnum.IN_PROGRESS.toString());

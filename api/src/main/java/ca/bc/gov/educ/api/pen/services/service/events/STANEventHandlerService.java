@@ -19,6 +19,9 @@ import static ca.bc.gov.educ.api.pen.services.constants.EventStatus.MESSAGE_PUBL
 @Slf4j
 public class STANEventHandlerService {
 
+  /**
+   * The Event repository.
+   */
   private final ServicesEventRepository eventRepository;
 
 
@@ -28,7 +31,7 @@ public class STANEventHandlerService {
    * @param eventRepository the ServicesEventRepository event repository
    */
   @Autowired
-  public STANEventHandlerService(ServicesEventRepository eventRepository) {
+  public STANEventHandlerService(final ServicesEventRepository eventRepository) {
     this.eventRepository = eventRepository;
   }
 
@@ -38,14 +41,14 @@ public class STANEventHandlerService {
    * @param choreographedEvent the choreographed event
    */
   @Transactional
-  public void updateEventStatus(ChoreographedEvent choreographedEvent) {
+  public void updateEventStatus(final ChoreographedEvent choreographedEvent) {
     if (choreographedEvent != null && choreographedEvent.getEventID() != null) {
-      var eventID = UUID.fromString(choreographedEvent.getEventID());
-      var eventOptional = eventRepository.findById(eventID);
+      final var eventID = UUID.fromString(choreographedEvent.getEventID());
+      final var eventOptional = this.eventRepository.findById(eventID);
       if (eventOptional.isPresent()) {
-        var event = eventOptional.get();
+        final var event = eventOptional.get();
         event.setEventStatus(MESSAGE_PUBLISHED.toString());
-        eventRepository.save(event);
+        this.eventRepository.save(event);
       }
     }
   }

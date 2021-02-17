@@ -29,7 +29,13 @@ import static ca.bc.gov.educ.api.pen.services.constants.TopicsEnum.PEN_SERVICES_
 @Component
 @Slf4j
 public class Publisher extends PubSub implements Closeable {
+  /**
+   * The Connection factory.
+   */
   private final StreamingConnectionFactory connectionFactory;
+  /**
+   * The Connection.
+   */
   private StreamingConnection connection;
 
   /**
@@ -53,6 +59,12 @@ public class Publisher extends PubSub implements Closeable {
     this.connection = this.connectionFactory.createConnection();
   }
 
+  /**
+   * Connection lost handler.
+   *
+   * @param streamingConnection the streaming connection
+   * @param exception           the exception
+   */
   private void connectionLostHandler(final StreamingConnection streamingConnection, final Exception exception) {
     this.connection = super.connectionLostHandler(this.connectionFactory);
   }

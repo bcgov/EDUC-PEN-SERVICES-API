@@ -34,18 +34,37 @@ import static ca.bc.gov.educ.api.pen.services.constants.EventStatus.DB_COMMITTED
  *
  * @author Mingwei
  */
-
 @Service
 public class StudentMergeService {
 
+  /**
+   * The Student merge repo.
+   */
   private final StudentMergeRepository studentMergeRepo;
 
+  /**
+   * The Event repository.
+   */
   private final ServicesEventRepository eventRepository;
 
+  /**
+   * The Student merge direction code table repo.
+   */
   private final StudentMergeDirectionCodeTableRepository studentMergeDirectionCodeTableRepo;
 
+  /**
+   * The Student merge source code table repo.
+   */
   private final StudentMergeSourceCodeTableRepository studentMergeSourceCodeTableRepo;
 
+  /**
+   * Instantiates a new Student merge service.
+   *
+   * @param studentMergeRepo                   the student merge repo
+   * @param eventRepository                    the event repository
+   * @param studentMergeDirectionCodeTableRepo the student merge direction code table repo
+   * @param studentMergeSourceCodeTableRepo    the student merge source code table repo
+   */
   @Autowired
   public StudentMergeService(final StudentMergeRepository studentMergeRepo, final ServicesEventRepository eventRepository, final StudentMergeDirectionCodeTableRepository studentMergeDirectionCodeTableRepo,
                              final StudentMergeSourceCodeTableRepository studentMergeSourceCodeTableRepo) {
@@ -55,14 +74,31 @@ public class StudentMergeService {
     this.studentMergeSourceCodeTableRepo = studentMergeSourceCodeTableRepo;
   }
 
+  /**
+   * Check for idempotency list.
+   *
+   * @param studentMergeEntities the student merge entities
+   * @return the list
+   */
   private List<StudentMergeEntity> checkForIdempotency(final List<StudentMergeEntity> studentMergeEntities) {
     return studentMergeEntities.stream().filter(this.getStudentMergeEntityNotPresentPredicate()).collect(Collectors.toList());
   }
 
+  /**
+   * Update list based on db existence list.
+   *
+   * @param studentMergeEntities the student merge entities
+   * @return the list
+   */
   private List<StudentMergeEntity> updateListBasedOnDBExistence(final List<StudentMergeEntity> studentMergeEntities) {
     return studentMergeEntities.stream().filter(this.getStudentMergeEntityPresentPredicate()).collect(Collectors.toList());
   }
 
+  /**
+   * Gets student merge entity not present predicate.
+   *
+   * @return the student merge entity not present predicate
+   */
   private Predicate<StudentMergeEntity> getStudentMergeEntityNotPresentPredicate() {
     return el -> {
       val mergeOptional = this.studentMergeRepo.
@@ -71,6 +107,11 @@ public class StudentMergeService {
     };
   }
 
+  /**
+   * Gets student merge entity present predicate.
+   *
+   * @return the student merge entity present predicate
+   */
   private Predicate<StudentMergeEntity> getStudentMergeEntityPresentPredicate() {
     return el -> {
       val mergeOptional = this.studentMergeRepo.
@@ -79,6 +120,13 @@ public class StudentMergeService {
     };
   }
 
+  /**
+   * Create merge pair.
+   *
+   * @param studentMergeEntities the student merge entities
+   * @return the pair
+   * @throws JsonProcessingException the json processing exception
+   */
   @Transactional(propagation = Propagation.MANDATORY)
   public Pair<List<StudentMergeEntity>, Optional<ServicesEvent>> createMerge(final List<StudentMergeEntity> studentMergeEntities) throws JsonProcessingException {
     final var updatedList = this.checkForIdempotency(studentMergeEntities);
@@ -90,6 +138,13 @@ public class StudentMergeService {
     return Pair.of(new ArrayList<>(), Optional.empty());
   }
 
+  /**
+   * Delete merge pair.
+   *
+   * @param studentMergeEntities the student merge entities
+   * @return the pair
+   * @throws JsonProcessingException the json processing exception
+   */
   @Transactional(propagation = Propagation.MANDATORY)
   public Pair<List<StudentMergeEntity>, Optional<ServicesEvent>> deleteMerge(final List<StudentMergeEntity> studentMergeEntities) throws JsonProcessingException {
     final var updatedList = this.updateListBasedOnDBExistence(studentMergeEntities);
@@ -104,6 +159,8 @@ public class StudentMergeService {
   /**
    * Returns the list of student merge record
    *
+   * @param studentID      the student id
+   * @param mergeDirection the merge direction
    * @return {@link List<StudentMergeEntity>}
    */
   public List<StudentMergeEntity> findStudentMerges(final UUID studentID, final String mergeDirection) {
@@ -125,10 +182,21 @@ public class StudentMergeService {
     return this.studentMergeDirectionCodeTableRepo.findAll();
   }
 
+  /**
+   * Find student merge direction code optional.
+   *
+   * @param mergeDirectionCode the merge direction code
+   * @return the optional
+   */
   public Optional<StudentMergeDirectionCodeEntity> findStudentMergeDirectionCode(final String mergeDirectionCode) {
     return Optional.ofNullable(this.loadStudentMergeDirectionCodes().get(mergeDirectionCode));
   }
 
+  /**
+   * Load student merge direction codes map.
+   *
+   * @return the map
+   */
   private Map<String, StudentMergeDirectionCodeEntity> loadStudentMergeDirectionCodes() {
     return this.getStudentMergeDirectionCodesList().stream().collect(Collectors.toMap(StudentMergeDirectionCodeEntity::getMergeDirectionCode, Function.identity()));
   }
@@ -143,14 +211,35 @@ public class StudentMergeService {
     return this.studentMergeSourceCodeTableRepo.findAll();
   }
 
+  /**
+   * Find student merge source code optional.
+   *
+   * @param mergeSourceCode the merge source code
+   * @return the optional
+   */
   public Optional<StudentMergeSourceCodeEntity> findStudentMergeSourceCode(final String mergeSourceCode) {
     return Optional.ofNullable(this.loadStudentMergeSourceCodes().get(mergeSourceCode));
   }
 
+  /**
+   * Load student merge source codes map.
+   *
+   * @return the map
+   */
   private Map<String, StudentMergeSourceCodeEntity> loadStudentMergeSourceCodes() {
     return this.getStudentMergeSourceCodesList().stream().collect(Collectors.toMap(StudentMergeSourceCodeEntity::getMergeSourceCode, Function.identity()));
   }
 
+  /**
+   * Create services event services event.
+   *
+   * @param createUser   the create user
+   * @param updateUser   the update user
+   * @param jsonString   the json string
+   * @param eventType    the event type
+   * @param eventOutcome the event outcome
+   * @return the services event
+   */
   private ServicesEvent createServicesEvent(final String createUser, final String updateUser, final String jsonString, final EventType eventType, final EventOutcome eventOutcome) {
     return ServicesEvent.builder()
         .createDate(LocalDateTime.now())

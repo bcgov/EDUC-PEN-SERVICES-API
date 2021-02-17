@@ -38,6 +38,12 @@ public interface PenServicesAPIEndpoint {
   @Schema(name = "PenRequestStudentValidationIssue", implementation = PenRequestStudentValidationIssue.class)
   List<PenRequestStudentValidationIssue> validateStudentData(@Validated @RequestBody PenRequestStudentValidationPayload validationPayload);
 
+  /**
+   * Gets next pen number.
+   *
+   * @param transactionID the transaction id
+   * @return the next pen number
+   */
   @GetMapping("/next-pen-number")
   @PreAuthorize("hasAuthority('SCOPE_GET_NEXT_PEN_NUMBER')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})

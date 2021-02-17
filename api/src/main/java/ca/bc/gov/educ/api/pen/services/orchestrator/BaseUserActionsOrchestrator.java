@@ -45,6 +45,15 @@ public abstract class BaseUserActionsOrchestrator<T> extends BaseOrchestrator<T>
     super(sagaService, messagePublisher, clazz, sagaName, topicToSubscribe);
   }
 
+  /**
+   * Process student read.
+   *
+   * @param saga        the saga
+   * @param sagaData    the saga data
+   * @param eventStates the event states
+   * @param pen         the pen
+   * @throws JsonProcessingException the json processing exception
+   */
   protected void processStudentRead(final Saga saga, final BaseStudentSagaData sagaData, final SagaEventStates eventStates, final String pen) throws JsonProcessingException {
     saga.setSagaState(GET_STUDENT.toString()); // set current event as saga state.
     saga.setPayload(JsonUtil.getJsonStringFromObject(sagaData));
@@ -58,6 +67,15 @@ public abstract class BaseUserActionsOrchestrator<T> extends BaseOrchestrator<T>
     log.info("message sent to STUDENT_API_TOPIC for GET_STUDENT Event.");
   }
 
+  /**
+   * Process student update.
+   *
+   * @param saga          the saga
+   * @param sagaData      the saga data
+   * @param eventStates   the event states
+   * @param studentUpdate the student update
+   * @throws JsonProcessingException the json processing exception
+   */
   protected void processStudentUpdate(final Saga saga, final BaseStudentSagaData sagaData, final SagaEventStates eventStates, final StudentSagaData studentUpdate) throws JsonProcessingException {
     studentUpdate.setUpdateUser(sagaData.getUpdateUser());
     sagaData.setRequestStudentID(UUID.fromString(studentUpdate.getStudentID()));

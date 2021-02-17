@@ -104,9 +104,10 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
   /**
    * Create single collection event state list.
    *
-   * @param eventOutcome  the event outcome
-   * @param nextEventType the next event type
-   * @param stepToExecute the step to execute
+   * @param eventOutcome      the event outcome
+   * @param nextStepPredicate the next step predicate
+   * @param nextEventType     the next event type
+   * @param stepToExecute     the step to execute
    * @return the list
    */
   protected List<SagaEventState<T>> createSingleCollectionEventState(final EventOutcome eventOutcome, final Predicate<T> nextStepPredicate, final EventType nextEventType, final SagaStep<T> stepToExecute) {
@@ -119,9 +120,10 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
   /**
    * Build saga event state saga event state.
    *
-   * @param eventOutcome  the event outcome
-   * @param nextEventType the next event type
-   * @param stepToExecute the step to execute
+   * @param eventOutcome      the event outcome
+   * @param nextStepPredicate the next step predicate
+   * @param nextEventType     the next event type
+   * @param stepToExecute     the step to execute
    * @return the saga event state
    */
   protected SagaEventState<T> buildSagaEventState(final EventOutcome eventOutcome, final Predicate<T> nextStepPredicate, final EventType nextEventType, final SagaStep<T> stepToExecute) {
@@ -132,10 +134,11 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
   /**
    * Register step to execute base orchestrator.
    *
-   * @param initEvent     the init event
-   * @param outcome       the outcome
-   * @param nextEvent     the next event
-   * @param stepToExecute the step to execute
+   * @param initEvent         the init event
+   * @param outcome           the outcome
+   * @param nextStepPredicate the next step predicate
+   * @param nextEvent         the next event
+   * @param stepToExecute     the step to execute
    * @return the base orchestrator
    */
   protected BaseOrchestrator<T> registerStepToExecute(final EventType initEvent, final EventOutcome outcome, final Predicate<T> nextStepPredicate, final EventType nextEvent, final SagaStep<T> stepToExecute) {
@@ -189,8 +192,8 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
   /**
    * Beginning step base orchestrator.
    *
-   * @param nextEvent         next event that will occur.
    * @param nextStepPredicate whether to execute the next step.
+   * @param nextEvent         next event that will occur.
    * @param stepToExecute     which method to execute for the next event. it is a lambda function.
    * @return {@link BaseOrchestrator}
    */
@@ -395,6 +398,18 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
     }
   }
 
+  /**
+   * Find and invoke next step.
+   *
+   * @param saga         the saga
+   * @param t            the t
+   * @param currentEvent the current event
+   * @param eventOutcome the event outcome
+   * @param event        the event
+   * @throws InterruptedException the interrupted exception
+   * @throws TimeoutException     the timeout exception
+   * @throws IOException          the io exception
+   */
   private void findAndInvokeNextStep(final Saga saga, final T t, final EventType currentEvent, final EventOutcome eventOutcome, final Event event) throws InterruptedException, TimeoutException, IOException {
     final Optional<SagaEventState<T>> sagaEventState = this.findNextSagaEventState(currentEvent, eventOutcome, t);
     if (sagaEventState.isPresent()) {
@@ -517,6 +532,7 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    *
    * @param currentEvent current event
    * @param eventOutcome event outcome.
+   * @param sagaData     the saga data
    * @return {@link Optional<SagaEventState>}
    */
   protected Optional<SagaEventState<T>> findNextSagaEventState(final EventType currentEvent, final EventOutcome eventOutcome, final T sagaData) {
@@ -531,6 +547,7 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    *
    * @param event          the current event.
    * @param saga           the model object.
+   * @param sagaData       the saga data
    * @param sagaEventState the next next event from {@link BaseOrchestrator#nextStepsToExecute}
    * @throws InterruptedException if thread is interrupted.
    * @throws TimeoutException     if connection to messaging system times out.

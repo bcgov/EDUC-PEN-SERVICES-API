@@ -31,7 +31,7 @@ public class RestWebClient {
    *
    * @param props the props
    */
-  public RestWebClient(ApplicationProperties props) {
+  public RestWebClient(final ApplicationProperties props) {
     this.props = props;
   }
 
@@ -43,18 +43,18 @@ public class RestWebClient {
   @Bean
   WebClient webClient() {
     val clientRegistryRepo = new InMemoryReactiveClientRegistrationRepository(ClientRegistration
-        .withRegistrationId(props.getClientID())
-        .tokenUri(props.getTokenURL())
-        .clientId(props.getClientID())
-        .clientSecret(props.getClientSecret())
+        .withRegistrationId(this.props.getClientID())
+        .tokenUri(this.props.getTokenURL())
+        .clientId(this.props.getClientID())
+        .clientSecret(this.props.getClientSecret())
         .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
         .build());
     val clientService = new InMemoryReactiveOAuth2AuthorizedClientService(clientRegistryRepo);
     val authorizedClientManager =
         new AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager(clientRegistryRepo, clientService);
     val oauthFilter = new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
-    oauthFilter.setDefaultClientRegistrationId(props.getClientID());
-    DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+    oauthFilter.setDefaultClientRegistrationId(this.props.getClientID());
+    final DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
     factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
     return WebClient.builder()
         .uriBuilderFactory(factory)
