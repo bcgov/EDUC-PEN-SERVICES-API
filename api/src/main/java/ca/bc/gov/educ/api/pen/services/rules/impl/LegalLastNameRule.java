@@ -42,26 +42,26 @@ public class LegalLastNameRule extends BaseRule {
    * @return the list
    */
   @Override
-  public List<PenRequestStudentValidationIssue> validate(PenRequestStudentValidationPayload validationPayload) {
-    var stopwatch = Stopwatch.createStarted();
+  public List<PenRequestStudentValidationIssue> validate(final PenRequestStudentValidationPayload validationPayload) {
+    final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new ArrayList<>();
-    var legalLastName = validationPayload.getLegalLastName();
+    final var legalLastName = validationPayload.getLegalLastName();
     if (StringUtils.isBlank(legalLastName)) {
-      results.add(createValidationEntity(ERROR, BLANK_FIELD, LEGAL_LAST));
+      results.add(this.createValidationEntity(ERROR, BLANK_FIELD, LEGAL_LAST));
     } else {
-      defaultValidationForNameFields(results, legalLastName, LEGAL_LAST);
+      this.defaultValidationForNameFields(results, legalLastName, LEGAL_LAST);
     }
     //PreReq: Skip this check if any of these issues has been reported for the current field: V2, V3, V4, V5, V6, V7, V8
     // to achieve above we do an empty check here and proceed only if there were no validation error till now, for this field.
     if (results.isEmpty()) {
-      checkFieldValueExactMatchWithInvalidText(results, legalLastName, LEGAL_LAST, validationPayload.getIsInteractive(), penNameTextService.getPenNameTexts());
+      this.checkFieldValueExactMatchWithInvalidText(results, legalLastName, LEGAL_LAST, validationPayload.getIsInteractive(), this.penNameTextService.getPenNameTexts());
     }
     if (results.isEmpty() && legalLastName.trim().length() == 1) {
-      results.add(createValidationEntity(WARNING, ONE_CHAR_NAME, LEGAL_LAST));
+      results.add(this.createValidationEntity(WARNING, ONE_CHAR_NAME, LEGAL_LAST));
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
-    log.info("Completed for {} in {} milli seconds",validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
     return results;
   }
 

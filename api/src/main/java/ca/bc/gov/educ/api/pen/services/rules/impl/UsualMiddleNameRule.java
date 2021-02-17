@@ -30,6 +30,7 @@ public class UsualMiddleNameRule extends BaseRule {
   public UsualMiddleNameRule(final PENNameTextService penNameTextService) {
     this.penNameTextService = penNameTextService;
   }
+
   /**
    * Validates the student record for the given rule.
    *
@@ -37,13 +38,13 @@ public class UsualMiddleNameRule extends BaseRule {
    * @return the validation result as a list.
    */
   @Override
-  public List<PenRequestStudentValidationIssue> validate(PenRequestStudentValidationPayload validationPayload) {
-    var stopwatch = Stopwatch.createStarted();
+  public List<PenRequestStudentValidationIssue> validate(final PenRequestStudentValidationPayload validationPayload) {
+    final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
-    doValidate(validationPayload.getIsInteractive(), results, validationPayload.getUsualMiddleNames(), USUAL_MID, penNameTextService);
+    this.doValidate(validationPayload.getIsInteractive(), results, validationPayload.getUsualMiddleNames(), USUAL_MID, this.penNameTextService);
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
-    log.info("Completed for {} in {} milli seconds",validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
     return results;
   }
 }

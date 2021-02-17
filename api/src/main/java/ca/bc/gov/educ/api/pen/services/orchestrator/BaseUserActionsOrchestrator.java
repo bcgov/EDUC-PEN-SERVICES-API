@@ -1,15 +1,13 @@
 package ca.bc.gov.educ.api.pen.services.orchestrator;
 
-import ca.bc.gov.educ.api.pen.services.constants.StudentHistoryActivityCodes;
 import ca.bc.gov.educ.api.pen.services.mapper.v1.StudentMergeCompleteSagaDataMapper;
 import ca.bc.gov.educ.api.pen.services.messaging.MessagePublisher;
 import ca.bc.gov.educ.api.pen.services.model.Saga;
 import ca.bc.gov.educ.api.pen.services.model.SagaEventStates;
 import ca.bc.gov.educ.api.pen.services.orchestrator.base.BaseOrchestrator;
 import ca.bc.gov.educ.api.pen.services.service.SagaService;
-import ca.bc.gov.educ.api.pen.services.struct.v1.Event;
 import ca.bc.gov.educ.api.pen.services.struct.v1.BaseStudentSagaData;
-import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMergeCompleteSagaData;
+import ca.bc.gov.educ.api.pen.services.struct.v1.Event;
 import ca.bc.gov.educ.api.pen.services.struct.v1.StudentSagaData;
 import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,46 +41,37 @@ public abstract class BaseUserActionsOrchestrator<T> extends BaseOrchestrator<T>
    * @param sagaName         the saga name
    * @param topicToSubscribe the topic to subscribe
    */
-  protected BaseUserActionsOrchestrator(SagaService sagaService, MessagePublisher messagePublisher, Class<T> clazz, String sagaName, String topicToSubscribe) {
+  protected BaseUserActionsOrchestrator(final SagaService sagaService, final MessagePublisher messagePublisher, final Class<T> clazz, final String sagaName, final String topicToSubscribe) {
     super(sagaService, messagePublisher, clazz, sagaName, topicToSubscribe);
   }
 
-  protected void processStudentRead(Saga saga, BaseStudentSagaData sagaData, SagaEventStates eventStates, String pen) throws JsonProcessingException {
+  protected void processStudentRead(final Saga saga, final BaseStudentSagaData sagaData, final SagaEventStates eventStates, final String pen) throws JsonProcessingException {
     saga.setSagaState(GET_STUDENT.toString()); // set current event as saga state.
     saga.setPayload(JsonUtil.getJsonStringFromObject(sagaData));
-    getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
-    Event nextEvent = Event.builder().sagaId(saga.getSagaId())
-            .eventType(GET_STUDENT)
-            .replyTo(getTopicToSubscribe())
-            .eventPayload(pen)
-            .build();
-    postMessageToTopic(STUDENT_API_TOPIC.toString(), nextEvent);
+    this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
+    final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
+        .eventType(GET_STUDENT)
+        .replyTo(this.getTopicToSubscribe())
+        .eventPayload(pen)
+        .build();
+    this.postMessageToTopic(STUDENT_API_TOPIC.toString(), nextEvent);
     log.info("message sent to STUDENT_API_TOPIC for GET_STUDENT Event.");
   }
 
-  protected void processStudentUpdate(Saga saga, BaseStudentSagaData sagaData, SagaEventStates eventStates, StudentSagaData studentUpdate) throws JsonProcessingException {
+  protected void processStudentUpdate(final Saga saga, final BaseStudentSagaData sagaData, final SagaEventStates eventStates, final StudentSagaData studentUpdate) throws JsonProcessingException {
     studentUpdate.setUpdateUser(sagaData.getUpdateUser());
     sagaData.setRequestStudentID(UUID.fromString(studentUpdate.getStudentID()));
     saga.setSagaState(UPDATE_STUDENT.toString()); // set current event as saga state.
     saga.setPayload(JsonUtil.getJsonStringFromObject(sagaData));
-    getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
+    this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
-    Event nextEvent = Event.builder().sagaId(saga.getSagaId())
-            .eventType(UPDATE_STUDENT)
-            .replyTo(getTopicToSubscribe())
-            .eventPayload(JsonUtil.getJsonStringFromObject(studentUpdate))
-            .build();
-    postMessageToTopic(STUDENT_API_TOPIC.toString(), nextEvent);
+    final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
+        .eventType(UPDATE_STUDENT)
+        .replyTo(this.getTopicToSubscribe())
+        .eventPayload(JsonUtil.getJsonStringFromObject(studentUpdate))
+        .build();
+    this.postMessageToTopic(STUDENT_API_TOPIC.toString(), nextEvent);
     log.info("message sent to STUDENT_API_TOPIC for UPDATE_STUDENT Event.");
   }
 
-  /**
-   *
-   * @param event                 the event
-   * @param saga                  the saga
-   * @param baseStudentSagaData   the student update saga data
-   */
-  protected void logStudentNotFound(Event event, Saga saga, BaseStudentSagaData baseStudentSagaData) {
-    log.error("Student record was not found. This should not happen. Please check the services api. :: {}", saga.getSagaId());
-  }
 }

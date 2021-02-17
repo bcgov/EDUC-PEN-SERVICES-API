@@ -33,7 +33,7 @@ public class GenderRule extends BaseRule {
    *
    * @param restUtils the rest utils
    */
-  public GenderRule(RestUtils restUtils) {
+  public GenderRule(final RestUtils restUtils) {
     this.restUtils = restUtils;
   }
 
@@ -44,25 +44,25 @@ public class GenderRule extends BaseRule {
    * @return the validation result as a list.
    */
   @Override
-  public List<PenRequestStudentValidationIssue> validate(PenRequestStudentValidationPayload validationPayload) {
-    var stopwatch = Stopwatch.createStarted();
+  public List<PenRequestStudentValidationIssue> validate(final PenRequestStudentValidationPayload validationPayload) {
+    final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
-    var genderCodes = restUtils.getGenderCodes();
-    String genderCode = validationPayload.getGenderCode();
+    final var genderCodes = this.restUtils.getGenderCodes();
+    final String genderCode = validationPayload.getGenderCode();
     if (StringUtils.isBlank(genderCode)) {
-      results.add(createValidationEntity(ERROR, GENDER_ERR, GENDER));
+      results.add(this.createValidationEntity(ERROR, GENDER_ERR, GENDER));
     } else {
-      String finalGenderCode = genderCode.trim();
-      long filteredCount = genderCodes.stream().filter(gender -> LocalDateTime.now().isAfter(gender.getEffectiveDate())
+      final String finalGenderCode = genderCode.trim();
+      final long filteredCount = genderCodes.stream().filter(gender -> LocalDateTime.now().isAfter(gender.getEffectiveDate())
           && LocalDateTime.now().isBefore(gender.getExpiryDate())
           && finalGenderCode.equalsIgnoreCase(gender.getGenderCode())).count();
       if (filteredCount < 1) {
-        results.add(createValidationEntity(ERROR, GENDER_ERR, GENDER));
+        results.add(this.createValidationEntity(ERROR, GENDER_ERR, GENDER));
       }
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
-    log.info("Completed for {} in {} milli seconds",validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
     return results;
   }
 }

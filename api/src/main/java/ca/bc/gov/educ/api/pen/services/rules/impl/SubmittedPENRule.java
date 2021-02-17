@@ -30,18 +30,18 @@ public class SubmittedPENRule extends BaseRule {
    * @return the list
    */
   @Override
-  public List<PenRequestStudentValidationIssue> validate(PenRequestStudentValidationPayload validationPayload) {
-    var stopwatch = Stopwatch.createStarted();
+  public List<PenRequestStudentValidationIssue> validate(final PenRequestStudentValidationPayload validationPayload) {
+    final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
     if (StringUtils.isNotBlank(validationPayload.getSubmittedPen())) {
-      boolean isInvalidCheckDigit = !validCheckDigit(validationPayload.getSubmittedPen().trim(), validationPayload.getTransactionID());
+      final boolean isInvalidCheckDigit = !this.validCheckDigit(validationPayload.getSubmittedPen().trim(), validationPayload.getTransactionID());
       if (isInvalidCheckDigit) {
-        results.add(createValidationEntity(WARNING, CHECK_DIGIT, SUBMITTED_PEN));
+        results.add(this.createValidationEntity(WARNING, CHECK_DIGIT, SUBMITTED_PEN));
       }
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
-    log.info("Completed for {} in {} milli seconds",validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
     return results;
   }
 
@@ -52,15 +52,15 @@ public class SubmittedPENRule extends BaseRule {
    * @param transactionID the transaction id
    * @return the boolean
    */
-  protected boolean validCheckDigit(String pen, String transactionID) {
+  protected boolean validCheckDigit(final String pen, final String transactionID) {
     log.debug(" transactionID :: {}, input :: pen={}", transactionID, pen);
     if (pen.length() != 9 || !pen.matches("-?\\d+(\\.\\d+)?")) {
       return false;
     }
-    List<Integer> odds = new ArrayList<>();
-    List<Integer> evens = new ArrayList<>();
+    final List<Integer> odds = new ArrayList<>();
+    final List<Integer> evens = new ArrayList<>();
     for (int i = 0; i < pen.length() - 1; i++) {
-      int number = Integer.parseInt(pen.substring(i, i + 1));
+      final int number = Integer.parseInt(pen.substring(i, i + 1));
       if (i % 2 == 0) {
         odds.add(number);
       } else {
@@ -68,27 +68,27 @@ public class SubmittedPENRule extends BaseRule {
       }
     }
 
-    int sumOdds = odds.stream().mapToInt(Integer::intValue).sum();
+    final int sumOdds = odds.stream().mapToInt(Integer::intValue).sum();
 
-    StringBuilder fullEvenStringBuilder = new StringBuilder();
-    for (int i : evens) {
+    final StringBuilder fullEvenStringBuilder = new StringBuilder();
+    for (final int i : evens) {
       fullEvenStringBuilder.append(i);
     }
 
-    List<Integer> listOfFullEvenValueDoubled = new ArrayList<>();
-    String fullEvenValueDoubledString = Integer.toString(Integer.parseInt(fullEvenStringBuilder.toString()) * 2);
+    final List<Integer> listOfFullEvenValueDoubled = new ArrayList<>();
+    final String fullEvenValueDoubledString = Integer.toString(Integer.parseInt(fullEvenStringBuilder.toString()) * 2);
     for (int i = 0; i < fullEvenValueDoubledString.length(); i++) {
       listOfFullEvenValueDoubled.add(Integer.parseInt(fullEvenValueDoubledString.substring(i, i + 1)));
     }
 
-    int sumEvens = listOfFullEvenValueDoubled.stream().mapToInt(Integer::intValue).sum();
+    final int sumEvens = listOfFullEvenValueDoubled.stream().mapToInt(Integer::intValue).sum();
 
-    int finalSum = sumEvens + sumOdds;
+    final int finalSum = sumEvens + sumOdds;
 
-    String penCheckDigit = pen.substring(8, 9);
+    final String penCheckDigit = pen.substring(8, 9);
 
 
-    boolean result = ((finalSum % 10 == 0 && penCheckDigit.equals("0")) || ((10 - finalSum % 10) == Integer.parseInt(penCheckDigit)));
+    final boolean result = ((finalSum % 10 == 0 && penCheckDigit.equals("0")) || ((10 - finalSum % 10) == Integer.parseInt(penCheckDigit)));
     log.debug(" transactionID :: {} , output :: booleanResult={}", transactionID, result);
     return result;
   }

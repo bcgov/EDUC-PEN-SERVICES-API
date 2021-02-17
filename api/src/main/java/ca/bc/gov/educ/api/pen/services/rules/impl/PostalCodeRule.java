@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationFieldCode.POSTAL_CODE;
-import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode.ERROR;
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode.WARNING;
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueTypeCode.PC_ERR;
 
@@ -32,16 +31,16 @@ public class PostalCodeRule extends BaseRule {
    * @return the validation result as a list.
    */
   @Override
-  public List<PenRequestStudentValidationIssue> validate(PenRequestStudentValidationPayload validationPayload) {
-    var stopwatch = Stopwatch.createStarted();
+  public List<PenRequestStudentValidationIssue> validate(final PenRequestStudentValidationPayload validationPayload) {
+    final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
-    String postalCode = validationPayload.getPostalCode();
+    final String postalCode = validationPayload.getPostalCode();
     if (StringUtils.isNotBlank(postalCode) && !pattern.matcher(postalCode).matches()) {
-      results.add(createValidationEntity(WARNING, PC_ERR, POSTAL_CODE));
+      results.add(this.createValidationEntity(WARNING, PC_ERR, POSTAL_CODE));
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
-    log.info("Completed for {} in {} milli seconds",validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
     return results;
   }
 }

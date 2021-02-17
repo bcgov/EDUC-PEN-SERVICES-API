@@ -41,43 +41,28 @@ public class MessageSubscriber {
   private final Connection connection;
 
   @Autowired
-  public MessageSubscriber(final Connection con, EventHandlerDelegatorService eventHandlerDelegatorService, final List<EventHandler> eventHandlers) {
+  public MessageSubscriber(final Connection con, final EventHandlerDelegatorService eventHandlerDelegatorService, final List<EventHandler> eventHandlers) {
     this.eventHandlerDelegatorService = eventHandlerDelegatorService;
     this.connection = con;
     eventHandlers.forEach(handler -> {
-      handlerMap.put(handler.getTopicToSubscribe(), handler);
-      subscribeForSAGA(handler.getTopicToSubscribe(), handler);
+      this.handlerMap.put(handler.getTopicToSubscribe(), handler);
+      this.subscribeForSAGA(handler.getTopicToSubscribe(), handler);
     });
   }
 
   /**
-   * Subscribe the topic on messages for SAGA
-   *
-   * @param topic         the topic name
-   * @param eventHandler  the orchestrator
-   */
-  private void subscribeForSAGA(String topic, EventHandler eventHandler) {
-    if (!handlerMap.containsKey(topic)) {
-      handlerMap.put(topic, eventHandler);
-    }
-    String queue = topic.replace("_", "-");
-    var dispatcher = connection.createDispatcher(onMessageForSAGA(eventHandler));
-    dispatcher.subscribe(topic, queue);
-  }
-
-  /**
    * On message, event handler for SAGA
-   * 
-   * @param eventHandler  the orchestrator
+   *
+   * @param eventHandler the orchestrator
    * @return the message handler
    */
-  private MessageHandler onMessageForSAGA(EventHandler eventHandler) {
+  private static MessageHandler onMessageForSAGA(final EventHandler eventHandler) {
     return (Message message) -> {
       if (message != null) {
         log.info("Message received subject :: {},  replyTo :: {}, subscriptionID :: {}", message.getSubject(), message.getReplyTo(), message.getSID());
         try {
-          var eventString = new String(message.getData());
-          var event = JsonUtil.getJsonObjectFromString(Event.class, eventString);
+          final var eventString = new String(message.getData());
+          final var event = JsonUtil.getJsonObjectFromString(Event.class, eventString);
           eventHandler.handleEvent(event);
         } catch (final Exception e) {
           log.error("Exception ", e);
@@ -87,12 +72,25 @@ public class MessageSubscriber {
   }
 
   /**
+   * Subscribe the topic on messages for SAGA
+   *
+   * @param topic        the topic name
+   * @param eventHandler the orchestrator
+   */
+  private void subscribeForSAGA(final String topic, final EventHandler eventHandler) {
+    this.handlerMap.computeIfAbsent(topic, k -> eventHandler);
+    final String queue = topic.replace("_", "-");
+    final var dispatcher = this.connection.createDispatcher(MessageSubscriber.onMessageForSAGA(eventHandler));
+    dispatcher.subscribe(topic, queue);
+  }
+
+  /**
    * Subscribe the topic on messages for API
    */
   @PostConstruct
   public void subscribe() {
-    String queue = PEN_SERVICES_API_TOPIC.toString().replace("_", "-");
-    var dispatcher = connection.createDispatcher(onMessage());
+    final String queue = PEN_SERVICES_API_TOPIC.toString().replace("_", "-");
+    final var dispatcher = this.connection.createDispatcher(this.onMessage());
     dispatcher.subscribe(PEN_SERVICES_API_TOPIC.toString(), queue);
   }
 
@@ -106,9 +104,9 @@ public class MessageSubscriber {
       if (message != null) {
         log.info("Message received is :: {} ", message);
         try {
-          var eventString = new String(message.getData());
-          var event = JsonUtil.getJsonObjectFromString(Event.class, eventString);
-          eventHandlerDelegatorService.handleEvent(event, message);
+          final var eventString = new String(message.getData());
+          final var event = JsonUtil.getJsonObjectFromString(Event.class, eventString);
+          this.eventHandlerDelegatorService.handleEvent(event, message);
           log.debug("Event is :: {}", event);
         } catch (final Exception e) {
           log.error("Exception ", e);

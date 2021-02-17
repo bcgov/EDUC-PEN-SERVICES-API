@@ -32,31 +32,31 @@ public class BirthDateRule extends BaseRule {
    * @return the validation result as a list.
    */
   @Override
-  public List<PenRequestStudentValidationIssue> validate(PenRequestStudentValidationPayload validationPayload) {
-    var stopwatch = Stopwatch.createStarted();
+  public List<PenRequestStudentValidationIssue> validate(final PenRequestStudentValidationPayload validationPayload) {
+    final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
     String birthDate = validationPayload.getDob();
     if (StringUtils.isBlank(birthDate)) {
-      results.add(createValidationEntity(ERROR, DOB_INVALID, BIRTH_DATE));
+      results.add(this.createValidationEntity(ERROR, DOB_INVALID, BIRTH_DATE));
     }
     if (results.isEmpty()) {
       birthDate = birthDate.trim();
       try {
-        var dobDate = LocalDate.parse(birthDate, DateTimeFormatter.ofPattern("uuuuMMdd").withResolverStyle(ResolverStyle.STRICT));
-        var dobPast = LocalDate.parse("19000101", DateTimeFormatter.ofPattern("uuuuMMdd").withResolverStyle(ResolverStyle.STRICT));
+        final var dobDate = LocalDate.parse(birthDate, DateTimeFormatter.ofPattern("uuuuMMdd").withResolverStyle(ResolverStyle.STRICT));
+        final var dobPast = LocalDate.parse("19000101", DateTimeFormatter.ofPattern("uuuuMMdd").withResolverStyle(ResolverStyle.STRICT));
         if (dobDate.isAfter(LocalDate.now())) {
-          results.add(createValidationEntity(ERROR, DOB_FUTURE, BIRTH_DATE));
+          results.add(this.createValidationEntity(ERROR, DOB_FUTURE, BIRTH_DATE));
         }
         if (dobDate.isBefore(dobPast)) {
-          results.add(createValidationEntity(ERROR, DOB_PAST, BIRTH_DATE));
+          results.add(this.createValidationEntity(ERROR, DOB_PAST, BIRTH_DATE));
         }
-      } catch (Exception ex) {
-        results.add(createValidationEntity(ERROR, DOB_INVALID, BIRTH_DATE));
+      } catch (final Exception ex) {
+        results.add(this.createValidationEntity(ERROR, DOB_INVALID, BIRTH_DATE));
       }
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
-    log.info("Completed for {} in {} milli seconds",validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
     return results;
   }
 }

@@ -1,9 +1,11 @@
 package ca.bc.gov.educ.api.pen.services.validator;
 
 import ca.bc.gov.educ.api.pen.services.model.StudentMergeDirectionCodeEntity;
-import ca.bc.gov.educ.api.pen.services.model.StudentMergeEntity;
 import ca.bc.gov.educ.api.pen.services.model.StudentMergeSourceCodeEntity;
-import ca.bc.gov.educ.api.pen.services.repository.*;
+import ca.bc.gov.educ.api.pen.services.repository.ServicesEventRepository;
+import ca.bc.gov.educ.api.pen.services.repository.StudentMergeDirectionCodeTableRepository;
+import ca.bc.gov.educ.api.pen.services.repository.StudentMergeRepository;
+import ca.bc.gov.educ.api.pen.services.repository.StudentMergeSourceCodeTableRepository;
 import ca.bc.gov.educ.api.pen.services.service.StudentMergeService;
 import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMerge;
 import org.junit.Before;
@@ -17,8 +19,6 @@ import org.springframework.validation.FieldError;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -28,7 +28,8 @@ public class StudentMergePayloadValidatorTest {
 
   @Mock
   StudentMergeRepository studentMergeRepo;
-
+  @Mock
+  ServicesEventRepository eventRepository;
   @Mock
   StudentMergeDirectionCodeTableRepository studentMergeDirectionCodeTableRepo;
 
@@ -45,80 +46,80 @@ public class StudentMergePayloadValidatorTest {
 
   @Before
   public void before() {
-    studentMergeService = new StudentMergeService(studentMergeRepo, studentMergeDirectionCodeTableRepo, studentMergeSourceCodeTableRepo);
-    studentMergePayloadValidator = new StudentMergePayloadValidator(studentMergeService);
+    this.studentMergeService = new StudentMergeService(this.studentMergeRepo, this.eventRepository, this.studentMergeDirectionCodeTableRepo, this.studentMergeSourceCodeTableRepo);
+    this.studentMergePayloadValidator = new StudentMergePayloadValidator(this.studentMergeService);
   }
 
   @Test
   public void testValidateMergeDirectionCode_WhenMergeDirectionCodeIsInvalid_ShouldAddAnErrorTOTheReturnedList() {
-    StudentMerge merge = StudentMerge.builder().studentMergeDirectionCode("WRONG_CODE").build();
-    List<FieldError> errorList = new ArrayList<>();
-    when(studentMergeDirectionCodeTableRepo.findAll()).thenReturn(createDummyStudentMergeDirectionCodeRecords());
-    studentMergePayloadValidator.validateMergeDirectionCode(merge, errorList);
+    final StudentMerge merge = StudentMerge.builder().studentMergeDirectionCode("WRONG_CODE").build();
+    final List<FieldError> errorList = new ArrayList<>();
+    when(this.studentMergeDirectionCodeTableRepo.findAll()).thenReturn(this.createDummyStudentMergeDirectionCodeRecords());
+    this.studentMergePayloadValidator.validateMergeDirectionCode(merge, errorList);
     assertEquals(1, errorList.size());
   }
 
   @Test
   public void testValidateMergeDirectionCode_WhenEffectiveDateIsAfterCurrentTime_ShouldAddAnErrorTOTheReturnedList() {
-    StudentMerge merge = StudentMerge.builder().studentMergeDirectionCode("TO").build();
-    List<FieldError> errorList = new ArrayList<>();
-    when(studentMergeDirectionCodeTableRepo.findAll()).thenReturn(createDummyStudentMergeDirectionCodeRecords(LocalDateTime.MAX, LocalDateTime.MAX));
-    studentMergePayloadValidator.validateMergeDirectionCode(merge, errorList);
+    final StudentMerge merge = StudentMerge.builder().studentMergeDirectionCode("TO").build();
+    final List<FieldError> errorList = new ArrayList<>();
+    when(this.studentMergeDirectionCodeTableRepo.findAll()).thenReturn(this.createDummyStudentMergeDirectionCodeRecords(LocalDateTime.MAX, LocalDateTime.MAX));
+    this.studentMergePayloadValidator.validateMergeDirectionCode(merge, errorList);
     assertEquals(1, errorList.size());
   }
 
   @Test
   public void testValidateMergeDirectionCode_WhenExpiryDateisBeforeCurrentTime_ShouldAddAnErrorTOTheReturnedList() {
-    StudentMerge merge = StudentMerge.builder().studentMergeDirectionCode("FROM").build();
-    List<FieldError> errorList = new ArrayList<>();
-    when(studentMergeDirectionCodeTableRepo.findAll()).thenReturn(createDummyStudentMergeDirectionCodeRecords(LocalDateTime.now(), LocalDateTime.MIN));
-    studentMergePayloadValidator.validateMergeDirectionCode(merge, errorList);
+    final StudentMerge merge = StudentMerge.builder().studentMergeDirectionCode("FROM").build();
+    final List<FieldError> errorList = new ArrayList<>();
+    when(this.studentMergeDirectionCodeTableRepo.findAll()).thenReturn(this.createDummyStudentMergeDirectionCodeRecords(LocalDateTime.now(), LocalDateTime.MIN));
+    this.studentMergePayloadValidator.validateMergeDirectionCode(merge, errorList);
     assertEquals(1, errorList.size());
   }
 
   @Test
   public void testValidateMergeSourceCode_WhenMergeSourceCodeIsNotExisted_ShouldAddAnErrorTOTheReturnedList() {
-    StudentMerge merge = StudentMerge.builder().studentMergeSourceCode("WRONG_CODE").build();
-    List<FieldError> errorList = new ArrayList<>();
-    when(studentMergeSourceCodeTableRepo.findAll()).thenReturn(createDummyStudentMergeSourceCodeRecords());
-    studentMergePayloadValidator.validateMergeSourceCode(merge, errorList);
+    final StudentMerge merge = StudentMerge.builder().studentMergeSourceCode("WRONG_CODE").build();
+    final List<FieldError> errorList = new ArrayList<>();
+    when(this.studentMergeSourceCodeTableRepo.findAll()).thenReturn(this.createDummyStudentMergeSourceCodeRecords());
+    this.studentMergePayloadValidator.validateMergeSourceCode(merge, errorList);
     assertEquals(1, errorList.size());
   }
 
   @Test
   public void testValidateMergeSourceCode_WhenEffectiveDateIsAfterCurrentTime_ShouldAddAnErrorTOTheReturnedList() {
-    StudentMerge merge = StudentMerge.builder().studentMergeSourceCode("SCHOOL").build();
-    List<FieldError> errorList = new ArrayList<>();
-    when(studentMergeSourceCodeTableRepo.findAll()).thenReturn(createDummyStudentMergeSourceCodeRecords(LocalDateTime.MAX, LocalDateTime.MAX));
-    studentMergePayloadValidator.validateMergeSourceCode(merge, errorList);
+    final StudentMerge merge = StudentMerge.builder().studentMergeSourceCode("SCHOOL").build();
+    final List<FieldError> errorList = new ArrayList<>();
+    when(this.studentMergeSourceCodeTableRepo.findAll()).thenReturn(this.createDummyStudentMergeSourceCodeRecords(LocalDateTime.MAX, LocalDateTime.MAX));
+    this.studentMergePayloadValidator.validateMergeSourceCode(merge, errorList);
     assertEquals(1, errorList.size());
   }
 
   @Test
   public void testValidateMergeSourceCode_WhenExpiryDateisBeforeCurrentTime_ShouldAddAnErrorTOTheReturnedList() {
-    StudentMerge merge = StudentMerge.builder().studentMergeSourceCode("MINISTRY").build();
-    List<FieldError> errorList = new ArrayList<>();
-    when(studentMergeSourceCodeTableRepo.findAll()).thenReturn(createDummyStudentMergeSourceCodeRecords(LocalDateTime.now(), LocalDateTime.MIN));
-    studentMergePayloadValidator.validateMergeSourceCode(merge, errorList);
+    final StudentMerge merge = StudentMerge.builder().studentMergeSourceCode("MINISTRY").build();
+    final List<FieldError> errorList = new ArrayList<>();
+    when(this.studentMergeSourceCodeTableRepo.findAll()).thenReturn(this.createDummyStudentMergeSourceCodeRecords(LocalDateTime.now(), LocalDateTime.MIN));
+    this.studentMergePayloadValidator.validateMergeSourceCode(merge, errorList);
     assertEquals(1, errorList.size());
   }
 
-  private List<StudentMergeDirectionCodeEntity> createDummyStudentMergeDirectionCodeRecords(LocalDateTime effectiveDate, LocalDateTime expiryDate) {
+  private List<StudentMergeDirectionCodeEntity> createDummyStudentMergeDirectionCodeRecords(final LocalDateTime effectiveDate, final LocalDateTime expiryDate) {
     return List.of(StudentMergeDirectionCodeEntity.builder().mergeDirectionCode("TO").effectiveDate(effectiveDate).expiryDate(expiryDate).build(),
         StudentMergeDirectionCodeEntity.builder().mergeDirectionCode("FROM").effectiveDate(effectiveDate).expiryDate(expiryDate).build());
   }
 
   private List<StudentMergeDirectionCodeEntity> createDummyStudentMergeDirectionCodeRecords() {
-    return createDummyStudentMergeDirectionCodeRecords(LocalDateTime.now(), LocalDateTime.MAX);
+    return this.createDummyStudentMergeDirectionCodeRecords(LocalDateTime.now(), LocalDateTime.MAX);
   }
 
-  private List<StudentMergeSourceCodeEntity> createDummyStudentMergeSourceCodeRecords(LocalDateTime effectiveDate, LocalDateTime expiryDate) {
+  private List<StudentMergeSourceCodeEntity> createDummyStudentMergeSourceCodeRecords(final LocalDateTime effectiveDate, final LocalDateTime expiryDate) {
     return List.of(StudentMergeSourceCodeEntity.builder().mergeSourceCode("SCHOOL").effectiveDate(effectiveDate).expiryDate(expiryDate).build(),
         StudentMergeSourceCodeEntity.builder().mergeSourceCode("MINISTRY").effectiveDate(effectiveDate).expiryDate(expiryDate).build());
   }
 
   private List<StudentMergeSourceCodeEntity> createDummyStudentMergeSourceCodeRecords() {
-    return createDummyStudentMergeSourceCodeRecords(LocalDateTime.now(), LocalDateTime.MAX);
+    return this.createDummyStudentMergeSourceCodeRecords(LocalDateTime.now(), LocalDateTime.MAX);
   }
 
 }

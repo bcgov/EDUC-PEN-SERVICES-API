@@ -37,13 +37,13 @@ public class UsualLastNameRule extends BaseRule {
    * @return the validation result as a list.
    */
   @Override
-  public List<PenRequestStudentValidationIssue> validate(PenRequestStudentValidationPayload validationPayload) {
-    var stopwatch = Stopwatch.createStarted();
+  public List<PenRequestStudentValidationIssue> validate(final PenRequestStudentValidationPayload validationPayload) {
+    final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
-    doValidate(validationPayload.getIsInteractive(), results, validationPayload.getUsualLastName(), USUAL_LAST, penNameTextService);
+    this.doValidate(validationPayload.getIsInteractive(), results, validationPayload.getUsualLastName(), USUAL_LAST, this.penNameTextService);
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
-    log.info("Completed for {} in {} milli seconds",validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
     return results;
   }
 

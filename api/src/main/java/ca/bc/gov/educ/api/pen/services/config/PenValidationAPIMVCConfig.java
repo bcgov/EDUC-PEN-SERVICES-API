@@ -19,16 +19,16 @@ public class PenValidationAPIMVCConfig implements WebMvcConfigurer {
    * The Pen reg api interceptor.
    */
   @Getter(AccessLevel.PRIVATE)
-  private final PenValidationAPIInterceptor penValidationAPIInterceptor;
+  private final PenServicesAPIInterceptor penServicesAPIInterceptor;
 
   /**
    * Instantiates a new Pen reg api mvc config.
    *
-   * @param penValidationAPIInterceptor the pen reg api interceptor
+   * @param penServicesAPIInterceptor the pen reg api interceptor
    */
   @Autowired
-  public PenValidationAPIMVCConfig(final PenValidationAPIInterceptor penValidationAPIInterceptor) {
-    this.penValidationAPIInterceptor = penValidationAPIInterceptor;
+  public PenValidationAPIMVCConfig(final PenServicesAPIInterceptor penServicesAPIInterceptor) {
+    this.penServicesAPIInterceptor = penServicesAPIInterceptor;
   }
 
   /**
@@ -37,7 +37,7 @@ public class PenValidationAPIMVCConfig implements WebMvcConfigurer {
    * @param registry the registry
    */
   @Override
-  public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(penValidationAPIInterceptor).addPathPatterns("/**");
+  public void addInterceptors(final InterceptorRegistry registry) {
+    registry.addInterceptor(this.penServicesAPIInterceptor).addPathPatterns("/**");
   }
 }

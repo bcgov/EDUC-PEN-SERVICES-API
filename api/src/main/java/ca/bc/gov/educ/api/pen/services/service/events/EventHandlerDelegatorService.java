@@ -1,13 +1,19 @@
 package ca.bc.gov.educ.api.pen.services.service.events;
 
 import ca.bc.gov.educ.api.pen.services.messaging.MessagePublisher;
+import ca.bc.gov.educ.api.pen.services.messaging.stan.Publisher;
+import ca.bc.gov.educ.api.pen.services.model.ServicesEvent;
 import ca.bc.gov.educ.api.pen.services.struct.v1.Event;
 import io.nats.client.Message;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -20,7 +26,7 @@ public class EventHandlerDelegatorService {
   /**
    * The constant PAYLOAD_LOG.
    */
-  public static final String PAYLOAD_LOG = "Payload is :: ";
+  public static final String PAYLOAD_LOG = "Payload is :: {}";
   /**
    * The Event handler service.
    */
@@ -32,17 +38,23 @@ public class EventHandlerDelegatorService {
    */
   @Getter(PRIVATE)
   private final MessagePublisher messagePublisher;
+  /**
+   * The Publisher.
+   */
+  private final Publisher publisher; // STAN publisher for choreography
 
   /**
    * Instantiates a new Event handler delegator service.
    *
    * @param eventHandlerService the event handler service
    * @param messagePublisher    the message publisher
+   * @param publisher           the publisher
    */
   @Autowired
-  public EventHandlerDelegatorService(EventHandlerService eventHandlerService, MessagePublisher messagePublisher) {
+  public EventHandlerDelegatorService(final EventHandlerService eventHandlerService, final MessagePublisher messagePublisher, final Publisher publisher) {
     this.eventHandlerService = eventHandlerService;
     this.messagePublisher = messagePublisher;
+    this.publisher = publisher;
   }
 
   /**
@@ -52,50 +64,37 @@ public class EventHandlerDelegatorService {
    * @param message the message
    */
   @Async("subscriberExecutor")
-  public void handleEvent(Event event, Message message) {
-    boolean isSynchronous = message.getReplyTo() != null;
-    byte[] response;
+  public void handleEvent(final Event event, final Message message) {
+    final boolean isSynchronous = message.getReplyTo() != null;
+    final byte[] response;
+    final Pair<byte[], Optional<ServicesEvent>> pairedResult;
     try {
       switch (event.getEventType()) {
         case VALIDATE_STUDENT_DEMOGRAPHICS:
           log.info("received validate student demographics event :: ");
           log.trace(PAYLOAD_LOG, event.getEventPayload());
-          response = getEventHandlerService().handleValidateStudentDemogDataEvent(event);
-          if (isSynchronous) { // this is for synchronous request/reply pattern.
-            getMessagePublisher().dispatchMessage(message.getReplyTo(), response);
-          } else { // this is for async.
-            getMessagePublisher().dispatchMessage(event.getReplyTo(), response);
-          }
+          response = this.getEventHandlerService().handleValidateStudentDemogDataEvent(event);
+          this.publishToNATS(event, message, isSynchronous, response);
           break;
         case GET_NEXT_PEN_NUMBER:
           log.info("received get next pen number event :: ");
           log.trace(PAYLOAD_LOG, event.getEventPayload());
-          response = getEventHandlerService().handleGetNextPenNumberEvent(event);
-          if (isSynchronous) { // this is for synchronous request/reply pattern.
-            getMessagePublisher().dispatchMessage(message.getReplyTo(), response);
-          } else { // this is for async.
-            getMessagePublisher().dispatchMessage(event.getReplyTo(), response);
-          }
+          response = this.getEventHandlerService().handleGetNextPenNumberEvent(event);
+          this.publishToNATS(event, message, isSynchronous, response);
           break;
         case CREATE_MERGE:
           log.info("received create merge data :: {}", event.getSagaId());
           log.trace(PAYLOAD_LOG, event.getEventPayload());
-          response = getEventHandlerService().handleCreateMergeEvent(event);
-          if (isSynchronous) { // this is for synchronous request/reply pattern.
-            getMessagePublisher().dispatchMessage(message.getReplyTo(), response);
-          } else { // this is for async.
-            getMessagePublisher().dispatchMessage(event.getReplyTo(), response);
-          }
+          pairedResult = this.getEventHandlerService().handleCreateMergeEvent(event);
+          this.publishToNATS(event, message, isSynchronous, pairedResult.getLeft());
+          pairedResult.getRight().ifPresent(this::publishToSTAN);
           break;
         case DELETE_MERGE:
           log.info("received delete merge data :: {}", event.getSagaId());
           log.trace(PAYLOAD_LOG, event.getEventPayload());
-          response = getEventHandlerService().handleDeleteMergeEvent(event);
-          if (isSynchronous) { // this is for synchronous request/reply pattern.
-            getMessagePublisher().dispatchMessage(message.getReplyTo(), response);
-          } else { // this is for async.
-            getMessagePublisher().dispatchMessage(event.getReplyTo(), response);
-          }
+          pairedResult = this.getEventHandlerService().handleDeleteMergeEvent(event);
+          this.publishToNATS(event, message, isSynchronous, pairedResult.getLeft());
+          pairedResult.getRight().ifPresent(this::publishToSTAN);
           break;
         default:
           log.info("silently ignoring other event :: {}", event);
@@ -105,4 +104,30 @@ public class EventHandlerDelegatorService {
       log.error("Exception", e);
     }
   }
+
+  /**
+   * Publish to nats.
+   *
+   * @param event         the event
+   * @param message       the message
+   * @param isSynchronous the is synchronous
+   * @param response      the response
+   */
+  private void publishToNATS(final Event event, final Message message, final boolean isSynchronous, final byte[] response) {
+    if (isSynchronous) { // this is for synchronous request/reply pattern.
+      this.getMessagePublisher().dispatchMessage(message.getReplyTo(), response);
+    } else { // this is for async.
+      this.getMessagePublisher().dispatchMessage(event.getReplyTo(), response);
+    }
+  }
+
+  /**
+   * Publish to stan.
+   *
+   * @param event the event
+   */
+  private void publishToSTAN(@NonNull final ServicesEvent event) {
+    this.publisher.dispatchChoreographyEvent(event);
+  }
+
 }

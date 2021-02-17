@@ -8,20 +8,20 @@ import javax.annotation.PreDestroy;
 
 @TestConfiguration
 public class TestRedisConfiguration {
- 
-    private final RedisServer redisServer;
- 
-    public TestRedisConfiguration() {
-        this.redisServer = new RedisServer(6370);
-    }
- 
-    @PostConstruct
-    public void postConstruct() {
-        redisServer.start();
-    }
- 
-    @PreDestroy
-    public void preDestroy() {
-        redisServer.stop();
-    }
+
+  private final RedisServer redisServer;
+
+  public TestRedisConfiguration() {
+    this.redisServer = new RedisServer(6370);
+  }
+
+  @PostConstruct
+  public void postConstruct() {
+    this.redisServer.start();
+  }
+
+  @PreDestroy
+  public void preDestroy() {
+    this.redisServer.stop();
+  }
 }

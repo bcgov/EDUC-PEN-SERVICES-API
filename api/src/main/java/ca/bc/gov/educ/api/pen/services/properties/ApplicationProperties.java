@@ -15,7 +15,15 @@ import org.springframework.stereotype.Component;
 @Setter
 public class ApplicationProperties {
 
+  /**
+   * The constant PEN_SERVICES_API.
+   */
   public static final String PEN_SERVICES_API = "PEN-SERVICES-API";
+  /**
+   * The Stan cluster.
+   */
+  @Value("${stan.cluster}")
+  String stanCluster;
   /**
    * The Client id.
    */
@@ -36,25 +44,29 @@ public class ApplicationProperties {
    */
   @Value("${url.api.student}")
   private String studentApiURL;
-
   /**
    * The Environment.
    */
   @Value("${environment}")
   private String environment;
-
   /**
    * The Redis url.
    */
   @Value("${url.redis}")
   private String redisUrl;
-
+  /**
+   * The Server.
+   */
   @Value("${nats.server}")
   private String server;
-
+  /**
+   * The Max reconnect.
+   */
   @Value("${nats.maxReconnect}")
   private int maxReconnect;
-
+  /**
+   * The Connection name.
+   */
   @Value("${nats.connectionName}")
   private String connectionName;
 }
