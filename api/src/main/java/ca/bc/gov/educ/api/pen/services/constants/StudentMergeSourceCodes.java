@@ -2,6 +2,9 @@ package ca.bc.gov.educ.api.pen.services.constants;
 
 import lombok.Getter;
 
+/**
+ * The enum Student merge source codes.
+ */
 public enum StudentMergeSourceCodes {
   /**
    * Ministry Identified
@@ -19,7 +22,7 @@ public enum StudentMergeSourceCodes {
    *
    * @param code the code
    */
-  StudentMergeSourceCodes(String code) {
+  StudentMergeSourceCodes(final String code) {
     this.code = code;
   }
 }

@@ -2,15 +2,18 @@ package ca.bc.gov.educ.api.pen.services.constants;
 
 import lombok.Getter;
 
+/**
+ * The enum Student status codes.
+ */
 public enum StudentStatusCodes {
   /**
    * Active
    */
-  Active("A"),
+  ACTIVE("A"),
   /**
    * Merged
    */
-  Merge("M");
+  MERGE("M");
 
   /**
    * The Code.
@@ -23,7 +26,7 @@ public enum StudentStatusCodes {
    *
    * @param code the code
    */
-  StudentStatusCodes(String code) {
+  StudentStatusCodes(final String code) {
     this.code = code;
   }
 }

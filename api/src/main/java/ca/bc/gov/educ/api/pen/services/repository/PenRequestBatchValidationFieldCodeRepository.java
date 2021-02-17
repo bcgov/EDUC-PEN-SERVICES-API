@@ -16,5 +16,6 @@ public interface PenRequestBatchValidationFieldCodeRepository extends CrudReposi
      *
      * @return the list
      */
+    @Override
     List<PenRequestBatchValidationFieldCodeEntity> findAll();
 }

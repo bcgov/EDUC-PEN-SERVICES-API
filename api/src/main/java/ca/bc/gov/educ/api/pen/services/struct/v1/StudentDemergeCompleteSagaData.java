@@ -9,6 +9,9 @@ import lombok.experimental.SuperBuilder;
 import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
+/**
+ * The type Student demerge complete saga data.
+ */
 @SuperBuilder
 @Data
 @AllArgsConstructor

@@ -13,7 +13,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The type Request util.
+ */
 public class RequestUtil {
+  /**
+   * Instantiates a new Request util.
+   */
   private RequestUtil() {
   }
 
@@ -22,7 +28,7 @@ public class RequestUtil {
    *
    * @param baseRequest The object which will be persisted.
    */
-  public static void setAuditColumnsForCreate(@NotNull BaseRequest baseRequest) {
+  public static void setAuditColumnsForCreate(@NotNull final BaseRequest baseRequest) {
     if (StringUtils.isBlank(baseRequest.getCreateUser())) {
       baseRequest.setCreateUser(ApplicationProperties.PEN_SERVICES_API);
     }
@@ -35,7 +41,7 @@ public class RequestUtil {
    *
    * @param baseRequest The object which will be persisted.
    */
-  public static void setAuditColumnsForUpdate(@NotNull BaseRequest baseRequest) {
+  public static void setAuditColumnsForUpdate(@NotNull final BaseRequest baseRequest) {
     if (StringUtils.isBlank(baseRequest.getUpdateUser())) {
       baseRequest.setUpdateUser(ApplicationProperties.PEN_SERVICES_API);
     }
@@ -46,13 +52,13 @@ public class RequestUtil {
    * Get the Sort.Order list from JSON string
    *
    * @param sortCriteriaJson The sort criterio JSON
-   * @param objectMapper The object mapper
-   * @param sorts The Sort.Order list
-   * @throws JsonProcessingException
+   * @param objectMapper     The object mapper
+   * @param sorts            The Sort.Order list
+   * @throws JsonProcessingException the json processing exception
    */
-  public static void getSortCriteria(String sortCriteriaJson, ObjectMapper objectMapper, List<Sort.Order> sorts) throws JsonProcessingException {
+  public static void getSortCriteria(final String sortCriteriaJson, final ObjectMapper objectMapper, final List<Sort.Order> sorts) throws JsonProcessingException {
     if (StringUtils.isNotBlank(sortCriteriaJson)) {
-      Map<String, String> sortMap = objectMapper.readValue(sortCriteriaJson, new TypeReference<>() {
+      final Map<String, String> sortMap = objectMapper.readValue(sortCriteriaJson, new TypeReference<>() {
       });
       sortMap.forEach((k, v) -> {
         if ("ASC".equalsIgnoreCase(v)) {

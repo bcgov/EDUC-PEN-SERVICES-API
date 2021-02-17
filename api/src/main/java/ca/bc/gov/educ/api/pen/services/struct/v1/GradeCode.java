@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @SuppressWarnings("squid:S1700")
 public class GradeCode implements Serializable {
+  private static final long serialVersionUID = 8115561492500492122L;
   /**
    * The Grade code.
    */

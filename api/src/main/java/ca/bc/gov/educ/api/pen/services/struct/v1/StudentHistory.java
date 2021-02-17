@@ -7,9 +7,11 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import javax.validation.constraints.Null;
 import java.io.Serializable;
 
+/**
+ * The type Student history.
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @SuperBuilder
@@ -17,14 +19,21 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @SuppressWarnings("java:S1948")
 public class StudentHistory extends Student implements Serializable {
+  /**
+   * The constant serialVersionUID.
+   */
   private static final long serialVersionUID = 1L;
-
-  String studentHistoryID;
-  String historyActivityCode;
-
   /**
    * The Update date.
    */
-  public String updateDate;
+  String updateDate;
+  /**
+   * The Student history id.
+   */
+  String studentHistoryID;
+  /**
+   * The History activity code.
+   */
+  String historyActivityCode;
 
 }

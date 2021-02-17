@@ -13,8 +13,16 @@ import org.springframework.stereotype.Component;
 public class MessagePublisher {
 
 
+  /**
+   * The Connection.
+   */
   private final Connection connection;
 
+  /**
+   * Instantiates a new Message publisher.
+   *
+   * @param con the con
+   */
   @Autowired
   public MessagePublisher(final Connection con) {
     this.connection = con;
@@ -26,7 +34,7 @@ public class MessagePublisher {
    * @param subject the subject
    * @param message the message
    */
-  public void dispatchMessage(String subject, byte[] message) {
-      connection.publish(subject, message);
+  public void dispatchMessage(final String subject, final byte[] message) {
+    this.connection.publish(subject, message);
   }
 }

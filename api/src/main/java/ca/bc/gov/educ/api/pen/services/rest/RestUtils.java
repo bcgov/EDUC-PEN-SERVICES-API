@@ -38,11 +38,29 @@ public class RestUtils {
    * The constant GENDER_CODES.
    */
   public static final String GENDER_CODES = "genderCodes";
+  /**
+   * The constant CONTENT_TYPE.
+   */
   public static final String CONTENT_TYPE = "Content-Type";
+  /**
+   * The Gender codes map.
+   */
   private final Map<String, List<GenderCode>> genderCodesMap = new ConcurrentHashMap<>();
+  /**
+   * The Grade codes map.
+   */
   private final Map<String, List<GradeCode>> gradeCodesMap = new ConcurrentHashMap<>();
+  /**
+   * The Gender lock.
+   */
   private final ReadWriteLock genderLock = new ReentrantReadWriteLock();
+  /**
+   * The Grade lock.
+   */
   private final ReadWriteLock gradeLock = new ReentrantReadWriteLock();
+  /**
+   * The Props.
+   */
   private final ApplicationProperties props;
 
   /**
@@ -53,9 +71,10 @@ public class RestUtils {
   /**
    * Instantiates a new Rest utils.
    *
-   * @param props the props
+   * @param props     the props
+   * @param webClient the web client
    */
-  public RestUtils(@Autowired final ApplicationProperties props, WebClient webClient) {
+  public RestUtils(@Autowired final ApplicationProperties props, final WebClient webClient) {
     this.props = props;
     this.webClient = webClient;
   }
@@ -66,9 +85,9 @@ public class RestUtils {
    */
   @PostConstruct
   public void init() {
-    setGenderCodesMap();
+    this.setGenderCodesMap();
     log.info("Called student api and loaded {} gender codes", this.genderCodesMap.values().size());
-    setGradeCodesMap();
+    this.setGradeCodesMap();
     log.info("Called student api and loaded {} grade codes", this.gradeCodesMap.values().size());
   }
 
@@ -78,7 +97,7 @@ public class RestUtils {
    * @return the gender codes from student api
    */
   public List<GenderCode> getGenderCodes() {
-    Lock readLock = genderLock.readLock();
+    final Lock readLock = this.genderLock.readLock();
     try {
       readLock.lock();
       return this.genderCodesMap.get(GENDER_CODES);
@@ -93,7 +112,7 @@ public class RestUtils {
    * @return the grade codes
    */
   public List<GradeCode> getGradeCodes() {
-    Lock readLock = gradeLock.readLock();
+    final Lock readLock = this.gradeLock.readLock();
     try {
       readLock.lock();
       return this.gradeCodesMap.get(GRADE_CODES);
@@ -109,8 +128,8 @@ public class RestUtils {
   @Retryable(value = {Exception.class}, maxAttempts = 20, backoff = @Backoff(multiplier = 2, delay = 2000))
   public void reloadCache() {
     log.info("started reloading cache..");
-    setGenderCodesMap();
-    setGradeCodesMap();
+    this.setGenderCodesMap();
+    this.setGradeCodesMap();
     log.info("reloading cache completed..");
   }
 
@@ -118,11 +137,11 @@ public class RestUtils {
    * Sets gender codes map.
    */
   public void setGenderCodesMap() {
-    Lock writeLock = genderLock.writeLock();
+    final Lock writeLock = this.genderLock.writeLock();
     try {
       writeLock.lock();
       this.genderCodesMap.clear();
-      List<GenderCode> genderCodes = webClient.get().uri(props.getStudentApiURL() + "/gender-codes").header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToFlux(GenderCode.class).collectList().block();
+      final List<GenderCode> genderCodes = this.webClient.get().uri(this.props.getStudentApiURL() + "/gender-codes").header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToFlux(GenderCode.class).collectList().block();
       this.genderCodesMap.put(GENDER_CODES, genderCodes);
     } finally {
       writeLock.unlock();
@@ -134,11 +153,11 @@ public class RestUtils {
    * Sets grade codes map.
    */
   public void setGradeCodesMap() {
-    Lock writeLock = gradeLock.writeLock();
+    final Lock writeLock = this.gradeLock.writeLock();
     try {
       writeLock.lock();
       this.gradeCodesMap.clear();
-      List<GradeCode> gradeCodes = webClient.get().uri(props.getStudentApiURL() + "/grade-codes").header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToFlux(GradeCode.class).collectList().block();
+      final List<GradeCode> gradeCodes = this.webClient.get().uri(this.props.getStudentApiURL() + "/grade-codes").header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToFlux(GradeCode.class).collectList().block();
       this.gradeCodesMap.put(GRADE_CODES, gradeCodes);
     } finally {
       writeLock.unlock();
@@ -153,27 +172,27 @@ public class RestUtils {
    * @throws JsonProcessingException the json processing exception
    */
   @Retryable(value = {Exception.class}, backoff = @Backoff(multiplier = 2, delay = 2000))
-  public int getLatestPenNumberFromStudentAPI(String transactionID) throws JsonProcessingException {
-    SearchCriteria criteria = SearchCriteria.builder().key("pen").operation(FilterOperation.STARTS_WITH).value("1").valueType(ValueType.STRING).build();
-    List<SearchCriteria> criteriaList = new ArrayList<>();
+  public int getLatestPenNumberFromStudentAPI(final String transactionID) throws JsonProcessingException {
+    final SearchCriteria criteria = SearchCriteria.builder().key("pen").operation(FilterOperation.STARTS_WITH).value("1").valueType(ValueType.STRING).build();
+    final List<SearchCriteria> criteriaList = new ArrayList<>();
     criteriaList.add(criteria);
-    List<Search> searches = new LinkedList<>();
+    final List<Search> searches = new LinkedList<>();
     searches.add(Search.builder().searchCriteriaList(criteriaList).build());
-    ObjectMapper objectMapper = new ObjectMapper();
-    String criteriaJSON = objectMapper.writeValueAsString(searches);
-    UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(props.getStudentApiURL() + "/paginated")
+    final ObjectMapper objectMapper = new ObjectMapper();
+    final String criteriaJSON = objectMapper.writeValueAsString(searches);
+    final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(this.props.getStudentApiURL() + "/paginated")
         .queryParam("searchCriteriaList", criteriaJSON)
         .queryParam("pageSize", 1)
         .queryParam("sort", "{\"pen\":\"DESC\"}");
 
-    var url = builder.toUriString();
+    final var url = builder.toUriString();
     log.info("url is :: {}", url);
-    ParameterizedTypeReference<RestPageImpl<Student>> responseType = new ParameterizedTypeReference<>() {
+    final ParameterizedTypeReference<RestPageImpl<Student>> responseType = new ParameterizedTypeReference<>() {
     };
-    var studentResponse = webClient.get().uri(url).header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToMono(responseType).block();
-    var optionalStudent = Objects.requireNonNull(studentResponse).getContent().stream().findFirst();
+    final var studentResponse = this.webClient.get().uri(url).header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToMono(responseType).block();
+    final var optionalStudent = Objects.requireNonNull(studentResponse).getContent().stream().findFirst();
     if (optionalStudent.isPresent()) {
-      var firstStudent = optionalStudent.get();
+      final var firstStudent = optionalStudent.get();
       return Integer.parseInt(firstStudent.getPen().substring(0, 8));
     }
     log.warn("PEN could not be retrieved, returning 0 for transactionID :: {}", transactionID);

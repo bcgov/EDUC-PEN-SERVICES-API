@@ -18,8 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.TimeoutException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.*;
@@ -40,7 +39,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    * @param sagaService      the saga service
    * @param messagePublisher the message publisher
    */
-  public StudentMergeCompleteOrchestrator(SagaService sagaService, MessagePublisher messagePublisher) {
+  public StudentMergeCompleteOrchestrator(final SagaService sagaService, final MessagePublisher messagePublisher) {
     super(sagaService, messagePublisher, StudentMergeCompleteSagaData.class, PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA.toString(), PEN_SERVICES_MERGE_STUDENTS_SAGA_TOPIC.toString());
   }
 
@@ -49,33 +48,49 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    */
   @Override
   public void populateStepsToExecuteMap() {
-    stepBuilder()
-            .begin(GET_STUDENT, this::getStudentByMergedToPen)
-            .step(GET_STUDENT, STUDENT_FOUND, this::isStepForMergedToPEN, UPDATE_STUDENT, this::updateMergedToStudent)
-            .step(UPDATE_STUDENT, STUDENT_UPDATED, this::isStepForMergedToPEN, CREATE_MERGE, this::createMerge)
-            .step(CREATE_MERGE, MERGE_CREATED, GET_STUDENT, this::getStudentByMergedFromPen)
-            .step(GET_STUDENT, STUDENT_FOUND, this::isStepForMergedFromPEN, UPDATE_STUDENT, this::updateMergedFromStudent)
-            .step(UPDATE_STUDENT, STUDENT_UPDATED, this::isStepForMergedFromPEN, GET_STUDENT_HISTORY, this::readAuditHistory)
-            .step(GET_STUDENT_HISTORY, STUDENT_HISTORY_FOUND, CREATE_STUDENT_HISTORY, this::addAuditHistory)
-            .step(CREATE_STUDENT_HISTORY, STUDENT_HISTORY_CREATED, GET_POSSIBLE_MATCH, this::readPossibleMatches)
-            .step(GET_POSSIBLE_MATCH, POSSIBLE_MATCH_FOUND, DELETE_POSSIBLE_MATCH, this::deletePossibleMatches)
-            .step(GET_POSSIBLE_MATCH, POSSIBLE_MATCH_NOT_FOUND, MARK_SAGA_COMPLETE, this::markSagaComplete)
-            .step(DELETE_POSSIBLE_MATCH, POSSIBLE_MATCH_DELETED, MARK_SAGA_COMPLETE, this::markSagaComplete);
+    this.stepBuilder()
+        .begin(GET_STUDENT, this::getStudentByMergedToPen)
+        .step(GET_STUDENT, STUDENT_FOUND, this::isStepForMergedToPEN, UPDATE_STUDENT, this::updateMergedToStudent)
+        .step(UPDATE_STUDENT, STUDENT_UPDATED, this::isStepForMergedToPEN, CREATE_MERGE, this::createMerge)
+        .step(CREATE_MERGE, MERGE_CREATED, GET_STUDENT, this::getStudentByMergedFromPen)
+        .step(GET_STUDENT, STUDENT_FOUND, this::isStepForMergedFromPEN, UPDATE_STUDENT, this::updateMergedFromStudent)
+        .step(UPDATE_STUDENT, STUDENT_UPDATED, this::isStepForMergedFromPEN, GET_STUDENT_HISTORY, this::readAuditHistory)
+        .step(GET_STUDENT_HISTORY, STUDENT_HISTORY_FOUND, CREATE_STUDENT_HISTORY, this::addAuditHistory)
+        .step(CREATE_STUDENT_HISTORY, STUDENT_HISTORY_CREATED, GET_POSSIBLE_MATCH, this::readPossibleMatches)
+        .step(GET_POSSIBLE_MATCH, POSSIBLE_MATCH_FOUND, DELETE_POSSIBLE_MATCH, this::deletePossibleMatches)
+        .step(GET_POSSIBLE_MATCH, POSSIBLE_MATCH_NOT_FOUND, MARK_SAGA_COMPLETE, this::markSagaComplete)
+        .step(DELETE_POSSIBLE_MATCH, POSSIBLE_MATCH_DELETED, MARK_SAGA_COMPLETE, this::markSagaComplete);
   }
 
-  protected void getStudentByMergedToPen(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws IOException {
-    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+  /**
+   * Gets student by merged to pen.
+   *
+   * @param event                        the event
+   * @param saga                         the saga
+   * @param studentMergeCompleteSagaData the student merge complete saga data
+   * @throws IOException the io exception
+   */
+  protected void getStudentByMergedToPen(final Event event, final Saga saga, final StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws IOException {
+    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setStatus(IN_PROGRESS.toString());
     studentMergeCompleteSagaData.setRequestStudentID(studentMergeCompleteSagaData.getStudentID());
 
-    processStudentRead(saga, studentMergeCompleteSagaData, eventStates, studentMergeCompleteSagaData.getMergedToPen());
+    this.processStudentRead(saga, studentMergeCompleteSagaData, eventStates, studentMergeCompleteSagaData.getMergedToPen());
   }
 
-  protected void getStudentByMergedFromPen(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws IOException {
-    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+  /**
+   * Gets student by merged from pen.
+   *
+   * @param event                        the event
+   * @param saga                         the saga
+   * @param studentMergeCompleteSagaData the student merge complete saga data
+   * @throws IOException the io exception
+   */
+  protected void getStudentByMergedFromPen(final Event event, final Saga saga, final StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws IOException {
+    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     studentMergeCompleteSagaData.setRequestStudentID(studentMergeCompleteSagaData.getMergeStudentID());
 
-    processStudentRead(saga, studentMergeCompleteSagaData, eventStates, studentMergeCompleteSagaData.getMergedFromPen());
+    this.processStudentRead(saga, studentMergeCompleteSagaData, eventStates, studentMergeCompleteSagaData.getMergedFromPen());
   }
 
   /**
@@ -85,15 +100,15 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    * Student Grade Code
    * Postal Code
    *
-   * @param event                             the event
-   * @param saga                              the saga
-   * @param studentMergeCompleteSagaData      the student merge saga data
+   * @param event                        the event
+   * @param saga                         the saga
+   * @param studentMergeCompleteSagaData the student merge saga data
    * @throws JsonProcessingException the json processing exception
    */
-  protected void updateMergedToStudent(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
-    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+  protected void updateMergedToStudent(final Event event, final Saga saga, final StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
+    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
 
-    StudentSagaData studentDataFromEventResponse = JsonUtil.getJsonObjectFromString(StudentSagaData.class, event.getEventPayload());
+    final StudentSagaData studentDataFromEventResponse = JsonUtil.getJsonObjectFromString(StudentSagaData.class, event.getEventPayload());
     studentDataFromEventResponse.setLegalFirstName(studentMergeCompleteSagaData.getLegalFirstName());
     studentDataFromEventResponse.setLegalLastName(studentMergeCompleteSagaData.getLegalLastName());
     studentDataFromEventResponse.setLegalMiddleNames(studentMergeCompleteSagaData.getLegalMiddleNames());
@@ -109,57 +124,57 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
     studentDataFromEventResponse.setMemo(studentMergeCompleteSagaData.getMemo());
     studentDataFromEventResponse.setHistoryActivityCode(StudentHistoryActivityCodes.MERGE.getCode());
 
-    processStudentUpdate(saga, studentMergeCompleteSagaData, eventStates, studentDataFromEventResponse);
+    this.processStudentUpdate(saga, studentMergeCompleteSagaData, eventStates, studentDataFromEventResponse);
   }
 
   /**
    * the following attributes on the student merge record get updated based on the incoming Merge request
    * status
    *
-   * @param event                             the event
-   * @param saga                              the saga
-   * @param studentMergeCompleteSagaData      the student merge saga data
+   * @param event                        the event
+   * @param saga                         the saga
+   * @param studentMergeCompleteSagaData the student merge saga data
    * @throws JsonProcessingException the json processing exception
    */
-  protected void updateMergedFromStudent(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
-    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+  protected void updateMergedFromStudent(final Event event, final Saga saga, final StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
+    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
 
-    StudentSagaData studentDataFromEventResponse = JsonUtil.getJsonObjectFromString(StudentSagaData.class, event.getEventPayload());
-    studentDataFromEventResponse.setStatusCode(StudentStatusCodes.Merge.getCode());
+    final StudentSagaData studentDataFromEventResponse = JsonUtil.getJsonObjectFromString(StudentSagaData.class, event.getEventPayload());
+    studentDataFromEventResponse.setStatusCode(StudentStatusCodes.MERGE.getCode());
     studentDataFromEventResponse.setTrueStudentID(studentMergeCompleteSagaData.getStudentID().toString());
     studentDataFromEventResponse.setLegalFirstName(studentMergeCompleteSagaData.getLegalFirstName());
     studentDataFromEventResponse.setHistoryActivityCode(StudentHistoryActivityCodes.MERGE.getCode());
 
-    processStudentUpdate(saga, studentMergeCompleteSagaData, eventStates, studentDataFromEventResponse);
+    this.processStudentUpdate(saga, studentMergeCompleteSagaData, eventStates, studentDataFromEventResponse);
   }
 
   /**
    * the following attributes on the student merge record get updated based on the incoming Merge request
    * status
    *
-   * @param event                             the event
-   * @param saga                              the saga
-   * @param studentMergeCompleteSagaData      the student merge saga data
+   * @param event                        the event
+   * @param saga                         the saga
+   * @param studentMergeCompleteSagaData the student merge saga data
    * @throws JsonProcessingException the json processing exception
    */
-  protected void createMerge(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
-    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+  protected void createMerge(final Event event, final Saga saga, final StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
+    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(CREATE_MERGE.toString()); // set current event as saga state.
 
-    StudentMerge studentMerge = STUDENT_MERGE_COMPLETE_SAGA_DATA_MAPPER.toStudentMerge(studentMergeCompleteSagaData);
+    final StudentMerge studentMerge = STUDENT_MERGE_COMPLETE_SAGA_DATA_MAPPER.toStudentMerge(studentMergeCompleteSagaData);
     studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.FROM.getCode());
     studentMerge.setStudentMergeSourceCode(StudentMergeSourceCodes.MI.getCode());
     studentMerge.setCreateUser(studentMergeCompleteSagaData.getCreateUser());
     studentMerge.setUpdateUser(studentMergeCompleteSagaData.getUpdateUser());
     studentMergeCompleteSagaData.setRequestStudentID(studentMergeCompleteSagaData.getMergeStudentID());
-    getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
+    this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
-    Event nextEvent = Event.builder().sagaId(saga.getSagaId())
-            .eventType(CREATE_MERGE)
-            .replyTo(getTopicToSubscribe())
-            .eventPayload(JsonUtil.getJsonStringFromObject(studentMerge))
-            .build();
-    postMessageToTopic(PEN_SERVICES_API_TOPIC.toString(), nextEvent);
+    final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
+        .eventType(CREATE_MERGE)
+        .replyTo(this.getTopicToSubscribe())
+        .eventPayload(JsonUtil.getJsonStringFromObject(studentMerge))
+        .build();
+    this.postMessageToTopic(PEN_SERVICES_API_TOPIC.toString(), nextEvent);
     log.info("message sent to PEN_SERVICES_API_TOPIC for CREATE_MERGE Event.");
   }
 
@@ -167,22 +182,22 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    * the following attributes on the student merge record get updated based on the incoming Merge request
    * status
    *
-   * @param event                             the event
-   * @param saga                              the saga
-   * @param studentMergeCompleteSagaData      the student merge saga data
+   * @param event                        the event
+   * @param saga                         the saga
+   * @param studentMergeCompleteSagaData the student merge saga data
    * @throws JsonProcessingException the json processing exception
    */
-  protected void readAuditHistory(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
-    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+  protected void readAuditHistory(final Event event, final Saga saga, final StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
+    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(GET_STUDENT_HISTORY.toString()); // set current event as saga state.
-    getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
+    this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
-    Event nextEvent = Event.builder().sagaId(saga.getSagaId())
-            .eventType(GET_STUDENT_HISTORY)
-            .replyTo(getTopicToSubscribe())
-            .eventPayload(studentMergeCompleteSagaData.getMergeStudentID().toString())
-            .build();
-    postMessageToTopic(STUDENT_API_TOPIC.toString(), nextEvent);
+    final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
+        .eventType(GET_STUDENT_HISTORY)
+        .replyTo(this.getTopicToSubscribe())
+        .eventPayload(studentMergeCompleteSagaData.getMergeStudentID().toString())
+        .build();
+    this.postMessageToTopic(STUDENT_API_TOPIC.toString(), nextEvent);
     log.info("message sent to STUDENT_API_TOPIC for GET_STUDENT_HISTORY Event.");
   }
 
@@ -190,30 +205,30 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    * the following attributes on the student merge record get updated based on the incoming Merge request
    * status
    *
-   * @param event                             the event
-   * @param saga                              the saga
-   * @param studentMergeCompleteSagaData              the student merge saga data
-   * @throws JsonProcessingException          the json processing exception
+   * @param event                        the event
+   * @param saga                         the saga
+   * @param studentMergeCompleteSagaData the student merge saga data
+   * @throws JsonProcessingException the json processing exception
    */
-  protected void addAuditHistory(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
-    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+  protected void addAuditHistory(final Event event, final Saga saga, final StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
+    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(CREATE_STUDENT_HISTORY.toString()); // set current event as saga state.
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, StudentHistory.class);
-    List<StudentHistory> historyList = objectMapper.readValue(event.getEventPayload(), type);
-    historyList.stream().forEach(h -> {
+    final ObjectMapper objectMapper = new ObjectMapper();
+    final JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, StudentHistory.class);
+    final List<StudentHistory> historyList = objectMapper.readValue(event.getEventPayload(), type);
+    historyList.forEach(h -> {
       h.setStudentHistoryID(null);
       h.setStudentID(studentMergeCompleteSagaData.getStudentID().toString());
     });
-    getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
+    this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
-    Event nextEvent = Event.builder().sagaId(saga.getSagaId())
-            .eventType(CREATE_STUDENT_HISTORY)
-            .replyTo(getTopicToSubscribe())
-            .eventPayload(JsonUtil.getJsonStringFromObject(historyList))
-            .build();
-    postMessageToTopic(STUDENT_API_TOPIC.toString(), nextEvent);
+    final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
+        .eventType(CREATE_STUDENT_HISTORY)
+        .replyTo(this.getTopicToSubscribe())
+        .eventPayload(JsonUtil.getJsonStringFromObject(historyList))
+        .build();
+    this.postMessageToTopic(STUDENT_API_TOPIC.toString(), nextEvent);
     log.info("message sent to STUDENT_API_TOPIC for CREATE_STUDENT_HISTORY Event.");
   }
 
@@ -221,22 +236,22 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    * the following attributes on the student merge record get updated based on the incoming Merge request
    * status
    *
-   * @param event                             the event
-   * @param saga                              the saga
-   * @param studentMergeCompleteSagaData              the student merge saga data
-   * @throws JsonProcessingException          the json processing exception
+   * @param event                        the event
+   * @param saga                         the saga
+   * @param studentMergeCompleteSagaData the student merge saga data
+   * @throws JsonProcessingException the json processing exception
    */
-  protected void readPossibleMatches(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
-    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+  protected void readPossibleMatches(final Event event, final Saga saga, final StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
+    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(GET_POSSIBLE_MATCH.toString()); // set current event as saga state.
-    getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
+    this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
-    Event nextEvent = Event.builder().sagaId(saga.getSagaId())
-            .eventType(GET_POSSIBLE_MATCH)
-            .replyTo(getTopicToSubscribe())
-            .eventPayload(studentMergeCompleteSagaData.getStudentID().toString())
-            .build();
-    postMessageToTopic(PEN_MATCH_API_TOPIC.toString(), nextEvent);
+    final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
+        .eventType(GET_POSSIBLE_MATCH)
+        .replyTo(this.getTopicToSubscribe())
+        .eventPayload(studentMergeCompleteSagaData.getStudentID().toString())
+        .build();
+    this.postMessageToTopic(PEN_MATCH_API_TOPIC.toString(), nextEvent);
     log.info("message sent to PEN_MATCH_API_TOPIC for GET_POSSIBLE_MATCH Event.");
   }
 
@@ -244,39 +259,51 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
    * the following attributes on the student merge record get updated based on the incoming Merge request
    * status
    *
-   * @param event                             the event
-   * @param saga                              the saga
-   * @param studentMergeCompleteSagaData      the student merge saga data
+   * @param event                        the event
+   * @param saga                         the saga
+   * @param studentMergeCompleteSagaData the student merge saga data
    * @throws JsonProcessingException the json processing exception
    */
-  protected void deletePossibleMatches(Event event, Saga saga, StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
-    SagaEventStates eventStates = createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+  protected void deletePossibleMatches(final Event event, final Saga saga, final StudentMergeCompleteSagaData studentMergeCompleteSagaData) throws JsonProcessingException {
+    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(DELETE_POSSIBLE_MATCH.toString()); // set current event as saga state.
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    JavaType type = objectMapper.getTypeFactory().
-            constructCollectionType(List.class, PossibleMatch.class);
-    List<PossibleMatch> allPossibleMatches = objectMapper.readValue(event.getEventPayload(), type);
-    List<PossibleMatch> possibleMatches = allPossibleMatches.stream()
-            .filter(item-> item.getMatchedStudentID().equals(studentMergeCompleteSagaData.getMergeStudentID().toString()))
-            .collect(Collectors.toList());
+    final ObjectMapper objectMapper = new ObjectMapper();
+    final JavaType type = objectMapper.getTypeFactory().
+        constructCollectionType(List.class, PossibleMatch.class);
+    final List<PossibleMatch> allPossibleMatches = objectMapper.readValue(event.getEventPayload(), type);
+    final List<PossibleMatch> possibleMatches = allPossibleMatches.stream()
+        .filter(item -> item.getMatchedStudentID().equals(studentMergeCompleteSagaData.getMergeStudentID().toString()))
+        .collect(Collectors.toList());
 
-    getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
+    this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
-    Event nextEvent = Event.builder().sagaId(saga.getSagaId())
-            .eventType(DELETE_POSSIBLE_MATCH)
-            .replyTo(getTopicToSubscribe())
-            .eventPayload(JsonUtil.getJsonStringFromObject(possibleMatches))
-            .build();
-    postMessageToTopic(PEN_MATCH_API_TOPIC.toString(), nextEvent);
+    final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
+        .eventType(DELETE_POSSIBLE_MATCH)
+        .replyTo(this.getTopicToSubscribe())
+        .eventPayload(JsonUtil.getJsonStringFromObject(possibleMatches))
+        .build();
+    this.postMessageToTopic(PEN_MATCH_API_TOPIC.toString(), nextEvent);
     log.info("message sent to PEN_MATCH_API_TOPIC for DELETE_POSSIBLE_MATCH Event.");
   }
 
-  private boolean isStepForMergedToPEN(StudentMergeCompleteSagaData studentMergeCompleteSagaData) {
+  /**
+   * Is step for merged to pen boolean.
+   *
+   * @param studentMergeCompleteSagaData the student merge complete saga data
+   * @return the boolean
+   */
+  private boolean isStepForMergedToPEN(final StudentMergeCompleteSagaData studentMergeCompleteSagaData) {
     return studentMergeCompleteSagaData.getRequestStudentID().equals(studentMergeCompleteSagaData.getStudentID());
   }
 
-  private boolean isStepForMergedFromPEN(StudentMergeCompleteSagaData studentMergeCompleteSagaData) {
+  /**
+   * Is step for merged from pen boolean.
+   *
+   * @param studentMergeCompleteSagaData the student merge complete saga data
+   * @return the boolean
+   */
+  private boolean isStepForMergedFromPEN(final StudentMergeCompleteSagaData studentMergeCompleteSagaData) {
     return studentMergeCompleteSagaData.getRequestStudentID().equals(studentMergeCompleteSagaData.getMergeStudentID());
   }
 }

@@ -16,5 +16,6 @@ public interface PenRequestBatchValidationIssueSeverityCodeRepository extends Cr
      *
      * @return the list
      */
+    @Override
     List<PenRequestBatchValidationIssueSeverityCodeEntity> findAll();
 }

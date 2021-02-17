@@ -20,7 +20,7 @@ public final class CodeUtil {
    * @param genderCode the gender code
    * @return the sex code
    */
-  public static String getSexCodeFromGenderCode(String genderCode) {
+  public static String getSexCodeFromGenderCode(final String genderCode) {
     if (GenderCodes.X.getCode().equals(genderCode)) {
       return SexCodes.U.getCode();
     }

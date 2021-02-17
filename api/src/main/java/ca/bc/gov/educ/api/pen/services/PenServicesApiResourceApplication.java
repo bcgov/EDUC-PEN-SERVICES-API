@@ -18,6 +18,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.PlatformTransactionManager;
+
 /**
  * The type Pen validation api resource application.
  */
@@ -33,10 +34,21 @@ public class PenServicesApiResourceApplication {
    *
    * @param args the input arguments
    */
-  public static void main(String[] args) {
+  public static void main(final String[] args) {
     SpringApplication.run(PenServicesApiResourceApplication.class, args);
   }
 
+  /**
+   * Lock provider For distributed lock, to avoid multiple pods executing the same scheduled task.
+   *
+   * @param jdbcTemplate       the jdbc template
+   * @param transactionManager the transaction manager
+   * @return the lock provider
+   */
+  @Bean
+  public LockProvider lockProvider(@Autowired final JdbcTemplate jdbcTemplate, @Autowired final PlatformTransactionManager transactionManager) {
+    return new JdbcTemplateLockProvider(jdbcTemplate, transactionManager, "PEN_SERVICES_SHEDLOCK");
+  }
 
   /**
    * The type Web security configuration.
@@ -61,30 +73,18 @@ public class PenServicesApiResourceApplication {
      * @param web the web
      */
     @Override
-    public void configure(WebSecurity web) {
+    public void configure(final WebSecurity web) {
       web.ignoring().antMatchers("/v3/api-docs/**",
-          "/actuator/health", "/actuator/prometheus","/actuator/**",
+          "/actuator/health", "/actuator/prometheus", "/actuator/**",
           "/swagger-ui/**");
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
       http
           .authorizeRequests()
           .anyRequest().authenticated().and()
           .oauth2ResourceServer().jwt();
     }
-  }
-
-  /**
-   * Lock provider For distributed lock, to avoid multiple pods executing the same scheduled task.
-   *
-   * @param jdbcTemplate       the jdbc template
-   * @param transactionManager the transaction manager
-   * @return the lock provider
-   */
-  @Bean
-  public LockProvider lockProvider(@Autowired JdbcTemplate jdbcTemplate, @Autowired PlatformTransactionManager transactionManager) {
-    return new JdbcTemplateLockProvider(jdbcTemplate, transactionManager, "PEN_SERVICES_SHEDLOCK");
   }
 }

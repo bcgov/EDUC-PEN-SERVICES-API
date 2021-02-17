@@ -46,7 +46,7 @@ public class PenService {
    * @param restUtils      the rest utils
    */
   @Autowired
-  public PenService(RedissonClient redissonClient, RestUtils restUtils) {
+  public PenService(final RedissonClient redissonClient, final RestUtils restUtils) {
     this.redissonClient = redissonClient;
     this.restUtils = restUtils;
   }
@@ -58,15 +58,15 @@ public class PenService {
    * @return the next pen number
    */
   @Retryable(value = {Exception.class}, backoff = @Backoff(multiplier = 2, delay = 2000))
-  public String getNextPenNumber(String transactionID) {
-    final RBucket<String> penForTransaction = getRedissonClient().getBucket(transactionID);
-    if(penForTransaction.isExists()){
+  public String getNextPenNumber(final String transactionID) {
+    final RBucket<String> penForTransaction = this.getRedissonClient().getBucket(transactionID);
+    if (penForTransaction.isExists()) {
       return penForTransaction.get();
-    }else {
-      int penWithoutCheckDigit = getNextPenNumberWithoutCheckDigit(transactionID);
-      int checkDigit = calculateCheckDigit(String.valueOf(penWithoutCheckDigit), transactionID);
-      String penGenerated =  penWithoutCheckDigit + "" + checkDigit;
-      penForTransaction.set(penGenerated,2, TimeUnit.DAYS);
+    } else {
+      final int penWithoutCheckDigit = this.getNextPenNumberWithoutCheckDigit(transactionID);
+      final int checkDigit = this.calculateCheckDigit(String.valueOf(penWithoutCheckDigit), transactionID);
+      final String penGenerated = penWithoutCheckDigit + "" + checkDigit;
+      penForTransaction.set(penGenerated, 2, TimeUnit.DAYS);
       return penGenerated;
     }
 
@@ -91,18 +91,18 @@ public class PenService {
    * @param guid                 the guid to identify the transaction.
    * @return checkDigit a number
    */
-  private int calculateCheckDigit(@NonNull String penWithoutCheckDigit, String guid) {
-    List<Integer> odds = new LinkedList<>();
-    List<Integer> evens = new LinkedList<>();
-    createOddAndEven(penWithoutCheckDigit, odds, evens);
-    int sumOdds = odds.stream().mapToInt(Integer::intValue).sum();
-    String fullEvenValueDoubledString = String.valueOf(Integer.parseInt(evens.stream().map(Object::toString).collect(Collectors.joining(""))) * 2);
-    List<Integer> listOfFullEvenValueDoubled = new LinkedList<>();
+  private int calculateCheckDigit(@NonNull final String penWithoutCheckDigit, final String guid) {
+    final List<Integer> odds = new LinkedList<>();
+    final List<Integer> evens = new LinkedList<>();
+    this.createOddAndEven(penWithoutCheckDigit, odds, evens);
+    final int sumOdds = odds.stream().mapToInt(Integer::intValue).sum();
+    final String fullEvenValueDoubledString = String.valueOf(Integer.parseInt(evens.stream().map(Object::toString).collect(Collectors.joining(""))) * 2);
+    final List<Integer> listOfFullEvenValueDoubled = new LinkedList<>();
     for (int i = 0; i < fullEvenValueDoubledString.length(); i++) {
       listOfFullEvenValueDoubled.add(Integer.parseInt(fullEvenValueDoubledString.substring(i, i + 1)));
     }
-    int sumEvens = listOfFullEvenValueDoubled.stream().mapToInt(Integer::intValue).sum();
-    int finalSum = sumEvens + sumOdds;
+    final int sumEvens = listOfFullEvenValueDoubled.stream().mapToInt(Integer::intValue).sum();
+    final int finalSum = sumEvens + sumOdds;
     int checkDigit = 0;
     if (finalSum % 10 != 0) {
       checkDigit = 10 - (finalSum % 10);
@@ -118,9 +118,9 @@ public class PenService {
    * @param odds                 the odds
    * @param evens                the evens
    */
-  private void createOddAndEven(String penWithoutCheckDigit, List<Integer> odds, List<Integer> evens) {
+  private void createOddAndEven(final String penWithoutCheckDigit, final List<Integer> odds, final List<Integer> evens) {
     for (int i = 0; i < penWithoutCheckDigit.length(); i++) {
-      int number = Integer.parseInt(penWithoutCheckDigit.substring(i, i + 1));
+      final int number = Integer.parseInt(penWithoutCheckDigit.substring(i, i + 1));
       if (i % 2 == 0) {
         odds.add(number);
       } else {
@@ -135,20 +135,20 @@ public class PenService {
    * @param transactionID the transactionID to identify transaction
    * @return the next pen number without check digit
    */
-  private int getNextPenNumberWithoutCheckDigit(String transactionID) {
+  private int getNextPenNumberWithoutCheckDigit(final String transactionID) {
     log.info("getNextPenNumberWithoutCheckDigit called for transactionID :: {}", transactionID);
-    RPermitExpirableSemaphore semaphore = getRedissonClient().getPermitExpirableSemaphore("getNextPen");
+    final RPermitExpirableSemaphore semaphore = this.getRedissonClient().getPermitExpirableSemaphore("getNextPen");
     semaphore.trySetPermits(1);
     semaphore.expire(120, TimeUnit.SECONDS);
     try {
-      String id = semaphore.tryAcquire(120, 40, TimeUnit.SECONDS);
+      final String id = semaphore.tryAcquire(120, 40, TimeUnit.SECONDS);
       int pen;
       if (id != null) {
-        final RBucket<Integer> penBucket = getRedissonClient().getBucket("PEN_NUMBER");
+        final RBucket<Integer> penBucket = this.getRedissonClient().getBucket("PEN_NUMBER");
         if (penBucket.isExists()) {
           pen = penBucket.get();
         } else {
-          pen = restUtils.getLatestPenNumberFromStudentAPI(transactionID);
+          pen = this.restUtils.getLatestPenNumberFromStudentAPI(transactionID);
           if (pen == 0) {
             throw new PenServicesAPIRuntimeException("Invalid Pen Returned from downstream method.");
           } else {
@@ -164,7 +164,7 @@ public class PenService {
         throw new PenServicesAPIRuntimeException("PEN could not be retrieved, as lock could not be acquired.");
       }
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.warn("PEN could not be retrieved, for transactionID :: {} :: {}", transactionID, e.getMessage());
       throw new PenServicesAPIRuntimeException("PEN could not be retrieved ".concat(e.getMessage()));
     }

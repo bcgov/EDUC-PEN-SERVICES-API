@@ -1,14 +1,30 @@
 package ca.bc.gov.educ.api.pen.services.exception;
 
+/**
+ * The type Saga runtime exception.
+ */
 public class SagaRuntimeException extends RuntimeException {
 
+  /**
+   * The constant serialVersionUID.
+   */
   private static final long serialVersionUID = 5241655513745148898L;
 
-  public SagaRuntimeException(String message) {
+  /**
+   * Instantiates a new Saga runtime exception.
+   *
+   * @param message the message
+   */
+  public SagaRuntimeException(final String message) {
     super(message);
   }
 
-  public SagaRuntimeException(Throwable exception) {
+  /**
+   * Instantiates a new Saga runtime exception.
+   *
+   * @param exception the exception
+   */
+  public SagaRuntimeException(final Throwable exception) {
     super(exception);
   }
 

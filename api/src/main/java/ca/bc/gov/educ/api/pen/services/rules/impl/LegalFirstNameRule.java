@@ -23,6 +23,9 @@ import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidat
 @Slf4j
 public class LegalFirstNameRule extends BaseRule {
 
+  /**
+   * The Pen name text service.
+   */
   private final PENNameTextService penNameTextService;
 
   /**
@@ -41,28 +44,28 @@ public class LegalFirstNameRule extends BaseRule {
    * @return the list
    */
   @Override
-  public List<PenRequestStudentValidationIssue> validate(PenRequestStudentValidationPayload validationPayload) {
-    var stopwatch = Stopwatch.createStarted();
+  public List<PenRequestStudentValidationIssue> validate(final PenRequestStudentValidationPayload validationPayload) {
+    final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
-    var legalFirstName = validationPayload.getLegalFirstName();
+    final var legalFirstName = validationPayload.getLegalFirstName();
     if (StringUtils.isBlank(legalFirstName)) {
-      results.add(createValidationEntity(WARNING, BLANK_FIELD, LEGAL_FIRST));
+      results.add(this.createValidationEntity(WARNING, BLANK_FIELD, LEGAL_FIRST));
     } else if (legalFirstName.trim().equals("'")) {
-      results.add(createValidationEntity(WARNING, APOSTROPHE, LEGAL_FIRST));
+      results.add(this.createValidationEntity(WARNING, APOSTROPHE, LEGAL_FIRST));
     } else {
-      defaultValidationForNameFields(results, legalFirstName, LEGAL_FIRST);
+      this.defaultValidationForNameFields(results, legalFirstName, LEGAL_FIRST);
     }
     //PreReq: Skip this check if any of these issues has been reported for the current field: V2, V3, V4, V5, V6, V7, V8
     // to achieve above we do an empty check here and proceed only if there were no validation error till now, for this field. V9 check.
     if (results.isEmpty()) {
-      checkFieldValueExactMatchWithInvalidText(results, legalFirstName, LEGAL_FIRST, validationPayload.getIsInteractive(), penNameTextService.getPenNameTexts());
+      this.checkFieldValueExactMatchWithInvalidText(results, legalFirstName, LEGAL_FIRST, validationPayload.getIsInteractive(), this.penNameTextService.getPenNameTexts());
     }
     if (results.isEmpty() && legalFirstName.trim().length() == 1) { // if we dont have any validation
-      results.add(createValidationEntity(WARNING, ONE_CHAR_NAME, LEGAL_FIRST));
+      results.add(this.createValidationEntity(WARNING, ONE_CHAR_NAME, LEGAL_FIRST));
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
-    log.info("Completed for {} in {} milli seconds",validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
     return results;
   }
 

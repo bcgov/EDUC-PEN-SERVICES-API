@@ -3,20 +3,22 @@ package ca.bc.gov.educ.api.pen.services.service.events;
 import ca.bc.gov.educ.api.pen.services.constants.EventOutcome;
 import ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode;
 import ca.bc.gov.educ.api.pen.services.mapper.v1.StudentMergeMapper;
+import ca.bc.gov.educ.api.pen.services.model.ServicesEvent;
 import ca.bc.gov.educ.api.pen.services.model.StudentMergeEntity;
-import ca.bc.gov.educ.api.pen.services.repository.StudentMergeRepository;
 import ca.bc.gov.educ.api.pen.services.service.PenRequestStudentRecordValidationService;
 import ca.bc.gov.educ.api.pen.services.service.PenService;
+import ca.bc.gov.educ.api.pen.services.service.StudentMergeService;
 import ca.bc.gov.educ.api.pen.services.struct.v1.Event;
 import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
 import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMerge;
 import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
-import ca.bc.gov.educ.api.pen.services.util.RequestUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.*;
 import static lombok.AccessLevel.PRIVATE;
@@ -38,18 +40,30 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 public class EventHandlerService {
 
   /**
+   * The constant RESPONDING_BACK.
+   */
+  public static final String RESPONDING_BACK = "responding back :: {}";
+  /**
    * The constant studentMapper.
    */
   private static final StudentMergeMapper studentMergeMapper = StudentMergeMapper.mapper;
-
+  /**
+   * The Validation service.
+   */
   @Getter(PRIVATE)
   private final PenRequestStudentRecordValidationService validationService;
 
+  /**
+   * The Pen service.
+   */
   @Getter(PRIVATE)
   private final PenService penService;
 
+  /**
+   * The Student merge service.
+   */
   @Getter(PRIVATE)
-  private final StudentMergeRepository studentMergeRepository;
+  private final StudentMergeService studentMergeService;
 
   /**
    * The Ob mapper.
@@ -59,33 +73,35 @@ public class EventHandlerService {
   /**
    * Instantiates a new Event handler service.
    *
-   * @param validationService       the validation service
-   * @param penService              the pen service
-   * @param studentMergeRepository  the student merge repository
+   * @param validationService   the validation service
+   * @param penService          the pen service
+   * @param studentMergeService the student merge
    */
   @Autowired
-  public EventHandlerService(PenRequestStudentRecordValidationService validationService, PenService penService, StudentMergeRepository studentMergeRepository) {
+  public EventHandlerService(final PenRequestStudentRecordValidationService validationService, final PenService penService, final StudentMergeService studentMergeService) {
     this.validationService = validationService;
     this.penService = penService;
-    this.studentMergeRepository = studentMergeRepository;
+    this.studentMergeService = studentMergeService;
   }
 
   /**
    * Handle validate student demog data event.
    *
    * @param event the event
+   * @return the byte [ ]
+   * @throws JsonProcessingException the json processing exception
    */
   @Transactional(propagation = REQUIRES_NEW)
-  public byte[] handleValidateStudentDemogDataEvent(@NonNull Event event) throws JsonProcessingException {
-    var validationPayload = JsonUtil.getJsonObjectFromString(PenRequestStudentValidationPayload.class, event.getEventPayload());
-    var result = getValidationService().validateStudentRecord(validationPayload);
-    EventOutcome eventOutcome;
-    String eventPayload;
+  public byte[] handleValidateStudentDemogDataEvent(@NonNull final Event event) throws JsonProcessingException {
+    final var validationPayload = JsonUtil.getJsonObjectFromString(PenRequestStudentValidationPayload.class, event.getEventPayload());
+    final var result = this.getValidationService().validateStudentRecord(validationPayload);
+    final EventOutcome eventOutcome;
+    final String eventPayload;
     if (result.isEmpty()) {
       eventOutcome = VALIDATION_SUCCESS_NO_ERROR_WARNING;
       eventPayload = VALIDATION_SUCCESS_NO_ERROR_WARNING.toString();
     } else {
-      var isError = result.stream().anyMatch(x -> x.getPenRequestBatchValidationIssueSeverityCode().equals(PenRequestStudentValidationIssueSeverityCode.ERROR.toString()));
+      final var isError = result.stream().anyMatch(x -> x.getPenRequestBatchValidationIssueSeverityCode().equals(PenRequestStudentValidationIssueSeverityCode.ERROR.toString()));
       if (isError) {
         eventOutcome = VALIDATION_SUCCESS_WITH_ERROR;
       } else {
@@ -94,132 +110,102 @@ public class EventHandlerService {
       eventPayload = JsonUtil.getJsonStringFromObject(result);
     }
 
-    Event newEvent = Event.builder()
-            .sagaId(event.getSagaId())
-            .eventType(event.getEventType())
-            .eventOutcome(eventOutcome)
-            .eventPayload(eventPayload).build();
+    final Event newEvent = Event.builder()
+        .sagaId(event.getSagaId())
+        .eventType(event.getEventType())
+        .eventOutcome(eventOutcome)
+        .eventPayload(eventPayload).build();
     if (log.isDebugEnabled()) {
-      log.debug("responding back :: {}", newEvent);
+      log.debug(RESPONDING_BACK, newEvent);
     }
-    return obMapper.writeValueAsBytes(newEvent);
+    return this.obMapper.writeValueAsBytes(newEvent);
   }
 
   /**
    * Handle get next PEN number event.
    *
    * @param event the event
+   * @return the byte [ ]
+   * @throws JsonProcessingException the json processing exception
    */
   @Transactional(propagation = REQUIRES_NEW)
-  public byte[] handleGetNextPenNumberEvent(@NonNull Event event) throws JsonProcessingException {
-    var transactionID = event.getEventPayload();
-    var nextPenNumber = getPenService().getNextPenNumber(transactionID);
+  public byte[] handleGetNextPenNumberEvent(@NonNull final Event event) throws JsonProcessingException {
+    final var transactionID = event.getEventPayload();
+    final var nextPenNumber = this.getPenService().getNextPenNumber(transactionID);
 
-    Event newEvent = Event.builder()
-            .sagaId(event.getSagaId())
-            .eventType(event.getEventType())
-            .eventOutcome(NEXT_PEN_NUMBER_RETRIEVED)
-            .eventPayload(nextPenNumber).build();
+    final Event newEvent = Event.builder()
+        .sagaId(event.getSagaId())
+        .eventType(event.getEventType())
+        .eventOutcome(NEXT_PEN_NUMBER_RETRIEVED)
+        .eventPayload(nextPenNumber).build();
     if (log.isDebugEnabled()) {
-      log.debug("responding back :: {}", newEvent);
+      log.debug(RESPONDING_BACK, newEvent);
     }
-    return obMapper.writeValueAsBytes(newEvent);
+    return this.obMapper.writeValueAsBytes(newEvent);
   }
 
   /**
    * Delete student merges for two ways
    *
-   * @param event   event with the payload for one student merge
+   * @param event event with the payload for one student merge
    * @return the list of two created student merges as two ways persistence
-   * @throws JsonProcessingException  the exception
+   * @throws JsonProcessingException the exception
    */
   @Transactional(propagation = REQUIRES_NEW)
-  public byte[] handleDeleteMergeEvent(@NonNull Event event) throws JsonProcessingException {
-    List<String> payload = new ArrayList<>();
+  public Pair<byte[], Optional<ServicesEvent>> handleDeleteMergeEvent(@NonNull final Event event) throws JsonProcessingException {
+    final List<StudentMergeEntity> mergeEntities = new ArrayList<>();
 
     // MergedToStudent
-    StudentMerge mergedToPEN = JsonUtil.getJsonObjectFromString(StudentMerge.class, event.getEventPayload());
-    deleteStudentMerge(payload, mergedToPEN);
-
+    final StudentMerge mergedToPEN = JsonUtil.getJsonObjectFromString(StudentMerge.class, event.getEventPayload());
+    mergeEntities.add(studentMergeMapper.toModel(mergedToPEN));
     // MergedFromStudent
-    StudentMerge mergedFromPEN = StudentMerge.builder().studentID(mergedToPEN.getMergeStudentID()).mergeStudentID(mergedToPEN.getStudentID())
-            .studentMergeDirectionCode("TO").studentMergeSourceCode(mergedToPEN.getStudentMergeSourceCode()).build();
-    deleteStudentMerge(payload, mergedFromPEN);
-
-    Event newEvent = Event.builder()
-            .sagaId(event.getSagaId())
-            .eventType(event.getEventType())
-            .eventOutcome(MERGE_DELETED)
-            .eventPayload(JsonUtil.getJsonStringFromObject(payload)).build();
+    final StudentMerge mergedFromPEN = StudentMerge.builder().studentID(mergedToPEN.getMergeStudentID()).mergeStudentID(mergedToPEN.getStudentID())
+        .studentMergeDirectionCode("TO").studentMergeSourceCode(mergedToPEN.getStudentMergeSourceCode()).build();
+    mergeEntities.add(studentMergeMapper.toModel(mergedFromPEN));
+    val pair = this.studentMergeService.deleteMerge(mergeEntities);
+    val deletedItems = pair.getLeft().stream().map(StudentMergeMapper.mapper::toStructure).collect(Collectors.toList());
+    final Event newEvent = Event.builder()
+        .sagaId(event.getSagaId())
+        .eventType(event.getEventType())
+        .eventOutcome(MERGE_DELETED)
+        .eventPayload(JsonUtil.getJsonStringFromObject(deletedItems)).build();
     if (log.isDebugEnabled()) {
-      log.debug("responding back :: {}", newEvent);
+      log.debug(RESPONDING_BACK, newEvent);
     }
-    return obMapper.writeValueAsBytes(newEvent);
+    return Pair.of(this.obMapper.writeValueAsBytes(newEvent), pair.getRight());
   }
 
   /**
    * Create student merges for two ways
    *
-   * @param event   event with the payload for one student merge
+   * @param event event with the payload for one student merge
    * @return the list of two created student merges as two ways persistence
-   * @throws JsonProcessingException  the exception
+   * @throws JsonProcessingException the exception
    */
   @Transactional(propagation = REQUIRES_NEW)
-  public byte[] handleCreateMergeEvent(@NonNull Event event) throws JsonProcessingException {
-    List<StudentMerge> payload = new ArrayList<>();
+  public Pair<byte[], Optional<ServicesEvent>> handleCreateMergeEvent(@NonNull final Event event) throws JsonProcessingException {
+    final List<StudentMergeEntity> mergeEntities = new ArrayList<>();
 
     // MergedToStudent
-    StudentMerge mergedToPEN = JsonUtil.getJsonObjectFromString(StudentMerge.class, event.getEventPayload());
-    createStudentMerge(payload, mergedToPEN);
-
+    final StudentMerge mergedToPEN = JsonUtil.getJsonObjectFromString(StudentMerge.class, event.getEventPayload());
+    mergeEntities.add(studentMergeMapper.toModel(mergedToPEN));
     // MergedFromStudent
-    StudentMerge mergedFromPEN = StudentMerge.builder().studentID(mergedToPEN.getMergeStudentID()).mergeStudentID(mergedToPEN.getStudentID())
-            .studentMergeDirectionCode("TO").studentMergeSourceCode(mergedToPEN.getStudentMergeSourceCode())
-            .createUser(mergedToPEN.getCreateUser()).updateUser(mergedToPEN.getUpdateUser()).build();
-    createStudentMerge(payload, mergedFromPEN);
-
-    Event newEvent = Event.builder()
-            .sagaId(event.getSagaId())
-            .eventType(event.getEventType())
-            .eventOutcome(MERGE_CREATED)
-            .eventPayload(JsonUtil.getJsonStringFromObject(payload)).build();
+    final StudentMerge mergedFromPEN = StudentMerge.builder().studentID(mergedToPEN.getMergeStudentID()).mergeStudentID(mergedToPEN.getStudentID())
+        .studentMergeDirectionCode("TO").studentMergeSourceCode(mergedToPEN.getStudentMergeSourceCode())
+        .createUser(mergedToPEN.getCreateUser()).updateUser(mergedToPEN.getUpdateUser()).build();
+    mergeEntities.add(studentMergeMapper.toModel(mergedFromPEN));
+    val pair = this.studentMergeService.createMerge(mergeEntities);
+    val savedItems = pair.getLeft().stream().map(StudentMergeMapper.mapper::toStructure).collect(Collectors.toList());
+    final Event newEvent = Event.builder()
+        .sagaId(event.getSagaId())
+        .eventType(event.getEventType())
+        .eventOutcome(MERGE_CREATED)
+        .eventPayload(JsonUtil.getJsonStringFromObject(savedItems)).build();
     if (log.isDebugEnabled()) {
-      log.debug("responding back :: {}", newEvent);
+      log.debug(RESPONDING_BACK, newEvent);
     }
-    return obMapper.writeValueAsBytes(newEvent);
+    return Pair.of(this.obMapper.writeValueAsBytes(newEvent), pair.getRight());
   }
 
-  /**
-   * Idempotent operation to persist a StudentMergeEntity
-   * @param payload       the list of student merge that will include the processed student merge
-   * @param studentMerge  the student merge to be processed
-   */
-  @Transactional
-  public void createStudentMerge(List<StudentMerge> payload, StudentMerge studentMerge) {
-    Optional<StudentMergeEntity> optional = getStudentMergeRepository()
-            .findStudentMergeEntityByStudentIDAndMergeStudentID(UUID.fromString(studentMerge.getStudentID()), UUID.fromString(studentMerge.getMergeStudentID()));
-    if (optional.isPresent()) {
-      payload.add(studentMergeMapper.toStructure(optional.get()));
-    } else {
-      RequestUtil.setAuditColumnsForCreate(studentMerge);
-      StudentMergeEntity merge = getStudentMergeRepository().save(studentMergeMapper.toModel(studentMerge));
-      payload.add(studentMergeMapper.toStructure(merge));
-    }
-  }
 
-  /**
-   * Idempotent operation to delete a StudentMergeEntity
-   * @param payload       the list of student merge that will include the processed student merge
-   * @param studentMerge  the student merge to be processed
-   */
-  @Transactional
-  public void deleteStudentMerge(List<String> payload, StudentMerge studentMerge) {
-    Optional<StudentMergeEntity> optional = getStudentMergeRepository()
-            .findStudentMergeEntityByStudentIDAndMergeStudentID(UUID.fromString(studentMerge.getStudentID()), UUID.fromString(studentMerge.getMergeStudentID()));
-    if (optional.isPresent()) {
-      // delete
-      getStudentMergeRepository().delete(optional.get());
-      payload.add(studentMerge.getStudentID());
-    }
-  }
 }

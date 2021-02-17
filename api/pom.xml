@@ -179,8 +179,8 @@
     </dependency>
     <dependency>
       <groupId>org.redisson</groupId>
-      <artifactId>redisson-spring-data-23</artifactId>
-      <version>3.13.4</version>
+      <artifactId>redisson-spring-data-24</artifactId>
+      <version>3.15.0</version>
     </dependency>
     <dependency>
       <groupId>it.ozimov</groupId>
@@ -209,6 +209,11 @@
       <groupId>net.javacrumbs.shedlock</groupId>
       <artifactId>shedlock-provider-jdbc-template</artifactId>
       <version>${shedlock.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.nats</groupId>
+      <artifactId>java-nats-streaming</artifactId>
+      <version>2.2.3</version>
     </dependency>
   </dependencies>
 

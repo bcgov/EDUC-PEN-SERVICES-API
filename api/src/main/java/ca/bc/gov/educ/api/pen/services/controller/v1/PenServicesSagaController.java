@@ -25,10 +25,20 @@ import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_ST
 import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA;
 import static lombok.AccessLevel.PRIVATE;
 
+/**
+ * The type Pen services saga controller.
+ */
 @RestController
 @Slf4j
 public class PenServicesSagaController implements PenServicesSagaEndpoint {
 
+  /**
+   * The constant sagaMapper.
+   */
+  private static final SagaMapper sagaMapper = SagaMapper.mapper;
+  /**
+   * The Saga service.
+   */
   @Getter(PRIVATE)
   private final SagaService sagaService;
   /**
@@ -37,44 +47,55 @@ public class PenServicesSagaController implements PenServicesSagaEndpoint {
   @Getter(PRIVATE)
   private final Map<String, Orchestrator> orchestratorMap = new HashMap<>();
 
-  private static final SagaMapper sagaMapper = SagaMapper.mapper;
-
+  /**
+   * Instantiates a new Pen services saga controller.
+   *
+   * @param sagaService   the saga service
+   * @param orchestrators the orchestrators
+   */
   @Autowired
-  public PenServicesSagaController(final SagaService sagaService, List<Orchestrator> orchestrators) {
+  public PenServicesSagaController(final SagaService sagaService, final List<Orchestrator> orchestrators) {
     this.sagaService = sagaService;
-    orchestrators.forEach(orchestrator -> orchestratorMap.put(orchestrator.getSagaName(), orchestrator));
-    log.info("'{}' Saga Orchestrators are loaded.", String.join(",", orchestratorMap.keySet()));
+    orchestrators.forEach(orchestrator -> this.orchestratorMap.put(orchestrator.getSagaName(), orchestrator));
+    log.info("'{}' Saga Orchestrators are loaded.", String.join(",", this.orchestratorMap.keySet()));
   }
 
   @Override
-  public ResponseEntity<Saga> readSaga(UUID sagaID) {
-    return getSagaService().findSagaById(sagaID)
-            .map(sagaMapper::toStruct)
-            .map(ResponseEntity::ok)
-            .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+  public ResponseEntity<Saga> readSaga(final UUID sagaID) {
+    return this.getSagaService().findSagaById(sagaID)
+        .map(sagaMapper::toStruct)
+        .map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
   }
 
   @Override
-  public ResponseEntity<String> completeStudentMerge(StudentMergeCompleteSagaData studentMergeCompleteSagaData) {
-    return processServicesSaga(PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA, studentMergeCompleteSagaData);
+  public ResponseEntity<String> completeStudentMerge(final StudentMergeCompleteSagaData studentMergeCompleteSagaData) {
+    return this.processServicesSaga(PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA, studentMergeCompleteSagaData);
   }
 
   @Override
-  public ResponseEntity<String> completeStudentDemerge(StudentDemergeCompleteSagaData studentDemergeCompleteSagaData) {
-    return processServicesSaga(PEN_SERVICES_STUDENT_DEMERGE_COMPLETE_SAGA, studentDemergeCompleteSagaData);
+  public ResponseEntity<String> completeStudentDemerge(final StudentDemergeCompleteSagaData studentDemergeCompleteSagaData) {
+    return this.processServicesSaga(PEN_SERVICES_STUDENT_DEMERGE_COMPLETE_SAGA, studentDemergeCompleteSagaData);
   }
 
-  private ResponseEntity<String> processServicesSaga(SagaEnum sagaName, BaseStudentSagaData sagaData) {
+  /**
+   * Process services saga response entity.
+   *
+   * @param sagaName the saga name
+   * @param sagaData the saga data
+   * @return the response entity
+   */
+  private ResponseEntity<String> processServicesSaga(final SagaEnum sagaName, final BaseStudentSagaData sagaData) {
     try {
-      var studentID = sagaData.getStudentID();
-      var sagaInProgress = getSagaService().findAllByStudentIDAndStatusIn(studentID, sagaName.toString(), getStatusesFilter());
+      final var studentID = sagaData.getStudentID();
+      final var sagaInProgress = this.getSagaService().findAllByStudentIDAndStatusIn(studentID, sagaName.toString(), this.getStatusesFilter());
       if (!sagaInProgress.isEmpty()) {
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
       }
-      String payload = JsonUtil.getJsonStringFromObject(sagaData);
-      var saga = getOrchestratorMap()
-              .get(sagaName.toString())
-              .startSaga(payload, studentID, sagaData.getCreateUser());
+      final String payload = JsonUtil.getJsonStringFromObject(sagaData);
+      final var saga = this.getOrchestratorMap()
+          .get(sagaName.toString())
+          .startSaga(payload, studentID, sagaData.getCreateUser());
       return ResponseEntity.ok(saga.getSagaId().toString());
     } catch (final Exception e) {
       Thread.currentThread().interrupt();
@@ -82,8 +103,13 @@ public class PenServicesSagaController implements PenServicesSagaEndpoint {
     }
   }
 
+  /**
+   * Gets statuses filter.
+   *
+   * @return the statuses filter
+   */
   protected List<String> getStatusesFilter() {
-    var statuses = new ArrayList<String>();
+    final var statuses = new ArrayList<String>();
     statuses.add(SagaStatusEnum.IN_PROGRESS.toString());
     statuses.add(SagaStatusEnum.STARTED.toString());
     return statuses;

@@ -11,5 +11,6 @@ import java.util.List;
  */
 @Repository
 public interface PenNameTextRepository extends CrudRepository<PENNameText, Integer> {
+  @Override
   List<PENNameText> findAll();
 }

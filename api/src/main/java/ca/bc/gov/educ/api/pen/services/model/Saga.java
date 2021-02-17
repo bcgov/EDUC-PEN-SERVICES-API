@@ -101,18 +101,40 @@ public class Saga {
   @Column(name = "UPDATE_DATE")
   LocalDateTime updateDate;
 
+  /**
+   * Gets payload.
+   *
+   * @return the payload
+   */
   public String getPayload() {
-    return new String(getPayloadBytes(), StandardCharsets.UTF_8);
+    return new String(this.getPayloadBytes(), StandardCharsets.UTF_8);
   }
 
-  public void setPayload(String payload) {
-    setPayloadBytes(payload.getBytes(StandardCharsets.UTF_8));
+  /**
+   * Sets payload.
+   *
+   * @param payload the payload
+   */
+  public void setPayload(final String payload) {
+    this.setPayloadBytes(payload.getBytes(StandardCharsets.UTF_8));
   }
 
+  /**
+   * The type Saga builder.
+   */
   public static class SagaBuilder {
+    /**
+     * The Payload bytes.
+     */
     byte[] payloadBytes;
 
-    public SagaBuilder payload(String payload) {
+    /**
+     * Payload saga builder.
+     *
+     * @param payload the payload
+     * @return the saga builder
+     */
+    public SagaBuilder payload(final String payload) {
       this.payloadBytes = payload.getBytes(StandardCharsets.UTF_8);
       return this;
     }

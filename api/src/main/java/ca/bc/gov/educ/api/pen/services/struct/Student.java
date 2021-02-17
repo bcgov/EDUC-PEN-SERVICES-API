@@ -2,7 +2,6 @@ package ca.bc.gov.educ.api.pen.services.struct;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -151,5 +150,8 @@ public class Student implements Serializable {
   @Size(max = 32)
   String updateUser;
 
+  /**
+   * The True student id.
+   */
   String trueStudentID;
 }

@@ -18,6 +18,9 @@ import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidat
  */
 @Slf4j
 public class UsualFirstNameRule extends BaseRule {
+  /**
+   * The Pen name text service.
+   */
   private final PENNameTextService penNameTextService;
 
   /**
@@ -28,6 +31,7 @@ public class UsualFirstNameRule extends BaseRule {
   public UsualFirstNameRule(final PENNameTextService penNameTextService) {
     this.penNameTextService = penNameTextService;
   }
+
   /**
    * Validates the student record for the given rule.
    *
@@ -35,13 +39,13 @@ public class UsualFirstNameRule extends BaseRule {
    * @return the validation result as a list.
    */
   @Override
-  public List<PenRequestStudentValidationIssue> validate(PenRequestStudentValidationPayload validationPayload) {
-    var stopwatch = Stopwatch.createStarted();
+  public List<PenRequestStudentValidationIssue> validate(final PenRequestStudentValidationPayload validationPayload) {
+    final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
-    doValidate(validationPayload.getIsInteractive(), results, validationPayload.getUsualFirstName(), USUAL_FIRST, penNameTextService);
+    this.doValidate(validationPayload.getIsInteractive(), results, validationPayload.getUsualFirstName(), USUAL_FIRST, this.penNameTextService);
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
-    log.info("Completed for {} in {} milli seconds",validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
     return results;
   }
 }

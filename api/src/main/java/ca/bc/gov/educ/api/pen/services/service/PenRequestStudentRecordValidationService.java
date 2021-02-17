@@ -30,7 +30,7 @@ public class PenRequestStudentRecordValidationService {
    * @param rules the rules
    */
   @Autowired
-  public PenRequestStudentRecordValidationService(List<Rule> rules) {
+  public PenRequestStudentRecordValidationService(final List<Rule> rules) {
     this.rules = rules;
   }
 
@@ -45,17 +45,17 @@ public class PenRequestStudentRecordValidationService {
    * @return the list
    */
   public List<PenRequestStudentValidationIssue> validateStudentRecord(final PenRequestStudentValidationPayload validationPayload) {
-    var stopwatch = Stopwatch.createStarted();
-    var validationResult = validationPayload.getIssueList();
-    rules.forEach(rule -> {
-      var result = rule.validate(validationPayload);
+    final var stopwatch = Stopwatch.createStarted();
+    final var validationResult = validationPayload.getIssueList();
+    this.rules.forEach(rule -> {
+      final var result = rule.validate(validationPayload);
       if (!result.isEmpty()) {
         validationResult.addAll(result);
       }
     });
     log.debug("found {} error/warnings for this transaction :: {}", validationResult.size(), validationPayload.getTransactionID());
     stopwatch.stop();
-    log.info("Completed validateStudentRecord for {} in {} milli seconds",validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    log.info("Completed validateStudentRecord for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
     return validationResult;
   }
 

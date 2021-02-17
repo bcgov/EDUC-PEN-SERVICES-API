@@ -16,9 +16,18 @@ import java.util.UUID;
 
 import static ca.bc.gov.educ.api.pen.services.constants.v1.URL.PEN_SERVICES;
 
+/**
+ * The interface Pen services saga endpoint.
+ */
 @RequestMapping(PEN_SERVICES)
 public interface PenServicesSagaEndpoint {
 
+  /**
+   * Read saga response entity.
+   *
+   * @param sagaID the saga id
+   * @return the response entity
+   */
   @GetMapping("/saga/{sagaID}")
   @PreAuthorize("hasAuthority('SCOPE_PEN_SERVICES_READ_SAGA')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK."), @ApiResponse(responseCode = "404", description = "Not Found.")})
@@ -26,11 +35,23 @@ public interface PenServicesSagaEndpoint {
   @Tag(name = "Endpoint to retrieve saga by its ID (GUID).", description = "Endpoint to retrieve saga by its ID (GUID).")
   ResponseEntity<Saga> readSaga(@PathVariable UUID sagaID);
 
+  /**
+   * Complete student merge response entity.
+   *
+   * @param studentMergeCompleteSagaData the student merge complete saga data
+   * @return the response entity
+   */
   @PostMapping("/student-merge-complete-saga")
   @PreAuthorize("hasAuthority('SCOPE_STUDENT_MERGE_COMPLETE_SAGA')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK.")})
   ResponseEntity<String> completeStudentMerge(@Validated @RequestBody StudentMergeCompleteSagaData studentMergeCompleteSagaData);
 
+  /**
+   * Complete student demerge response entity.
+   *
+   * @param studentDemergeCompleteSagaData the student demerge complete saga data
+   * @return the response entity
+   */
   @PostMapping("/student-demerge-complete-saga")
   @PreAuthorize("hasAuthority('SCOPE_STUDENT_DEMERGE_COMPLETE_SAGA')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK.")})

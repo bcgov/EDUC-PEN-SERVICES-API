@@ -25,6 +25,9 @@ import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidat
 @Slf4j
 public class LegalMiddleNameRule extends BaseRule {
 
+  /**
+   * The Pen name text service.
+   */
   private final PENNameTextService penNameTextService;
 
   /**
@@ -43,41 +46,53 @@ public class LegalMiddleNameRule extends BaseRule {
    * @return the validation result as a list.
    */
   @Override
-  public List<PenRequestStudentValidationIssue> validate(PenRequestStudentValidationPayload validationPayload) {
-    var stopwatch = Stopwatch.createStarted();
+  public List<PenRequestStudentValidationIssue> validate(final PenRequestStudentValidationPayload validationPayload) {
+    final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
     var legalMiddleName = validationPayload.getLegalMiddleNames();
     if (StringUtils.isNotBlank(legalMiddleName)) {
       legalMiddleName = legalMiddleName.trim();
-      defaultValidationForNameFields(results, legalMiddleName, LEGAL_MID);
+      this.defaultValidationForNameFields(results, legalMiddleName, LEGAL_MID);
     }
     if (results.isEmpty() && StringUtils.isNotBlank(legalMiddleName)) {
-      checkFieldValueExactMatchWithInvalidText(results, legalMiddleName, LEGAL_MID, validationPayload.getIsInteractive(), penNameTextService.getPenNameTexts());
+      this.checkFieldValueExactMatchWithInvalidText(results, legalMiddleName, LEGAL_MID, validationPayload.getIsInteractive(), this.penNameTextService.getPenNameTexts());
     }
     if (results.isEmpty() && StringUtils.isNotBlank(legalMiddleName)
-        && legalFirstNameHasNoErrors(validationPayload) && legalLastNameHasNoErrors(validationPayload)
+        && this.legalFirstNameHasNoErrors(validationPayload) && this.legalLastNameHasNoErrors(validationPayload)
         && (legalMiddleName.equals(validationPayload.getLegalFirstName()) || legalMiddleName.equals(validationPayload.getLegalLastName()))) {
-      results.add(createValidationEntity(WARNING, REPEAT_MID, LEGAL_MID));
+      results.add(this.createValidationEntity(WARNING, REPEAT_MID, LEGAL_MID));
     }
     if (results.isEmpty() && StringUtils.isNotBlank(legalMiddleName)
-        && legalFirstNameHasNoErrors(validationPayload)
+        && this.legalFirstNameHasNoErrors(validationPayload)
         && StringUtils.isNotBlank(validationPayload.getLegalFirstName())
         && validationPayload.getLegalFirstName().contains(legalMiddleName)) {
-      results.add(createValidationEntity(WARNING, EMBEDDED_MID, LEGAL_MID));
+      results.add(this.createValidationEntity(WARNING, EMBEDDED_MID, LEGAL_MID));
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
-    log.info("Completed for {} in {} milli seconds",validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
     return results;
   }
 
-  private boolean legalLastNameHasNoErrors(PenRequestStudentValidationPayload validationPayload) {
-    var result = validationPayload.getIssueList().stream().filter(element -> element.getPenRequestBatchValidationFieldCode().equals(LEGAL_LAST.getCode())).collect(Collectors.toList());
+  /**
+   * Legal last name has no errors boolean.
+   *
+   * @param validationPayload the validation payload
+   * @return the boolean
+   */
+  private boolean legalLastNameHasNoErrors(final PenRequestStudentValidationPayload validationPayload) {
+    final var result = validationPayload.getIssueList().stream().filter(element -> element.getPenRequestBatchValidationFieldCode().equals(LEGAL_LAST.getCode())).collect(Collectors.toList());
     return result.isEmpty();
   }
 
-  private boolean legalFirstNameHasNoErrors(PenRequestStudentValidationPayload validationPayload) {
-    var result = validationPayload.getIssueList().stream().filter(element -> element.getPenRequestBatchValidationFieldCode().equals(LEGAL_FIRST.getCode())).collect(Collectors.toList());
+  /**
+   * Legal first name has no errors boolean.
+   *
+   * @param validationPayload the validation payload
+   * @return the boolean
+   */
+  private boolean legalFirstNameHasNoErrors(final PenRequestStudentValidationPayload validationPayload) {
+    final var result = validationPayload.getIssueList().stream().filter(element -> element.getPenRequestBatchValidationFieldCode().equals(LEGAL_FIRST.getCode())).collect(Collectors.toList());
     return result.isEmpty();
   }
 }

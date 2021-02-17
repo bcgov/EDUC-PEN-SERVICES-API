@@ -23,51 +23,51 @@ public enum EventOutcome {
   NEXT_PEN_NUMBER_RETRIEVED,
 
   /**
-   *
+   * Initiate success event outcome.
    */
   INITIATE_SUCCESS,
   /**
-   *
+   * Student found event outcome.
    */
   STUDENT_FOUND,
   /**
-   *
+   * Student updated event outcome.
    */
   STUDENT_UPDATED,
   /**
-   *
+   * Merge created event outcome.
    */
   MERGE_CREATED,
   /**
-   *
+   * Merge deleted event outcome.
    */
   MERGE_DELETED,
   /**
-   *
+   * Student history found event outcome.
    */
   STUDENT_HISTORY_FOUND,
   /**
-   *
+   * Student history created event outcome.
    */
   STUDENT_HISTORY_CREATED,
   /**
-   *
+   * Possible match found event outcome.
    */
   POSSIBLE_MATCH_FOUND,
   /**
-   *
+   * Possible match not found event outcome.
    */
   POSSIBLE_MATCH_NOT_FOUND,
   /**
-   *
+   * Possible match added event outcome.
    */
   POSSIBLE_MATCH_ADDED,
   /**
-   *
+   * Possible match deleted event outcome.
    */
   POSSIBLE_MATCH_DELETED,
   /**
-   *
+   * Saga completed event outcome.
    */
   SAGA_COMPLETED
   }

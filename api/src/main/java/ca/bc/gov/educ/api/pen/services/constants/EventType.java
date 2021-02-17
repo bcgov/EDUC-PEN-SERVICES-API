@@ -15,12 +15,12 @@ public enum EventType {
   GET_NEXT_PEN_NUMBER,
 
   /**
-   *
+   * Initiated event type.
    */
   INITIATED,
 
   /**
-   *
+   * Get student event type.
    */
   GET_STUDENT,
 
@@ -49,12 +49,24 @@ public enum EventType {
    */
   CREATE_STUDENT_HISTORY,
 
+  /**
+   * Get possible match event type.
+   */
   GET_POSSIBLE_MATCH,
 
+  /**
+   * Add possible match event type.
+   */
   ADD_POSSIBLE_MATCH,
 
+  /**
+   * Delete possible match event type.
+   */
   DELETE_POSSIBLE_MATCH,
 
+  /**
+   * Mark saga complete event type.
+   */
   MARK_SAGA_COMPLETE,
 
 }

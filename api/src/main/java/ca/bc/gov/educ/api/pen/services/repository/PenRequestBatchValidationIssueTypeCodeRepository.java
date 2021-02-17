@@ -16,5 +16,6 @@ public interface PenRequestBatchValidationIssueTypeCodeRepository extends CrudRe
      *
      * @return the list
      */
+    @Override
     List<PenRequestBatchValidationIssueTypeCodeEntity> findAll();
 }
