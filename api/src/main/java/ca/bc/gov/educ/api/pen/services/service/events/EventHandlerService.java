@@ -177,6 +177,25 @@ public class EventHandlerService {
 
   /**
    * Create student merges for two ways
+   * <pre>
+   *      * MergedToStudent - Surviving / TruePEN that has a status of "ACTIVE" and a merge direction of "FROM" against merged student
+   *      *
+   *      * TruePEN is merged "FROM" MergedPEN
+   *      * StudentMerge entity
+   *      *    studentID       : TruePEN's studentID     (active student)
+   *      *    directionCode   : "FROM"
+   *      *    mergeStudentID  : MergedPEN's studentID   (merged student)
+   * </pre>
+   * <pre>
+   *      * MergedFromStudent - Non-surviving / MergedPEN that has a status of "MERGED" and a merge direction of "TO" against active student
+   *      *
+   *      * MergedPEN is merged "TO" TruePEN
+   *      * StudentMerge entity
+   *      *    studentID       : MergedPEN's studentID   (merged student)
+   *      *    directionCode   : "TO"
+   *      *    mergeStudentID  : TruePEN's studentID     (active student)
+   *      *
+   *  </pre>
    *
    * @param event event with the payload for one student merge
    * @return the list of two created student merges as two ways persistence
@@ -185,27 +204,9 @@ public class EventHandlerService {
   @Transactional(propagation = REQUIRES_NEW)
   public Pair<byte[], Optional<ServicesEvent>> handleCreateMergeEvent(@NonNull final Event event) throws JsonProcessingException {
     final List<StudentMergeEntity> mergeEntities = new ArrayList<>();
-
-    /**
-     * MergedToStudent - Surviving / TruePEN that has a status of "ACTIVE" and a merge direction of "FROM" against merged student
-     *
-     * TruePEN is merged "FROM" MergedPEN
-     * StudentMerge entity
-     *    studentID       : TruePEN's studentID     (active student)
-     *    directionCode   : "FROM"
-     *    mergeStudentID  : MergedPEN's studentID   (merged student)
-     */
     final StudentMerge mergedToPEN = JsonUtil.getJsonObjectFromString(StudentMerge.class, event.getEventPayload());
     mergeEntities.add(studentMergeMapper.toModel(mergedToPEN));
-    /**
-     * MergedFromStudent - Non-surviving / MergedPEN that has a status of "MERGED" and a merge direction of "TO" against active student
-     *
-     * MergedPEN is merged "TO" TruePEN
-     * StudentMerge entity
-     *    studentID       : MergedPEN's studentID   (merged student)
-     *    directionCode   : "TO"
-     *    mergeStudentID  : TruePEN's studentID     (active student)
-     */
+
     final StudentMerge mergedFromPEN = StudentMerge.builder().studentID(mergedToPEN.getMergeStudentID()).mergeStudentID(mergedToPEN.getStudentID())
         .studentMergeDirectionCode("TO").studentMergeSourceCode(mergedToPEN.getStudentMergeSourceCode())
         .createUser(mergedToPEN.getCreateUser()).updateUser(mergedToPEN.getUpdateUser()).build();
