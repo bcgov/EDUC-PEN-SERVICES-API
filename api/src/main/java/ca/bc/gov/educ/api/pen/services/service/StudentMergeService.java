@@ -150,7 +150,7 @@ public class StudentMergeService {
     final var updatedList = this.updateListBasedOnDBExistence(studentMergeEntities);
     if (!updatedList.isEmpty()) {
       this.studentMergeRepo.deleteAll(updatedList);
-      return Pair.of(updatedList, Optional.of(this.eventRepository.save(this.createServicesEvent(updatedList.get(0).getCreateUser(), updatedList.get(0).getUpdateUser(),
+      return Pair.of(updatedList, Optional.of(this.eventRepository.save(this.createServicesEvent(studentMergeEntities.get(0).getCreateUser(), studentMergeEntities.get(0).getUpdateUser(),
           JsonUtil.getJsonStringFromObject(updatedList.stream().map(StudentMergeMapper.mapper::toStructure).collect(Collectors.toList())), EventType.DELETE_MERGE, EventOutcome.MERGE_DELETED))));
     }
     return Pair.of(new ArrayList<>(), Optional.empty());
