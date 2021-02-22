@@ -12,6 +12,7 @@ import ca.bc.gov.educ.api.pen.services.struct.v1.Event;
 import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
 import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMerge;
 import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
+import ca.bc.gov.educ.api.pen.services.util.RequestUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
@@ -205,11 +206,13 @@ public class EventHandlerService {
   public Pair<byte[], Optional<ServicesEvent>> handleCreateMergeEvent(@NonNull final Event event) throws JsonProcessingException {
     final List<StudentMergeEntity> mergeEntities = new ArrayList<>();
     final StudentMerge mergedToPEN = JsonUtil.getJsonObjectFromString(StudentMerge.class, event.getEventPayload());
+    RequestUtil.setAuditColumnsForCreate(mergedToPEN);
     mergeEntities.add(studentMergeMapper.toModel(mergedToPEN));
 
     final StudentMerge mergedFromPEN = StudentMerge.builder().studentID(mergedToPEN.getMergeStudentID()).mergeStudentID(mergedToPEN.getStudentID())
         .studentMergeDirectionCode("TO").studentMergeSourceCode(mergedToPEN.getStudentMergeSourceCode())
         .createUser(mergedToPEN.getCreateUser()).updateUser(mergedToPEN.getUpdateUser()).build();
+    RequestUtil.setAuditColumnsForCreate(mergedFromPEN);
     mergeEntities.add(studentMergeMapper.toModel(mergedFromPEN));
     val pair = this.studentMergeService.createMerge(mergeEntities);
     val savedItems = pair.getLeft().stream().map(StudentMergeMapper.mapper::toStructure).collect(Collectors.toList());
