@@ -24,6 +24,10 @@ public class StudentHistory extends Student implements Serializable {
    */
   private static final long serialVersionUID = 1L;
   /**
+   * The Create date.
+   */
+  String createDate;
+  /**
    * The Update date.
    */
   String updateDate;
