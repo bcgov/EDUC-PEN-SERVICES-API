@@ -22,7 +22,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "SERVICES_EVENT")
+@Table(name = "PEN_SERVICES_EVENT")
 @Data
 @DynamicUpdate
 public class ServicesEvent {
