@@ -87,11 +87,13 @@ public class Subscriber extends PubSub implements Closeable {
    */
   public void onPenServicesEventsTopic(final Message message) {
     if (message != null) {
+      log.info("received message :: subject {}, getCrc32 {}, getSequence {}, getReplyTo {}, isRedelivered {}", message.getSubject(), message.getCrc32(), message.getSequence(), message.getReplyTo(), message.isRedelivered());
       try {
         final String eventString = new String(message.getData());
         final ChoreographedEvent event = JsonUtil.getJsonObjectFromString(ChoreographedEvent.class, eventString);
-        this.stanEventHandlerService.updateEventStatus(event);
         log.info("received event :: {} ", event);
+        this.stanEventHandlerService.updateEventStatus(event);
+
       } catch (final Exception ex) {
         log.error("Exception ", ex);
       }
