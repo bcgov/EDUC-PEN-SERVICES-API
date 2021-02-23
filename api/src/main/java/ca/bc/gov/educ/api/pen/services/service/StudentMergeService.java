@@ -91,7 +91,12 @@ public class StudentMergeService {
    * @return the list
    */
   private List<StudentMergeEntity> updateListBasedOnDBExistence(final List<StudentMergeEntity> studentMergeEntities) {
-    return studentMergeEntities.stream().filter(this.getStudentMergeEntityPresentPredicate()).collect(Collectors.toList());
+    final List<StudentMergeEntity> updatedEntities = new ArrayList<>();
+    for (val entity : studentMergeEntities) {
+      val studentMergeOptional = this.getStudentMergeEntityIfPresent(entity);
+      studentMergeOptional.ifPresent(updatedEntities::add);
+    }
+    return updatedEntities;
   }
 
   /**
@@ -112,12 +117,9 @@ public class StudentMergeService {
    *
    * @return the student merge entity present predicate
    */
-  private Predicate<StudentMergeEntity> getStudentMergeEntityPresentPredicate() {
-    return el -> {
-      val mergeOptional = this.studentMergeRepo.
-          findByStudentIDAndMergeStudentIDAndStudentMergeDirectionCode(el.getStudentID(), el.getMergeStudentID(), el.getStudentMergeDirectionCode());
-      return mergeOptional.isPresent();
-    };
+  private Optional<StudentMergeEntity> getStudentMergeEntityIfPresent(final StudentMergeEntity entity) {
+    return this.studentMergeRepo.
+            findByStudentIDAndMergeStudentIDAndStudentMergeDirectionCode(entity.getStudentID(), entity.getMergeStudentID(), entity.getStudentMergeDirectionCode());
   }
 
   /**
