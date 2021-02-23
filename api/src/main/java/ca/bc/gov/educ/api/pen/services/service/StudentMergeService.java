@@ -93,8 +93,7 @@ public class StudentMergeService {
   private List<StudentMergeEntity> updateListBasedOnDBExistence(final List<StudentMergeEntity> studentMergeEntities) {
     final List<StudentMergeEntity> updatedEntities = new ArrayList<>();
     for (val entity : studentMergeEntities) {
-      val studentMergeOptional = this.getStudentMergeEntityIfPresent(entity);
-      studentMergeOptional.ifPresent(updatedEntities::add);
+      this.getStudentMergeEntityIfPresent(entity).ifPresent(updatedEntities::add);
     }
     return updatedEntities;
   }
