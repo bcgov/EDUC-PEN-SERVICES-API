@@ -37,7 +37,7 @@ public class NatsConnection implements Closeable {
    */
   @Autowired
   public NatsConnection(final ApplicationProperties applicationProperties) throws IOException, InterruptedException {
-    this.natsCon = NatsConnection.connectToNats(applicationProperties.getServer(), applicationProperties.getMaxReconnect(), applicationProperties.getConnectionName());
+    this.natsCon = this.connectToNats(applicationProperties.getServer(), applicationProperties.getMaxReconnect(), applicationProperties.getConnectionName());
   }
 
   /**
@@ -46,7 +46,7 @@ public class NatsConnection implements Closeable {
    * @param connection the connection
    * @param events     the events
    */
-  private static void connectionListener(final Connection connection, final ConnectionListener.Events events) {
+  private void connectionListener(final Connection connection, final ConnectionListener.Events events) {
     log.info("NATS -> {}", events.toString());
   }
 
@@ -60,9 +60,9 @@ public class NatsConnection implements Closeable {
    * @throws IOException          the io exception
    * @throws InterruptedException the interrupted exception
    */
-  private static Connection connectToNats(final String serverUrl, final int maxReconnect, final String connectionName) throws IOException, InterruptedException {
+  private Connection connectToNats(final String serverUrl, final int maxReconnect, final String connectionName) throws IOException, InterruptedException {
     final io.nats.client.Options natsOptions = new io.nats.client.Options.Builder()
-        .connectionListener(NatsConnection::connectionListener)
+        .connectionListener(this::connectionListener)
         .maxPingsOut(5)
         .pingInterval(Duration.ofSeconds(2))
         .connectionName(connectionName)

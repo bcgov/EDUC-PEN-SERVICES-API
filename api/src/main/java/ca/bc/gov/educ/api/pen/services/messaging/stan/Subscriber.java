@@ -54,6 +54,7 @@ public class Subscriber extends PubSub implements Closeable {
     final Options options = new Options.Builder()
         .clusterId(applicationProperties.getStanCluster())
         .connectionLostHandler(this::connectionLostHandler)
+        .traceConnection()
         .natsConn(natsConnection)
         .maxPingsOut(30)
         .pingInterval(Duration.ofSeconds(2))
