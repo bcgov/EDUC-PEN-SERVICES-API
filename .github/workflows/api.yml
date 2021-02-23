@@ -1,6 +1,7 @@
 name: API CI
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -37,7 +38,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run unit tests
-        run: mvn -f pom.xml clean test
+        run: mvn clean package
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
@@ -49,5 +50,5 @@ jobs:
          # -Dsonar.host.url=https://sonarcloud.io
           #-Dsonar.organization=bcgov-sonarcloud
           #-Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+        #env:
+         # GITHUB_TOKEN: ${{ github.token }}

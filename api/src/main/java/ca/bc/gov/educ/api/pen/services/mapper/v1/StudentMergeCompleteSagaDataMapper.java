@@ -43,9 +43,9 @@ public interface StudentMergeCompleteSagaDataMapper {
   @Mapping(target = "mergeStudentID", source = "studentDemergeCompleteSagaData.mergedFromStudentID")
   @Mapping(target = "studentMergeDirectionCode", ignore = true)
   @Mapping(target = "studentMergeSourceCode", ignore = true)
-  @Mapping(target = "updateUser", source = "studentDemergeCompleteSagaData.updateUser")
   @Mapping(target = "studentMergeID", ignore = true)
-  @Mapping(target = "createUser", ignore = true)
+  @Mapping(target = "updateUser", source = "studentDemergeCompleteSagaData.updateUser")
+  @Mapping(target = "createUser", source = "studentDemergeCompleteSagaData.createUser")
   @Mapping(target = "createDate", ignore = true)
   @Mapping(target = "updateDate", ignore = true)
   StudentMerge toStudentMerge(StudentDemergeCompleteSagaData studentDemergeCompleteSagaData);
