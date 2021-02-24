@@ -53,7 +53,7 @@ public class RedissonSpringDataConfig {
       config.useSingleServer()
           .setAddress(this.applicationProperties.getRedisUrl());
     } else {
-      config.useClusterServers().setMasterConnectionMinimumIdleSize(5).setSlaveConnectionMinimumIdleSize(5)
+      config.useClusterServers().setMasterConnectionMinimumIdleSize(2).setSlaveConnectionMinimumIdleSize(2)
           .addNodeAddress(this.applicationProperties.getRedisUrl());
     }
     redisson = Redisson.create(config);
