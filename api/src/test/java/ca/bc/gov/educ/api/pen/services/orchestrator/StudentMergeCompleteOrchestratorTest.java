@@ -239,13 +239,15 @@ public class StudentMergeCompleteOrchestratorTest {
       sagaService.updateAttachedEntityDuringSagaProcess(sagaFromDBtoUpdate);
       saga = sagaService.findSagaById(saga.getSagaId()).orElseThrow();
     }
-    var studentMergePayload = StudentMerge.builder().studentID(studentID).mergeStudentID(mergeStudentID).studentMergeDirectionCode("FROM").studentMergeSourceCode("MI").build();
+    var studentHistoryPayload = StudentHistory.builder().studentHistoryID(studentHistoryID).studentID(studentID).legalFirstName("Jackson").build();
+    List<StudentHistory> copiedHistoryList = new ArrayList<>();
+    copiedHistoryList.add(studentHistoryPayload);
     var invocations = mockingDetails(messagePublisher).getInvocations().size();
     var event = Event.builder()
-            .eventType(CREATE_MERGE)
-            .eventOutcome(EventOutcome.MERGE_CREATED)
+            .eventType(CREATE_STUDENT_HISTORY)
+            .eventOutcome(EventOutcome.STUDENT_HISTORY_CREATED)
             .sagaId(saga.getSagaId())
-            .eventPayload(JsonUtil.getJsonStringFromObject(studentMergePayload))
+            .eventPayload(JsonUtil.getJsonStringFromObject(copiedHistoryList))
             .build();
     orchestrator.handleEvent(event);
     verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(STUDENT_API_TOPIC.toString()), eventCaptor.capture());
@@ -262,8 +264,8 @@ public class StudentMergeCompleteOrchestratorTest {
     assertThat(getStudentMergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID().toString()).isEqualTo(mergeStudentID);
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
-    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(CREATE_MERGE.toString());
-    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.MERGE_CREATED.toString());
+    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(CREATE_STUDENT_HISTORY.toString());
+    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.STUDENT_HISTORY_CREATED.toString());
   }
 
   @Test
@@ -318,13 +320,13 @@ public class StudentMergeCompleteOrchestratorTest {
       sagaService.updateAttachedEntityDuringSagaProcess(sagaFromDBtoUpdate);
       saga = sagaService.findSagaById(saga.getSagaId()).orElseThrow();
     }
-    var studentPayload = Student.builder().studentID(studentID).legalFirstName("Jack").build();
+    var studentMergePayload = StudentMerge.builder().studentID(studentID).mergeStudentID(mergeStudentID).studentMergeDirectionCode("FROM").studentMergeSourceCode("MI").build();
     var invocations = mockingDetails(messagePublisher).getInvocations().size();
     var event = Event.builder()
-            .eventType(UPDATE_STUDENT)
-            .eventOutcome(EventOutcome.STUDENT_UPDATED)
+            .eventType(CREATE_MERGE)
+            .eventOutcome(EventOutcome.MERGE_CREATED)
             .sagaId(saga.getSagaId())
-            .eventPayload(JsonUtil.getJsonStringFromObject(studentPayload))
+            .eventPayload(JsonUtil.getJsonStringFromObject(studentMergePayload))
             .build();
     orchestrator.handleEvent(event);
     verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(STUDENT_API_TOPIC.toString()), eventCaptor.capture());
@@ -342,8 +344,8 @@ public class StudentMergeCompleteOrchestratorTest {
     assertThat(getStudentMergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID().toString()).isEqualTo(mergeStudentID);
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
-    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(UPDATE_STUDENT.toString());
-    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.STUDENT_UPDATED.toString());
+    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(CREATE_MERGE.toString());
+    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.MERGE_CREATED.toString());
   }
 
   @Test
@@ -402,15 +404,13 @@ public class StudentMergeCompleteOrchestratorTest {
       sagaService.updateAttachedEntityDuringSagaProcess(sagaFromDBtoUpdate);
       saga = sagaService.findSagaById(saga.getSagaId()).orElseThrow();
     }
-    var studentHistoryPayload = StudentHistory.builder().studentHistoryID(studentHistoryID).studentID(studentID).legalFirstName("Jackson").build();
-    List<StudentHistory> copiedHistoryList = new ArrayList<>();
-    copiedHistoryList.add(studentHistoryPayload);
+    var studentPayload = Student.builder().studentID(studentID).legalFirstName("Jack").build();
     var invocations = mockingDetails(messagePublisher).getInvocations().size();
     var event = Event.builder()
-            .eventType(CREATE_STUDENT_HISTORY)
-            .eventOutcome(EventOutcome.STUDENT_HISTORY_CREATED)
+            .eventType(UPDATE_STUDENT)
+            .eventOutcome(EventOutcome.STUDENT_UPDATED)
             .sagaId(saga.getSagaId())
-            .eventPayload(JsonUtil.getJsonStringFromObject(copiedHistoryList))
+            .eventPayload(JsonUtil.getJsonStringFromObject(studentPayload))
             .build();
     orchestrator.handleEvent(event);
     verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(PEN_MATCH_API_TOPIC.toString()), eventCaptor.capture());
@@ -428,8 +428,8 @@ public class StudentMergeCompleteOrchestratorTest {
     assertThat(getStudentMergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID().toString()).isEqualTo(mergeStudentID);
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
-    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(CREATE_STUDENT_HISTORY.toString());
-    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.STUDENT_HISTORY_CREATED.toString());
+    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(UPDATE_STUDENT.toString());
+    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.STUDENT_UPDATED.toString());
   }
 
   @Test
