@@ -4,9 +4,11 @@ import ca.bc.gov.educ.api.pen.services.properties.ApplicationProperties;
 import ca.bc.gov.educ.api.pen.services.service.events.STANEventHandlerService;
 import ca.bc.gov.educ.api.pen.services.struct.v1.ChoreographedEvent;
 import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.nats.client.Connection;
 import io.nats.streaming.*;
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.threads.EnhancedQueueExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeoutException;
 
 import static ca.bc.gov.educ.api.pen.services.constants.TopicsEnum.PEN_SERVICES_EVENTS_TOPIC;
@@ -26,6 +29,9 @@ import static ca.bc.gov.educ.api.pen.services.constants.TopicsEnum.PEN_SERVICES_
 @Component
 @Slf4j
 public class Subscriber extends PubSub implements Closeable {
+  private final Executor executor = new EnhancedQueueExecutor.Builder()
+      .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("stan-subscriber-%d").build())
+      .setCorePoolSize(1).setMaximumPoolSize(1).setKeepAliveTime(Duration.ofSeconds(60)).build();
   /**
    * The Connection factory.
    */
@@ -74,8 +80,8 @@ public class Subscriber extends PubSub implements Closeable {
    */
   @PostConstruct
   public void subscribe() throws InterruptedException, TimeoutException, IOException {
-    final SubscriptionOptions options = new SubscriptionOptions.Builder().durableName("pen-services-api-pen-services-event-consumer").build();
-    this.connection.subscribe(PEN_SERVICES_EVENTS_TOPIC.toString(), "pen-services-api-pen-services-event", this::onPenServicesEventsTopic, options);
+    final SubscriptionOptions options = new SubscriptionOptions.Builder().durableName("psapi-event-consumer").build();
+    this.connection.subscribe(PEN_SERVICES_EVENTS_TOPIC.toString(), "ps-api-event", this::onPenServicesEventsTopic, options);
   }
 
   /**
@@ -87,16 +93,19 @@ public class Subscriber extends PubSub implements Closeable {
    */
   public void onPenServicesEventsTopic(final Message message) {
     if (message != null) {
-      log.info("received message :: subject {}, getCrc32 {}, getSequence {}, getReplyTo {}, isRedelivered {}", message.getSubject(), message.getCrc32(), message.getSequence(), message.getReplyTo(), message.isRedelivered());
-      try {
-        final String eventString = new String(message.getData());
-        final ChoreographedEvent event = JsonUtil.getJsonObjectFromString(ChoreographedEvent.class, eventString);
-        log.info("received event :: {} ", event);
-        this.stanEventHandlerService.updateEventStatus(event);
+      this.executor.execute(() -> {
+        log.info("received message :: subject {}, getCrc32 {}, getSequence {}, getReplyTo {}, isRedelivered {}", message.getSubject(), message.getCrc32(), message.getSequence(), message.getReplyTo(), message.isRedelivered());
+        try {
+          final String eventString = new String(message.getData());
+          final ChoreographedEvent event = JsonUtil.getJsonObjectFromString(ChoreographedEvent.class, eventString);
+          log.info("received event :: {} ", event);
+          this.stanEventHandlerService.updateEventStatus(event);
 
-      } catch (final Exception ex) {
-        log.error("Exception ", ex);
-      }
+        } catch (final Exception ex) {
+          log.error("Exception ", ex);
+        }
+      });
+
     }
   }
 

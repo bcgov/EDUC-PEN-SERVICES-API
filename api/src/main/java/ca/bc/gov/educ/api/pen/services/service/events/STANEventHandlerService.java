@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventStatus.MESSAGE_PUBLISHED;
@@ -48,6 +49,7 @@ public class STANEventHandlerService {
       if (eventOptional.isPresent()) {
         final var event = eventOptional.get();
         event.setEventStatus(MESSAGE_PUBLISHED.toString());
+        event.setUpdateDate(LocalDateTime.now());
         this.eventRepository.save(event);
       }
     }
