@@ -142,7 +142,6 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
     final StudentSagaData studentDataFromEventResponse = JsonUtil.getJsonObjectFromString(StudentSagaData.class, event.getEventPayload());
     studentDataFromEventResponse.setStatusCode(StudentStatusCodes.MERGE.getCode());
     studentDataFromEventResponse.setTrueStudentID(studentMergeCompleteSagaData.getStudentID().toString());
-    studentDataFromEventResponse.setLegalFirstName(studentMergeCompleteSagaData.getLegalFirstName());
     studentDataFromEventResponse.setHistoryActivityCode(StudentHistoryActivityCodes.MERGE.getCode());
 
     this.processStudentUpdate(saga, studentMergeCompleteSagaData, eventStates, studentDataFromEventResponse);
