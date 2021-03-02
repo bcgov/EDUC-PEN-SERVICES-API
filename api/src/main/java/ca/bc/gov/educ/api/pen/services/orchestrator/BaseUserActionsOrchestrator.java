@@ -13,7 +13,6 @@ import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.UUID;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventType.GET_STUDENT;
 import static ca.bc.gov.educ.api.pen.services.constants.EventType.UPDATE_STUDENT;
@@ -78,7 +77,7 @@ public abstract class BaseUserActionsOrchestrator<T> extends BaseOrchestrator<T>
    */
   protected void processStudentUpdate(final Saga saga, final BaseStudentSagaData sagaData, final SagaEventStates eventStates, final StudentSagaData studentUpdate) throws JsonProcessingException {
     studentUpdate.setUpdateUser(sagaData.getUpdateUser());
-    sagaData.setRequestStudentID(UUID.fromString(studentUpdate.getStudentID()));
+    sagaData.setRequestStudentID(studentUpdate.getStudentID());
     saga.setSagaState(UPDATE_STUDENT.toString()); // set current event as saga state.
     saga.setPayload(JsonUtil.getJsonStringFromObject(sagaData));
     this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);

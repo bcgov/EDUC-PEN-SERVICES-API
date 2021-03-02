@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.pen.services.endpoint.v1;
 
 import ca.bc.gov.educ.api.pen.services.struct.v1.Saga;
+import ca.bc.gov.educ.api.pen.services.struct.v1.SplitPenSagaData;
 import ca.bc.gov.educ.api.pen.services.struct.v1.StudentDemergeCompleteSagaData;
 import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMergeCompleteSagaData;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -57,4 +58,14 @@ public interface PenServicesSagaEndpoint {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK.")})
   ResponseEntity<String> completeStudentDemerge(@Validated @RequestBody StudentDemergeCompleteSagaData studentDemergeCompleteSagaData);
 
+  /**
+   * Complete split pen response entity.
+   *
+   * @param splitPenSagaData the split pen saga data
+   * @return the response entity
+   */
+  @PostMapping("/split-pen-saga")
+  @PreAuthorize("hasAuthority('SCOPE_STUDENT_SPLIT_PEN_SAGA')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK.")})
+  ResponseEntity<String> splitPen(@Validated @RequestBody SplitPenSagaData splitPenSagaData);
 }

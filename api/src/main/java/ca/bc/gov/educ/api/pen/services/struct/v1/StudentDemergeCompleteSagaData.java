@@ -3,17 +3,18 @@ package ca.bc.gov.educ.api.pen.services.struct.v1;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotNull;
-import java.util.UUID;
 
 /**
  * The type Student demerge complete saga data.
  */
 @SuperBuilder
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -29,7 +30,7 @@ public class StudentDemergeCompleteSagaData extends BaseStudentSagaData {
    * MergedFromStudent: student id.
    */
   @NotNull(message = "MergedFromStudent ID can not be null.")
-  UUID mergedFromStudentID;
+  String mergedFromStudentID;
 
   /**
    * MergeToPen: TruePEN.
@@ -41,6 +42,6 @@ public class StudentDemergeCompleteSagaData extends BaseStudentSagaData {
    * MergedFromStudent: student id.
    */
   @NotNull(message = "MergedToStudent ID can not be null.")
-  UUID mergedToStudentID;
+  String mergedToStudentID;
 
 }

@@ -29,14 +29,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventType.*;
 import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_STUDENT_DEMERGE_COMPLETE_SAGA;
-import static ca.bc.gov.educ.api.pen.services.constants.SagaStatusEnum.COMPLETED;
 import static ca.bc.gov.educ.api.pen.services.constants.TopicsEnum.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -153,7 +151,7 @@ public class StudentDemergeCompleteOrchestratorTest {
     if (sagaFromDBtoUpdateOptional.isPresent()) {
       var sagaFromDBtoUpdate = sagaFromDBtoUpdateOptional.get();
       var payload = JsonUtil.getJsonObjectFromString(StudentDemergeCompleteSagaData.class, sagaFromDBtoUpdate.getPayload());
-      payload.setRequestStudentID(UUID.fromString(mergedFromStudentID));
+      payload.setRequestStudentID(mergedFromStudentID);
       sagaFromDBtoUpdate.setPayload(JsonUtil.getJsonStringFromObject(payload));
       sagaService.updateAttachedEntityDuringSagaProcess(sagaFromDBtoUpdate);
       saga = sagaService.findSagaById(saga.getSagaId()).orElseThrow();
@@ -193,7 +191,7 @@ public class StudentDemergeCompleteOrchestratorTest {
       var sagaFromDBtoUpdate = sagaFromDBtoUpdateOptional.get();
       var payload = JsonUtil.getJsonObjectFromString(StudentDemergeCompleteSagaData.class, sagaFromDBtoUpdate.getPayload());
       payload.setLegalFirstName("Jackson");
-      payload.setRequestStudentID(UUID.fromString(mergedFromStudentID));
+      payload.setRequestStudentID(mergedFromStudentID);
       sagaFromDBtoUpdate.setPayload(JsonUtil.getJsonStringFromObject(payload));
       sagaService.updateAttachedEntityDuringSagaProcess(sagaFromDBtoUpdate);
       saga = sagaService.findSagaById(saga.getSagaId()).orElseThrow();
@@ -231,7 +229,7 @@ public class StudentDemergeCompleteOrchestratorTest {
     if (sagaFromDBtoUpdateOptional.isPresent()) {
       var sagaFromDBtoUpdate = sagaFromDBtoUpdateOptional.get();
       var payload = JsonUtil.getJsonObjectFromString(StudentDemergeCompleteSagaData.class, sagaFromDBtoUpdate.getPayload());
-      payload.setRequestStudentID(UUID.fromString(mergedFromStudentID));
+      payload.setRequestStudentID(mergedFromStudentID);
       sagaFromDBtoUpdate.setPayload(JsonUtil.getJsonStringFromObject(payload));
       sagaService.updateAttachedEntityDuringSagaProcess(sagaFromDBtoUpdate);
       saga = sagaService.findSagaById(saga.getSagaId()).orElseThrow();
@@ -258,8 +256,8 @@ public class StudentDemergeCompleteOrchestratorTest {
     assertThat(sagaFromDB).isPresent();
     var currentSaga = sagaFromDB.get();
     assertThat(currentSaga.getSagaState()).isEqualTo(DELETE_MERGE.toString());
-    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getStudentID().toString()).isEqualTo(mergedFromStudentID);
-    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID().toString()).isEqualTo(mergedFromStudentID);
+    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getStudentID()).isEqualTo(mergedFromStudentID);
+    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID()).isEqualTo(mergedFromStudentID);
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
     assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(UPDATE_STUDENT.toString());
@@ -272,7 +270,7 @@ public class StudentDemergeCompleteOrchestratorTest {
     if (sagaFromDBtoUpdateOptional.isPresent()) {
       var sagaFromDBtoUpdate = sagaFromDBtoUpdateOptional.get();
       var payload = JsonUtil.getJsonObjectFromString(StudentDemergeCompleteSagaData.class, sagaFromDBtoUpdate.getPayload());
-      payload.setRequestStudentID(UUID.fromString(mergedToStudentID));
+      payload.setRequestStudentID(mergedToStudentID);
       sagaFromDBtoUpdate.setPayload(JsonUtil.getJsonStringFromObject(payload));
       sagaService.updateAttachedEntityDuringSagaProcess(sagaFromDBtoUpdate);
       saga = sagaService.findSagaById(saga.getSagaId()).orElseThrow();
@@ -296,9 +294,9 @@ public class StudentDemergeCompleteOrchestratorTest {
     assertThat(sagaFromDB).isPresent();
     var currentSaga = sagaFromDB.get();
     assertThat(currentSaga.getSagaState()).isEqualTo(GET_STUDENT.toString());
-    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergedToStudentID().toString()).isEqualTo(mergedToStudentID);
-    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergedFromStudentID().toString()).isEqualTo(mergedFromStudentID);
-    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID().toString()).isEqualTo(mergedToStudentID);
+    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergedToStudentID()).isEqualTo(mergedToStudentID);
+    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergedFromStudentID()).isEqualTo(mergedFromStudentID);
+    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID()).isEqualTo(mergedToStudentID);
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
     assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(DELETE_MERGE.toString());
@@ -311,7 +309,7 @@ public class StudentDemergeCompleteOrchestratorTest {
     if (sagaFromDBtoUpdateOptional.isPresent()) {
       var sagaFromDBtoUpdate = sagaFromDBtoUpdateOptional.get();
       var payload = JsonUtil.getJsonObjectFromString(StudentDemergeCompleteSagaData.class, sagaFromDBtoUpdate.getPayload());
-      payload.setRequestStudentID(UUID.fromString(mergedToStudentID));
+      payload.setRequestStudentID(mergedToStudentID);
       sagaFromDBtoUpdate.setPayload(JsonUtil.getJsonStringFromObject(payload));
       sagaService.updateAttachedEntityDuringSagaProcess(sagaFromDBtoUpdate);
       saga = sagaService.findSagaById(saga.getSagaId()).orElseThrow();
@@ -338,9 +336,9 @@ public class StudentDemergeCompleteOrchestratorTest {
     assertThat(sagaFromDB).isPresent();
     var currentSaga = sagaFromDB.get();
     assertThat(currentSaga.getSagaState()).isEqualTo(UPDATE_STUDENT.toString());
-    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergedToStudentID().toString()).isEqualTo(mergedToStudentID);
-    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergedFromStudentID().toString()).isEqualTo(mergedFromStudentID);
-    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID().toString()).isEqualTo(mergedToStudentID);
+    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergedToStudentID()).isEqualTo(mergedToStudentID);
+    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergedFromStudentID()).isEqualTo(mergedFromStudentID);
+    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID()).isEqualTo(mergedToStudentID);
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
     assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(GET_STUDENT.toString());
@@ -353,7 +351,7 @@ public class StudentDemergeCompleteOrchestratorTest {
     if (sagaFromDBtoUpdateOptional.isPresent()) {
       var sagaFromDBtoUpdate = sagaFromDBtoUpdateOptional.get();
       var payload = JsonUtil.getJsonObjectFromString(StudentDemergeCompleteSagaData.class, sagaFromDBtoUpdate.getPayload());
-      payload.setRequestStudentID(UUID.fromString(mergedToStudentID));
+      payload.setRequestStudentID(mergedToStudentID);
       sagaFromDBtoUpdate.setPayload(JsonUtil.getJsonStringFromObject(payload));
       sagaService.updateAttachedEntityDuringSagaProcess(sagaFromDBtoUpdate);
       saga = sagaService.findSagaById(saga.getSagaId()).orElseThrow();
@@ -379,9 +377,9 @@ public class StudentDemergeCompleteOrchestratorTest {
     assertThat(sagaFromDB).isPresent();
     var currentSaga = sagaFromDB.get();
     assertThat(currentSaga.getSagaState()).isEqualTo(ADD_POSSIBLE_MATCH.toString());
-    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergedToStudentID().toString()).isEqualTo(mergedToStudentID);
-    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergedFromStudentID().toString()).isEqualTo(mergedFromStudentID);
-    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID().toString()).isEqualTo(mergedToStudentID);
+    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergedToStudentID()).isEqualTo(mergedToStudentID);
+    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getMergedFromStudentID()).isEqualTo(mergedFromStudentID);
+    assertThat(getStudentDemergeCompleteSagaDataFromJsonString(currentSaga.getPayload()).getRequestStudentID()).isEqualTo(mergedToStudentID);
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
     assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(UPDATE_STUDENT.toString());

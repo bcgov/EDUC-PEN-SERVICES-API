@@ -3,17 +3,18 @@ package ca.bc.gov.educ.api.pen.services.struct.v1;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotNull;
-import java.util.UUID;
 
 /**
  * The type Student merge complete saga data.
  */
 @SuperBuilder
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -35,7 +36,7 @@ public class StudentMergeCompleteSagaData extends BaseStudentSagaData {
    * The merge student id.
    */
   @NotNull(message = "Merge Student ID can not be null.")
-  UUID mergeStudentID;
+  String mergeStudentID;
 
   /**
    * The Student merge direction code.

@@ -31,4 +31,8 @@ public enum TopicsEnum {
    * Pen services demerge students saga topic topics enum.
    */
   PEN_SERVICES_DEMERGE_STUDENTS_SAGA_TOPIC,
+  /**
+   * Pen services split pen saga topic topics enum.
+   */
+  PEN_SERVICES_SPLIT_PEN_SAGA_TOPIC,
 }

@@ -141,7 +141,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
 
     final StudentSagaData studentDataFromEventResponse = JsonUtil.getJsonObjectFromString(StudentSagaData.class, event.getEventPayload());
     studentDataFromEventResponse.setStatusCode(StudentStatusCodes.MERGE.getCode());
-    studentDataFromEventResponse.setTrueStudentID(studentMergeCompleteSagaData.getStudentID().toString());
+    studentDataFromEventResponse.setTrueStudentID(studentMergeCompleteSagaData.getStudentID());
     studentDataFromEventResponse.setHistoryActivityCode(StudentHistoryActivityCodes.MERGE.getCode());
 
     this.processStudentUpdate(saga, studentMergeCompleteSagaData, eventStates, studentDataFromEventResponse);
@@ -194,7 +194,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
     final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
         .eventType(GET_STUDENT_HISTORY)
         .replyTo(this.getTopicToSubscribe())
-        .eventPayload(studentMergeCompleteSagaData.getMergeStudentID().toString())
+        .eventPayload(studentMergeCompleteSagaData.getMergeStudentID())
         .build();
     this.postMessageToTopic(STUDENT_API_TOPIC.toString(), nextEvent);
     log.info("message sent to STUDENT_API_TOPIC for GET_STUDENT_HISTORY Event.");
@@ -218,7 +218,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
     final List<StudentHistory> historyList = objectMapper.readValue(event.getEventPayload(), type);
     historyList.forEach(h -> {
       h.setStudentHistoryID(null);
-      h.setStudentID(studentMergeCompleteSagaData.getStudentID().toString());
+      h.setStudentID(studentMergeCompleteSagaData.getStudentID());
     });
     this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
@@ -248,7 +248,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
     final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
         .eventType(GET_POSSIBLE_MATCH)
         .replyTo(this.getTopicToSubscribe())
-        .eventPayload(studentMergeCompleteSagaData.getStudentID().toString())
+        .eventPayload(studentMergeCompleteSagaData.getStudentID())
         .build();
     this.postMessageToTopic(PEN_MATCH_API_TOPIC.toString(), nextEvent);
     log.info("message sent to PEN_MATCH_API_TOPIC for GET_POSSIBLE_MATCH Event.");
@@ -272,7 +272,7 @@ public class StudentMergeCompleteOrchestrator extends BaseUserActionsOrchestrato
         constructCollectionType(List.class, PossibleMatch.class);
     final List<PossibleMatch> allPossibleMatches = objectMapper.readValue(event.getEventPayload(), type);
     final List<PossibleMatch> possibleMatches = allPossibleMatches.stream()
-        .filter(item -> item.getMatchedStudentID().equals(studentMergeCompleteSagaData.getMergeStudentID().toString()))
+        .filter(item -> item.getMatchedStudentID().equals(studentMergeCompleteSagaData.getMergeStudentID()))
         .collect(Collectors.toList());
 
     this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
