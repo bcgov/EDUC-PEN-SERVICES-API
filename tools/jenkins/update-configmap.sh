@@ -78,6 +78,9 @@ $KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body
 
 #READ_SAGA
 "$KCADM_FILE_BIN_FOLDER"/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body "{\"description\": \"Scope to READ a SAGA record by its ID\",\"id\": \"PEN_SERVICES_READ_SAGA\",\"name\": \"PEN_SERVICES_READ_SAGA\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
+#STUDENT_SPLIT_PEN_SAGA
+$KCADM_FILE_BIN_FOLDER/kcadm.sh create client-scopes -r $SOAM_KC_REALM_ID --body "{\"description\": \"Scope to start processing split pen saga\",\"id\": \"STUDENT_SPLIT_PEN_SAGA\",\"name\": \"STUDENT_SPLIT_PEN_SAGA\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
 ###########################################################
 #Setup for config-map
 ###########################################################

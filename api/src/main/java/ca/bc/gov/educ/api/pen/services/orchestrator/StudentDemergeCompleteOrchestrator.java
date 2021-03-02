@@ -79,7 +79,7 @@ public class StudentDemergeCompleteOrchestrator extends BaseUserActionsOrchestra
     final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
         .eventType(GET_STUDENT_HISTORY)
         .replyTo(this.getTopicToSubscribe())
-        .eventPayload(studentDemergeCompleteSagaData.getMergedFromStudentID().toString())
+        .eventPayload(studentDemergeCompleteSagaData.getMergedFromStudentID())
         .build();
     this.postMessageToTopic(STUDENT_API_TOPIC.toString(), nextEvent);
     log.info("message sent to STUDENT_API_TOPIC for GET_STUDENT_HISTORY Event.");
@@ -245,8 +245,8 @@ public class StudentDemergeCompleteOrchestrator extends BaseUserActionsOrchestra
     this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
     final PossibleMatch possibleMatch = new PossibleMatch();
-    possibleMatch.setStudentID(studentDemergeCompleteSagaData.getMergedToStudentID().toString());
-    possibleMatch.setMatchedStudentID(studentDemergeCompleteSagaData.getMergedFromStudentID().toString());
+    possibleMatch.setStudentID(studentDemergeCompleteSagaData.getMergedToStudentID());
+    possibleMatch.setMatchedStudentID(studentDemergeCompleteSagaData.getMergedFromStudentID());
     possibleMatch.setMatchReasonCode(MatchReasonCodes.DEMERGE);
     possibleMatch.setCreateUser(studentDemergeCompleteSagaData.getCreateUser());
     possibleMatch.setUpdateUser(studentDemergeCompleteSagaData.getUpdateUser());

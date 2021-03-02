@@ -7,10 +7,7 @@ import ca.bc.gov.educ.api.pen.services.exception.SagaRuntimeException;
 import ca.bc.gov.educ.api.pen.services.mapper.SagaMapper;
 import ca.bc.gov.educ.api.pen.services.orchestrator.base.Orchestrator;
 import ca.bc.gov.educ.api.pen.services.service.SagaService;
-import ca.bc.gov.educ.api.pen.services.struct.v1.BaseStudentSagaData;
-import ca.bc.gov.educ.api.pen.services.struct.v1.Saga;
-import ca.bc.gov.educ.api.pen.services.struct.v1.StudentDemergeCompleteSagaData;
-import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMergeCompleteSagaData;
+import ca.bc.gov.educ.api.pen.services.struct.v1.*;
 import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
 
-import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_STUDENT_DEMERGE_COMPLETE_SAGA;
-import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA;
+import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.*;
 import static lombok.AccessLevel.PRIVATE;
 
 /**
@@ -78,6 +74,11 @@ public class PenServicesSagaController implements PenServicesSagaEndpoint {
     return this.processServicesSaga(PEN_SERVICES_STUDENT_DEMERGE_COMPLETE_SAGA, studentDemergeCompleteSagaData);
   }
 
+  @Override
+  public ResponseEntity<String> splitPen(final SplitPenSagaData splitPenSagaData) {
+    return this.processServicesSaga(PEN_SERVICES_SPLIT_PEN_SAGA, splitPenSagaData);
+  }
+
   /**
    * Process services saga response entity.
    *
@@ -87,7 +88,7 @@ public class PenServicesSagaController implements PenServicesSagaEndpoint {
    */
   private ResponseEntity<String> processServicesSaga(final SagaEnum sagaName, final BaseStudentSagaData sagaData) {
     try {
-      final var studentID = sagaData.getStudentID();
+      final var studentID = UUID.fromString(sagaData.getStudentID());
       final var sagaInProgress = this.getSagaService().findAllByStudentIDAndStatusIn(studentID, sagaName.toString(), this.getStatusesFilter());
       if (!sagaInProgress.isEmpty()) {
         return ResponseEntity.status(HttpStatus.CONFLICT).build();

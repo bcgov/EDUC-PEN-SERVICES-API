@@ -31,6 +31,14 @@ public enum EventOutcome {
    */
   STUDENT_FOUND,
   /**
+   * Student created event outcome.
+   */
+  STUDENT_CREATED,
+  /**
+   * Student already exist event outcome.
+   */
+  STUDENT_ALREADY_EXIST,
+  /**
    * Student updated event outcome.
    */
   STUDENT_UPDATED,

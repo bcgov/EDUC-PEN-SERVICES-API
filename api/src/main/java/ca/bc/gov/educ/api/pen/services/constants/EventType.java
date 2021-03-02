@@ -25,6 +25,11 @@ public enum EventType {
   GET_STUDENT,
 
   /**
+   * Create student event type.
+   */
+  CREATE_STUDENT,
+
+  /**
    * Update Student.
    */
   UPDATE_STUDENT,

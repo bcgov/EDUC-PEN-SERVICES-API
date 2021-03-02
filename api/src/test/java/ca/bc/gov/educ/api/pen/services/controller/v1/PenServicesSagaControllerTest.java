@@ -21,8 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
-import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_STUDENT_DEMERGE_COMPLETE_SAGA;
-import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_STUDENT_MERGE_COMPLETE_SAGA;
+import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.*;
 import static ca.bc.gov.educ.api.pen.services.constants.v1.URL.PEN_SERVICES;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -170,6 +169,38 @@ public class PenServicesSagaControllerTest {
             .andDo(print()).andExpect(status().isConflict());
   }
 
+  // Split pen
+  @Test
+  public void testProcessSplitPen_GivenInvalidPayload_ShouldReturnStatusBadRequest() throws Exception {
+    this.mockMvc.perform(post(PEN_SERVICES + "/split-pen-saga")
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "STUDENT_SPLIT_PEN_SAGA")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON)
+      .content(placeholderInvalidSagaData()))
+      .andDo(print()).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void testProcessSplitPen_GivenValidPayload_ShouldReturnStatusOk() throws Exception {
+    this.mockMvc.perform(post(PEN_SERVICES + "/split-pen-saga")
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "STUDENT_SPLIT_PEN_SAGA")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON)
+      .content(placeholderSplitPenSagaData()))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$").exists());
+  }
+
+  @Test
+  public void testProcessSplitPen_GivenValidPayload_and_SagaWithSameStudentIdStarted_ShouldReturnStatusConflict() throws Exception {
+    var payload = placeholderSplitPenSagaData();
+    sagaService.createSagaRecordInDB(PEN_SERVICES_SPLIT_PEN_SAGA.toString(), "Test", payload, UUID.fromString(studentID));
+    this.mockMvc.perform(post(PEN_SERVICES + "/split-pen-saga")
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "STUDENT_SPLIT_PEN_SAGA")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON)
+      .content(payload))
+      .andDo(print()).andExpect(status().isConflict());
+  }
 
   protected String placeholderInvalidSagaData() {
     return " {\n" +
@@ -204,6 +235,20 @@ public class PenServicesSagaControllerTest {
             "    \"mergedFromPen\": \"" + mergedFromPen + "\",\n" +
             "    \"historyActivityCode\": \"DEMERGE\"\n" +
             "  }";
+  }
+
+  protected String placeholderSplitPenSagaData() {
+    return " {\n" +
+      "    \"createUser\": \"test\",\n" +
+      "    \"updateUser\": \"test\",\n" +
+      "    \"studentID\": \"" + studentID + "\",\n" +
+      "    \"historyActivityCode\": \"MERGE\",\n" +
+      "    \"legalFirstName\": \"Jack\",\n" +
+      "    \"newStudent\": {\n" +
+      "       \"studentID\": \"" + studentID + "\",\n" +
+      "       \"legalFirstName\": \"Jack\"\n" +
+      "    }\n" +
+      "  }";
   }
 
 
