@@ -294,6 +294,18 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    * @param sagaData the payload string as object.
    */
   protected void markSagaComplete(final Event event, final Saga saga, final T sagaData) {
+    this.markSagaComplete(event, saga, sagaData, "");
+  }
+
+  /**
+   * This method updates the DB and marks the process as complete.
+   *
+   * @param event    the current event.
+   * @param saga     the saga model object.
+   * @param sagaData the payload string as object.
+   * @param payloadToSubscribers the event payload to subscribers
+   */
+  protected void markSagaComplete(final Event event, final Saga saga, final T sagaData, final String payloadToSubscribers) {
     log.trace("payload is {}", sagaData);
     if (this.shouldSendNotificationEvent) {
       final var finalEvent = new NotificationEvent();
@@ -303,7 +315,7 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
       finalEvent.setSagaStatus(COMPLETED.toString());
       finalEvent.setStudentID(saga.getStudentID().toString());
       finalEvent.setSagaName(this.getSagaName());
-      finalEvent.setEventPayload(""); // no need to send payload as it is not required by the subscribers.
+      finalEvent.setEventPayload(payloadToSubscribers);
       this.postMessageToTopic(this.getTopicToSubscribe(), finalEvent);
     }
 

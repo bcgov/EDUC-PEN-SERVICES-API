@@ -34,6 +34,7 @@ import java.util.concurrent.TimeoutException;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventType.*;
 import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_SPLIT_PEN_SAGA;
+import static ca.bc.gov.educ.api.pen.services.constants.SagaStatusEnum.COMPLETED;
 import static ca.bc.gov.educ.api.pen.services.constants.TopicsEnum.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -280,6 +281,40 @@ public class SplitPenOrchestratorTest {
     assertThat(sagaStates.size()).isEqualTo(1);
     assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(EventType.CREATE_STUDENT.toString());
     assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.STUDENT_ALREADY_EXIST.toString());
+  }
+
+  @Test
+  public void testMarkSplitPenSagaComplete_givenEventAndSagaData_shouldPostEventToStudentApi() throws IOException, InterruptedException, TimeoutException {
+    var invocations = mockingDetails(messagePublisher).getInvocations().size();
+    var newStudentID = UUID.randomUUID().toString();
+    var possibleMatch = PossibleMatch.builder()
+      .possibleMatchID(UUID.randomUUID().toString())
+      .studentID(newStudentID)
+      .matchedStudentID(UUID.randomUUID().toString())
+      .build();
+    var possibleMatchesPayload = List.of(possibleMatch);
+
+    var event = Event.builder()
+      .eventType(EventType.ADD_POSSIBLE_MATCH)
+      .eventOutcome(EventOutcome.POSSIBLE_MATCH_ADDED)
+      .sagaId(saga.getSagaId())
+      .studentID(studentID)
+      .eventPayload(JsonUtil.getJsonStringFromObject(possibleMatchesPayload))
+      .build();
+
+    orchestrator.handleEvent(event);
+    verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(PEN_SERVICES_SPLIT_PEN_SAGA_TOPIC.toString()), eventCaptor.capture());
+    var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(eventCaptor.getValue()));
+    assertThat(newEvent.getEventType()).isEqualTo(MARK_SAGA_COMPLETE);
+    assertThat(newEvent.getEventPayload()).isEqualTo(newStudentID);
+
+    var sagaFromDB = sagaService.findSagaById(saga.getSagaId());
+    assertThat(sagaFromDB).isPresent();
+    assertThat(sagaFromDB.get().getSagaState()).isEqualTo(COMPLETED.toString());
+    var sagaStates = sagaService.findAllSagaStates(saga);
+    assertThat(sagaStates.size()).isEqualTo(1);
+    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(EventType.ADD_POSSIBLE_MATCH.toString());
+    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.POSSIBLE_MATCH_ADDED.toString());
   }
 
   /**
