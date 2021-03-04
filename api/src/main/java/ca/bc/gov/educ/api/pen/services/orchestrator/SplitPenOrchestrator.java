@@ -9,6 +9,8 @@ import ca.bc.gov.educ.api.pen.services.service.SagaService;
 import ca.bc.gov.educ.api.pen.services.struct.v1.*;
 import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +35,11 @@ public class SplitPenOrchestrator extends BaseUserActionsOrchestrator<SplitPenSa
   protected static final StudentMapper studentMapper = StudentMapper.mapper;
 
   /**
+   * The Ob mapper.
+   */
+  private final ObjectMapper obMapper = new ObjectMapper();
+
+  /**
    * Instantiates a new Base orchestrator.
    *
    * @param sagaService      the saga service
@@ -54,7 +61,7 @@ public class SplitPenOrchestrator extends BaseUserActionsOrchestrator<SplitPenSa
         .step(CREATE_STUDENT, STUDENT_ALREADY_EXIST, ADD_POSSIBLE_MATCH, this::addPossibleMatchesToStudent)
         .or()
         .step(CREATE_STUDENT, STUDENT_CREATED, ADD_POSSIBLE_MATCH, this::addPossibleMatchesToStudent)
-        .end(ADD_POSSIBLE_MATCH, POSSIBLE_MATCH_ADDED);
+        .step(ADD_POSSIBLE_MATCH, POSSIBLE_MATCH_ADDED, MARK_SAGA_COMPLETE, this::markSplitPenSagaComplete);
   }
 
   /**
@@ -168,4 +175,25 @@ public class SplitPenOrchestrator extends BaseUserActionsOrchestrator<SplitPenSa
     log.info("message sent to PEN_MATCH_API_TOPIC for ADD_POSSIBLE_MATCH Event.");
   }
 
+  /**
+   * Mark the process as complete
+   *
+   * @param event             the event
+   * @param saga              the saga
+   * @param splitPenSagaData  the split pen saga data
+   * @throws JsonProcessingException the json processing exception
+   */
+  public void markSplitPenSagaComplete(final Event event, final Saga saga, final SplitPenSagaData splitPenSagaData) throws JsonProcessingException {
+    var studentID = "";
+
+    JavaType type = obMapper.getTypeFactory().
+      constructCollectionType(List.class, PossibleMatch.class);
+
+    List<PossibleMatch> possibleMatches = obMapper.readValue(event.getEventPayload(), type);
+    if(possibleMatches.size() > 0) {
+      studentID = possibleMatches.get(0).getStudentID();
+    }
+
+    markSagaComplete(event, saga, splitPenSagaData, studentID);
+  }
 }
