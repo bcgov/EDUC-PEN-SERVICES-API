@@ -185,15 +185,15 @@ public class SplitPenOrchestrator extends BaseUserActionsOrchestrator<SplitPenSa
    * @throws JsonProcessingException the json processing exception
    */
   public void markSplitPenSagaComplete(final Event event, final Saga saga, final SplitPenSagaData splitPenSagaData) throws JsonProcessingException {
-    var studentID = "";
-
     JavaType type = obMapper.getTypeFactory().
       constructCollectionType(List.class, PossibleMatch.class);
 
     List<PossibleMatch> possibleMatches = obMapper.readValue(event.getEventPayload(), type);
-    if(possibleMatches.size() > 0) {
-      studentID = possibleMatches.get(0).getStudentID();
-    }
+    var studentID = possibleMatches.stream()
+      .filter(match -> ! match.getStudentID().equals(splitPenSagaData.getStudentID()))
+      .findFirst()
+      .map(PossibleMatch::getStudentID)
+      .orElse("");
 
     markSagaComplete(event, saga, splitPenSagaData, studentID);
   }
