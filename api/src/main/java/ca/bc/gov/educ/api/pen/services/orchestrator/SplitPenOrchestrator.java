@@ -115,6 +115,7 @@ public class SplitPenOrchestrator extends BaseUserActionsOrchestrator<SplitPenSa
   public void createStudent(final Event event, final Saga saga, final SplitPenSagaData splitPenSagaData) throws JsonProcessingException {
     var pen = event.getEventPayload();
     var student = splitPenSagaData.getNewStudent();
+    student.setStudentID(null);
     student.setPen(pen);
     student.setDemogCode(StudentDemogCodes.ACCEPTED.getCode());
     student.setStatusCode(StudentStatusCodes.ACTIVE.getCode());

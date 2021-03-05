@@ -97,6 +97,7 @@ public class SplitPenOrchestratorTest {
     MockitoAnnotations.openMocks(this);
     var payload = placeholderSplitPenSagaData();
     sagaData = getSplitPenSagaDataFromJsonString(payload);
+    sagaData.setStudentID(studentID);
     sagaData.setPen("123456789");
     sagaData.setLocalID("20345678");
     sagaData.setGradeCode("01");
@@ -330,7 +331,7 @@ public class SplitPenOrchestratorTest {
       "    \"historyActivityCode\": \"MERGE\",\n" +
       "    \"legalFirstName\": \"Jack\",\n" +
       "    \"newStudent\": {\n" +
-      "       \"studentID\": null,\n" +
+      "       \"studentID\": \"" + studentID + "\",\n" +
       "       \"legalFirstName\": \"Jack\"\n" +
       "    }\n" +
       "  }";
