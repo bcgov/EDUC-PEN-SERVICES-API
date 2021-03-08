@@ -92,7 +92,7 @@ public class RestUtils {
    */
   @PostConstruct
   public void init() {
-    bgTask.execute(()->{
+    this.bgTask.execute(() -> {
       this.setGenderCodesMap();
       log.info("Called student api and loaded {} gender codes", this.genderCodesMap.values().size());
       this.setGradeCodesMap();
@@ -150,7 +150,8 @@ public class RestUtils {
     try {
       writeLock.lock();
       this.genderCodesMap.clear();
-      final List<GenderCode> genderCodes = this.webClient.get().uri(this.props.getStudentApiURL() + "/gender-codes").header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToFlux(GenderCode.class).collectList().block();
+      final List<GenderCode> genderCodes = this.webClient.get().uri(this.props.getStudentApiURL(), uri -> uri.path("/gender-codes").build())
+          .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToFlux(GenderCode.class).collectList().block();
       this.genderCodesMap.put(GENDER_CODES, genderCodes);
     } finally {
       writeLock.unlock();
@@ -166,7 +167,7 @@ public class RestUtils {
     try {
       writeLock.lock();
       this.gradeCodesMap.clear();
-      final List<GradeCode> gradeCodes = this.webClient.get().uri(this.props.getStudentApiURL() + "/grade-codes").header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToFlux(GradeCode.class).collectList().block();
+      final List<GradeCode> gradeCodes = this.webClient.get().uri(this.props.getStudentApiURL(), uri -> uri.path("/grade-codes").build()).header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToFlux(GradeCode.class).collectList().block();
       this.gradeCodesMap.put(GRADE_CODES, gradeCodes);
     } finally {
       writeLock.unlock();
