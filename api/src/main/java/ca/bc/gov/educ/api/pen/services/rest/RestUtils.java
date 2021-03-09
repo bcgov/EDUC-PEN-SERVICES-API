@@ -93,10 +93,14 @@ public class RestUtils {
   @PostConstruct
   public void init() {
     this.bgTask.execute(() -> {
-      this.setGenderCodesMap();
-      log.info("Called student api and loaded {} gender codes", this.genderCodesMap.values().size());
-      this.setGradeCodesMap();
-      log.info("Called student api and loaded {} grade codes", this.gradeCodesMap.values().size());
+      try {
+        this.setGenderCodesMap();
+        log.info("Called student api and loaded {} gender codes", this.genderCodesMap.values().size());
+        this.setGradeCodesMap();
+        log.info("Called student api and loaded {} grade codes", this.gradeCodesMap.values().size());
+      } catch (final Exception ex) {
+        log.error("Exception ex", ex);
+      }
     });
   }
 
@@ -199,7 +203,10 @@ public class RestUtils {
     log.info("url is :: {}", url);
     final ParameterizedTypeReference<RestPageImpl<Student>> responseType = new ParameterizedTypeReference<>() {
     };
-    final var studentResponse = this.webClient.get().uri(url).header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToMono(responseType).block();
+    final var studentResponse = this.webClient.get()
+        .uri(url)
+        .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .retrieve().bodyToMono(responseType).block();
     final var optionalStudent = Objects.requireNonNull(studentResponse).getContent().stream().findFirst();
     if (optionalStudent.isPresent()) {
       final var firstStudent = optionalStudent.get();
