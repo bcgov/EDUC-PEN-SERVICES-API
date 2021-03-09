@@ -1,14 +1,12 @@
 package ca.bc.gov.educ.api.pen.services.support;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.test.context.TestConfiguration;
 import redis.embedded.RedisServer;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-@Configuration
-@Profile({"test", "testWebclient"})
+@TestConfiguration
 public class TestRedisConfiguration {
 
   private final RedisServer redisServer;
