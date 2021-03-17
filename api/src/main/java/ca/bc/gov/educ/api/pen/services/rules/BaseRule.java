@@ -85,20 +85,17 @@ public abstract class BaseRule implements Rule {
   }
 
   protected boolean fieldContainsRepeatedCharacters(final String fieldValue){
-    int repeatedCharsCount=0;
+    if(StringUtils.isBlank(fieldValue) || fieldValue.length() < 2 || this.fieldStartsWithInvertedPrefix(fieldValue)){
+      return false;
+    }
+
     final Character firstChar= fieldValue.charAt(0);
-    if (this.fieldStartsWithInvertedPrefix(fieldValue)) { return false; }
     for(final Character character : fieldValue.toCharArray()){
-      if(firstChar.equals(character)){
-        repeatedCharsCount++;
+      if(!firstChar.equals(character)){
+        return false;
       }
     }
-   if(repeatedCharsCount==fieldValue.length()){
-     if(fieldValue.length()>=2){
-       return true;
-     }
-   }
-    return false;
+    return true;
   }
 
   /**
