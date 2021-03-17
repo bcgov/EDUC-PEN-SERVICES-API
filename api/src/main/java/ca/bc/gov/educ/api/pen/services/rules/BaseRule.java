@@ -84,6 +84,20 @@ public abstract class BaseRule implements Rule {
     return false;
   }
 
+  protected boolean fieldContainsRepeatedCharacters(final String fieldValue){
+    if(StringUtils.isBlank(fieldValue) || fieldValue.length() < 2 || this.fieldStartsWithInvertedPrefix(fieldValue)){
+      return false;
+    }
+
+    final Character firstChar= fieldValue.charAt(0);
+    for(final Character character : fieldValue.toCharArray()){
+      if(!firstChar.equals(character)){
+        return false;
+      }
+    }
+    return true;
+  }
+
   /**
    * Gets entity.
    *
@@ -114,6 +128,7 @@ public abstract class BaseRule implements Rule {
     return fieldValue.contains(SPACE);
   }
 
+
   /**
    * Field starts with inverted prefix boolean.
    *
@@ -138,6 +153,7 @@ public abstract class BaseRule implements Rule {
    * |    | Check: Field contains any of: ^ (carat), _   (underscore), ' (single quote/apostrophe).    |                                                                     |         |             |
    * | V5 | PreReq: Skip this check on LEGALFIRST if V3 already   recorded for LEGALFIRST.             | LEGALLAST, LEGALFIRST, LEGALMID, USUALLAST, USUALFIRST,   USUALMID  | ERROR   | BEGININVALID  |
    * |    | Check: Field begins with any of: *(asterisk), _   (underscore), " (double quote), - (dash) |                                                                     |         |             |
+   * | V6 | Check: Name field has only repeated characters (i.e. JJJJJ)                                | LEGALLAST, LEGALFIRST, USUALLAST, USUALFIRST                        | ERROR   | REPEATCHARS |
    * | V7 | PreReq: Skip this check on LEGALFIRST if V3 already   recorded for LEGALFIRST.             | LEGALLAST, LEGALFIRST, USUALLAST, USUALFIRST                        | WARNING | BLANKINNAME |
    * |    | Check: Field has blanks within the field                                                   |                                                                     |         |             |
    * | V8 | PreReq: Skip this check on LEGALFIRST if V3 already   recorded for LEGALFIRST.             | LEGALLAST, LEGALFIRST, LEGALMID, USUALLAST, USUALFIRST,   USUALMID  | WARNING | INVPREFIX   |
@@ -162,6 +178,9 @@ public abstract class BaseRule implements Rule {
     }
     if (this.fieldStartsWithInvertedPrefix(fieldValue)) {
       results.add(this.createValidationEntity(WARNING, INV_PREFIX, fieldCode));
+    }
+    if (this.fieldContainsRepeatedCharacters(fieldValue)){
+      results.add(this.createValidationEntity(ERROR,REPEATED_CHARS,fieldCode));
     }
   }
 
