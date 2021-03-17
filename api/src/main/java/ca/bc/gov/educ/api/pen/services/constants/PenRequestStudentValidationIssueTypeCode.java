@@ -59,6 +59,10 @@ public enum PenRequestStudentValidationIssueTypeCode {
    */
   INV_CHARS("INVCHARS"),
   /**
+   * Repeated chars pen request  student validation issue type code.
+   */
+  REPEATED_CHARS("REPEATCHARS"),
+  /**
    * Inv prefix pen request  student validation issue type code.
    */
   INV_PREFIX("INVPREFIX"),

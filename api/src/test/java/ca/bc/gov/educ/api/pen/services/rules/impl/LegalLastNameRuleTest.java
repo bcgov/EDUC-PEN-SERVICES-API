@@ -63,6 +63,10 @@ public class LegalLastNameRuleTest {
   @Parameters({
       "null, 1",
       ", 1",
+      "JJ, 1",
+      "JJXXY, 0",
+      "JJJ, 1",
+      "JJJJ, 1",
       "XX, 1",
       "ZZ, 1",
       "BLANK, 1",
