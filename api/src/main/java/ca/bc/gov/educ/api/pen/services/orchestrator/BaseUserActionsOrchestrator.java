@@ -13,6 +13,7 @@ import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.UUID;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventType.GET_STUDENT;
 import static ca.bc.gov.educ.api.pen.services.constants.EventType.UPDATE_STUDENT;
@@ -57,13 +58,17 @@ public abstract class BaseUserActionsOrchestrator<T> extends BaseOrchestrator<T>
     saga.setSagaState(GET_STUDENT.toString()); // set current event as saga state.
     saga.setPayload(JsonUtil.getJsonStringFromObject(sagaData));
     this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
-    final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
+    final Event nextEvent = this.buildGetStudentByPenEvent(saga.getSagaId(), pen);
+    this.postMessageToTopic(STUDENT_API_TOPIC.toString(), nextEvent);
+    log.info("message sent to STUDENT_API_TOPIC for GET_STUDENT Event.");
+  }
+
+  protected Event buildGetStudentByPenEvent(final UUID sagaID, final String pen) {
+    return Event.builder().sagaId(sagaID)
         .eventType(GET_STUDENT)
         .replyTo(this.getTopicToSubscribe())
         .eventPayload(pen)
         .build();
-    this.postMessageToTopic(STUDENT_API_TOPIC.toString(), nextEvent);
-    log.info("message sent to STUDENT_API_TOPIC for GET_STUDENT Event.");
   }
 
   /**

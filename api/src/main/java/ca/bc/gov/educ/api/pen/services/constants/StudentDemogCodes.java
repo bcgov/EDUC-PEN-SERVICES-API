@@ -9,7 +9,11 @@ public enum StudentDemogCodes {
   /**
    * Accepted
    */
-  ACCEPTED("A");
+  ACCEPTED("A"),
+  /**
+   * Accepted
+   */
+  CONFIRMED("C");
 
   /**
    * The Code.

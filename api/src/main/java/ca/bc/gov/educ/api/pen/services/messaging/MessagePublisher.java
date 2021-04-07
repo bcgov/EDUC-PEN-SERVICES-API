@@ -2,8 +2,12 @@ package ca.bc.gov.educ.api.pen.services.messaging;
 
 import io.nats.client.Connection;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.time.Duration;
+import java.util.Optional;
 
 /**
  * The type Message publisher.
@@ -36,5 +40,13 @@ public class MessagePublisher {
    */
   public void dispatchMessage(final String subject, final byte[] message) {
     this.connection.publish(subject, message);
+  }
+
+  public Optional<String> requestMessage(final String subject, final byte[] message) throws InterruptedException {
+    val response = this.connection.request(subject, message, Duration.ofSeconds(30)).getData();
+    if (response == null || response.length == 0) {
+      return Optional.empty();
+    }
+    return Optional.of(new String(response));
   }
 }

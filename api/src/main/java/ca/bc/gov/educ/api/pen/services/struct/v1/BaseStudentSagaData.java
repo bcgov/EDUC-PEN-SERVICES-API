@@ -17,11 +17,6 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BaseStudentSagaData extends BaseStudentData {
-  /**
-   * The Student id.
-   */
-  @NotNull(message = "studentID cannot be null")
-  private String studentID;
 
   /**
    * The History activity code.
