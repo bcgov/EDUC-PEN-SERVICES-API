@@ -11,7 +11,7 @@ public enum StudentDemogCodes {
    */
   ACCEPTED("A"),
   /**
-   * Accepted
+   * Confirmed
    */
   CONFIRMED("C");
 
