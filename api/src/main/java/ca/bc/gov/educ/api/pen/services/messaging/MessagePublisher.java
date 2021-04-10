@@ -43,10 +43,13 @@ public class MessagePublisher {
   }
 
   public Optional<String> requestMessage(final String subject, final byte[] message) throws InterruptedException {
+    log.info("requesting from NATS on topic :: {} with payload :: {}", subject, new String(message));
     val response = this.connection.request(subject, message, Duration.ofSeconds(30)).getData();
     if (response == null || response.length == 0) {
       return Optional.empty();
     }
-    return Optional.of(new String(response));
+    final String responseValue = new String(response);
+    log.info("got response from NATS :: {}", responseValue);
+    return Optional.of(responseValue);
   }
 }
