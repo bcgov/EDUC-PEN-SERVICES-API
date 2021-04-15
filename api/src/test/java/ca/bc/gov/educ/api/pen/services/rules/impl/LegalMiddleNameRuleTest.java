@@ -43,10 +43,10 @@ public class LegalMiddleNameRuleTest {
   @Before
   public void setup() throws IOException {
     MockitoAnnotations.initMocks(this);
-    rule = new LegalMiddleNameRule(service);
+    this.rule = new LegalMiddleNameRule(this.service);
     if (penNameTexts == null) {
       final File file = new File(
-          Objects.requireNonNull(getClass().getClassLoader().getResource("pen_names_text_sample.json")).getFile()
+          Objects.requireNonNull(this.getClass().getClassLoader().getResource("pen_names_text_sample.json")).getFile()
       );
       penNameTexts = new ObjectMapper().readValue(file, new TypeReference<>() {
       });
@@ -63,8 +63,8 @@ public class LegalMiddleNameRuleTest {
   @Parameters({
       "null, 0",
       ", 0",
-      "XX, 1",
-      "ZZ, 1",
+      "XXAAA, 1",
+      "ZZAAA, 1",
       "BLANK, 1",
       "AVAILABLE, 1",
       "ABC, 1",
@@ -84,13 +84,13 @@ public class LegalMiddleNameRuleTest {
       "DUMMY, 1",
       "DUPLICATE, 1"
   })
-  public void testValidate_givenDifferentLegalMiddleName_shouldReturnResults(String legalMiddleName, int expectedErrors) {
+  public void testValidate_givenDifferentLegalMiddleName_shouldReturnResults(String legalMiddleName, final int expectedErrors) {
     if ("null".equals(legalMiddleName)) {
       legalMiddleName = null;
     }
-    when(service.getPenNameTexts()).thenReturn(penNameTexts);
-    PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(false).transactionID(UUID.randomUUID().toString()).legalMiddleNames(legalMiddleName).build();
-    var result = rule.validate(payload);
+    when(this.service.getPenNameTexts()).thenReturn(penNameTexts);
+    final PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(false).transactionID(UUID.randomUUID().toString()).legalMiddleNames(legalMiddleName).build();
+    final var result = this.rule.validate(payload);
     assertThat(result).size().isEqualTo(expectedErrors);
   }
 
@@ -107,7 +107,7 @@ public class LegalMiddleNameRuleTest {
       "null,XX,ahjks, 0",
       ",XX,ahjks, 0",
       "XX,XX,ahjks, 1",
-      "ZZ,XX,ahjks, 1",
+      "ZZ,XX,ahjks, 0",
       "john,john,cox, 1",
       "yang,Mingwei,yang, 1",
       "Vel,Marco,Vel, 1",
@@ -115,13 +115,13 @@ public class LegalMiddleNameRuleTest {
       "Om Mishra,Om,Mishra,1",
 
   })
-  public void testValidate_givenDifferentLegalMiddleNameAndFirstNameAndLastName_shouldReturnResults(String legalMiddleName, String legalFirstName, String legalLastName, int expectedErrors) {
+  public void testValidate_givenDifferentLegalMiddleNameAndFirstNameAndLastName_shouldReturnResults(String legalMiddleName, final String legalFirstName, final String legalLastName, final int expectedErrors) {
     if ("null".equals(legalMiddleName)) {
       legalMiddleName = null;
     }
-    when(service.getPenNameTexts()).thenReturn(penNameTexts);
-    PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(false).transactionID(UUID.randomUUID().toString()).legalMiddleNames(legalMiddleName).legalLastName(legalLastName).legalFirstName(legalFirstName).build();
-    var result = rule.validate(payload);
+    when(this.service.getPenNameTexts()).thenReturn(penNameTexts);
+    final PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(false).transactionID(UUID.randomUUID().toString()).legalMiddleNames(legalMiddleName).legalLastName(legalLastName).legalFirstName(legalFirstName).build();
+    final var result = this.rule.validate(payload);
     assertThat(result).size().isEqualTo(expectedErrors);
   }
 }

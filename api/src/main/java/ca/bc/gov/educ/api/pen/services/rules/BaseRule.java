@@ -85,7 +85,7 @@ public abstract class BaseRule implements Rule {
   }
 
   protected boolean fieldContainsRepeatedCharacters(final String fieldValue){
-    if(StringUtils.isBlank(fieldValue) || fieldValue.length() < 2 || this.fieldStartsWithInvertedPrefix(fieldValue)){
+    if (StringUtils.isBlank(fieldValue) || fieldValue.length() < 2) {
       return false;
     }
 
@@ -137,7 +137,7 @@ public abstract class BaseRule implements Rule {
    */
   protected boolean fieldStartsWithInvertedPrefix(final String fieldValue) {
     for (final String invPrefix : invertedPrefix) {
-      if (fieldValue.startsWith(invPrefix)) {
+      if (fieldValue.length() > invPrefix.length() && fieldValue.startsWith(invPrefix)) {
         return true;
       }
     }
@@ -179,9 +179,7 @@ public abstract class BaseRule implements Rule {
     if (this.fieldStartsWithInvertedPrefix(fieldValue)) {
       results.add(this.createValidationEntity(WARNING, INV_PREFIX, fieldCode));
     }
-    if (this.fieldContainsRepeatedCharacters(fieldValue)){
-      results.add(this.createValidationEntity(ERROR,REPEATED_CHARS,fieldCode));
-    }
+
   }
 
 
