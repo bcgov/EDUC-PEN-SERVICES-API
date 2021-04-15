@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.api.pen.services.rules.impl;
 
-import ca.bc.gov.educ.api.pen.services.rules.BaseRule;
+import ca.bc.gov.educ.api.pen.services.rules.BaseLastNameFirstNameRule;
 import ca.bc.gov.educ.api.pen.services.service.PENNameTextService;
 import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationIssue;
 import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
@@ -17,7 +17,7 @@ import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidat
  * The type Usual first name rule.
  */
 @Slf4j
-public class UsualFirstNameRule extends BaseRule {
+public class UsualFirstNameRule extends BaseLastNameFirstNameRule {
   /**
    * The Pen name text service.
    */
