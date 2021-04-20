@@ -19,11 +19,7 @@ public class ApplicationProperties {
    * The constant PEN_SERVICES_API.
    */
   public static final String PEN_SERVICES_API = "PEN-SERVICES-API";
-  /**
-   * The Stan cluster.
-   */
-  @Value("${stan.cluster}")
-  String stanCluster;
+  public static final String STREAM_NAME = "PEN_SERVICES_EVENTS";
   /**
    * The Client id.
    */

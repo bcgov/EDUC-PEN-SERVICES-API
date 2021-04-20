@@ -14,11 +14,11 @@ import static ca.bc.gov.educ.api.pen.services.constants.EventStatus.MESSAGE_PUBL
 
 
 /**
- * This class will process events from STAN, which is used in choreography pattern, where messages are published if a student is created or updated.
+ * This class will process events from Jet Stream, which is used in choreography pattern.
  */
 @Service
 @Slf4j
-public class STANEventHandlerService {
+public class JetStreamEventHandlerService {
 
   /**
    * The Event repository.
@@ -32,7 +32,7 @@ public class STANEventHandlerService {
    * @param eventRepository the ServicesEventRepository event repository
    */
   @Autowired
-  public STANEventHandlerService(final ServicesEventRepository eventRepository) {
+  public JetStreamEventHandlerService(final ServicesEventRepository eventRepository) {
     this.eventRepository = eventRepository;
   }
 

@@ -52,4 +52,14 @@ public class MessagePublisher {
     log.info("got response from NATS :: {}", responseValue);
     return Optional.of(responseValue);
   }
+
+/*  @Scheduled(fixedRate = 10000)
+  public void test() throws JsonProcessingException {
+    val event = new NotificationEvent();
+    event.setEventType(EventType.GET_STUDENT);
+    event.setEventOutcome(EventOutcome.STUDENT_FOUND);
+    event.setSagaStatus("INITIATED");
+    event.setEventPayload("");
+    this.dispatchMessage(PEN_SERVICES_API_TOPIC.toString(), JsonUtil.getJsonBytesFromObject(event));
+  }*/
 }
