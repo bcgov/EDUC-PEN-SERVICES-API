@@ -2,7 +2,7 @@ package ca.bc.gov.educ.api.pen.services.service.events;
 
 import ca.bc.gov.educ.api.pen.services.constants.EventOutcome;
 import ca.bc.gov.educ.api.pen.services.messaging.MessagePublisher;
-import ca.bc.gov.educ.api.pen.services.messaging.stan.Publisher;
+import ca.bc.gov.educ.api.pen.services.messaging.jetstream.Publisher;
 import ca.bc.gov.educ.api.pen.services.model.ServicesEvent;
 import ca.bc.gov.educ.api.pen.services.repository.ServicesEventRepository;
 import ca.bc.gov.educ.api.pen.services.repository.StudentMergeRepository;

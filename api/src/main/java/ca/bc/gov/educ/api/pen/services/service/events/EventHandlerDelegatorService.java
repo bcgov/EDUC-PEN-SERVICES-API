@@ -1,7 +1,7 @@
 package ca.bc.gov.educ.api.pen.services.service.events;
 
 import ca.bc.gov.educ.api.pen.services.messaging.MessagePublisher;
-import ca.bc.gov.educ.api.pen.services.messaging.stan.Publisher;
+import ca.bc.gov.educ.api.pen.services.messaging.jetstream.Publisher;
 import ca.bc.gov.educ.api.pen.services.model.ServicesEvent;
 import ca.bc.gov.educ.api.pen.services.struct.v1.Event;
 import io.nats.client.Message;
@@ -41,7 +41,7 @@ public class EventHandlerDelegatorService {
   /**
    * The Publisher.
    */
-  private final Publisher publisher; // STAN publisher for choreography
+  private final Publisher publisher; // Jet Stream publisher for choreography
 
   /**
    * Instantiates a new Event handler delegator service.
@@ -87,14 +87,14 @@ public class EventHandlerDelegatorService {
           log.trace(PAYLOAD_LOG, event.getEventPayload());
           pairedResult = this.getEventHandlerService().handleCreateMergeEvent(event);
           this.publishToNATS(event, message, isSynchronous, pairedResult.getLeft());
-          pairedResult.getRight().ifPresent(this::publishToSTAN);
+          pairedResult.getRight().ifPresent(this::publishToJetStream);
           break;
         case DELETE_MERGE:
           log.info("received delete merge data :: {}", event.getSagaId());
           log.trace(PAYLOAD_LOG, event.getEventPayload());
           pairedResult = this.getEventHandlerService().handleDeleteMergeEvent(event);
           this.publishToNATS(event, message, isSynchronous, pairedResult.getLeft());
-          pairedResult.getRight().ifPresent(this::publishToSTAN);
+          pairedResult.getRight().ifPresent(this::publishToJetStream);
           break;
         default:
           log.info("silently ignoring other event :: {}", event);
@@ -126,7 +126,7 @@ public class EventHandlerDelegatorService {
    *
    * @param event the event
    */
-  private void publishToSTAN(@NonNull final ServicesEvent event) {
+  private void publishToJetStream(@NonNull final ServicesEvent event) {
     this.publisher.dispatchChoreographyEvent(event);
   }
 

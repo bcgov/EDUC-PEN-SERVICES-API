@@ -4,7 +4,7 @@ import ca.bc.gov.educ.api.pen.services.constants.EventOutcome;
 import ca.bc.gov.educ.api.pen.services.constants.EventStatus;
 import ca.bc.gov.educ.api.pen.services.constants.EventType;
 import ca.bc.gov.educ.api.pen.services.messaging.NatsConnection;
-import ca.bc.gov.educ.api.pen.services.messaging.stan.Publisher;
+import ca.bc.gov.educ.api.pen.services.messaging.jetstream.Publisher;
 import ca.bc.gov.educ.api.pen.services.model.ServicesEvent;
 import ca.bc.gov.educ.api.pen.services.repository.ServicesEventRepository;
 import net.javacrumbs.shedlock.core.LockAssert;
@@ -26,13 +26,13 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @RunWith(SpringRunner.class)
-public class STANEventSchedulerTest {
+public class JetStreamEventSchedulerTest {
 
   @Autowired
   ServicesEventRepository eventRepository;
 
   @Autowired
-  STANEventScheduler stanEventScheduler;
+  JetStreamEventScheduler jetStreamEventScheduler;
 
   @Autowired
   NatsConnection natsConnection;
@@ -51,25 +51,25 @@ public class STANEventSchedulerTest {
   }
 
   @Test
-  public void testFindAndPublishStudentEventsToSTAN_givenNoRecordsInDB_shouldDoNothing() {
+  public void testFindAndPublishStudentEventsToJetStream_givenNoRecordsInDB_shouldDoNothing() {
     final var invocations = mockingDetails(this.publisher).getInvocations().size();
-    this.stanEventScheduler.findAndPublishStudentEventsToSTAN();
+    this.jetStreamEventScheduler.findAndPublishStudentEventsToJetStream();
     verify(this.publisher, atMost(invocations)).dispatchChoreographyEvent(any());
   }
 
   @Test
-  public void testFindAndPublishStudentEventsToSTAN_givenRecordsInDBButLessThan5Minutes_shouldDoNothing() {
+  public void testFindAndPublishStudentEventsToJetStream_givenRecordsInDBButLessThan5Minutes_shouldDoNothing() {
     final var invocations = mockingDetails(this.publisher).getInvocations().size();
     this.eventRepository.save(this.createPlaceHolderEvent(1));
-    this.stanEventScheduler.findAndPublishStudentEventsToSTAN();
+    this.jetStreamEventScheduler.findAndPublishStudentEventsToJetStream();
     verify(this.publisher, atMost(invocations)).dispatchChoreographyEvent(any());
   }
 
   @Test
-  public void testFindAndPublishStudentEventsToSTAN_givenRecordsInDBButGreaterThan5Minutes_shouldSendMessagesToSTAN() {
+  public void testFindAndPublishStudentEventsToJetStream_givenRecordsInDBButGreaterThan5Minutes_shouldSendMessagesToJetStream() {
     final var invocations = mockingDetails(this.publisher).getInvocations().size();
     this.eventRepository.save(this.createPlaceHolderEvent(10));
-    this.stanEventScheduler.findAndPublishStudentEventsToSTAN();
+    this.jetStreamEventScheduler.findAndPublishStudentEventsToJetStream();
     verify(this.publisher, atLeast(invocations + 1)).dispatchChoreographyEvent(any());
   }
 

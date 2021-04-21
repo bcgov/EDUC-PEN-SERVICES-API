@@ -43,10 +43,10 @@ public class LegalFirstNameRuleTest {
   @Before
   public void setup() throws IOException {
     MockitoAnnotations.initMocks(this);
-    rule = new LegalFirstNameRule(service);
+    this.rule = new LegalFirstNameRule(this.service);
     if (penNameTexts == null) {
       final File file = new File(
-          Objects.requireNonNull(getClass().getClassLoader().getResource("pen_names_text_sample.json")).getFile()
+          Objects.requireNonNull(this.getClass().getClassLoader().getResource("pen_names_text_sample.json")).getFile()
       );
       penNameTexts = new ObjectMapper().readValue(file, new TypeReference<>() {
       });
@@ -61,6 +61,7 @@ public class LegalFirstNameRuleTest {
    */
   @Test
   @Parameters({
+      "LLLLL, 1",
       "null, 1",
       "JJ, 1",
       "JJXXY, 0",
@@ -86,15 +87,16 @@ public class LegalFirstNameRuleTest {
       "FANCYPANTS, 1",
       "ESTATE, 1",
       "DUMMY, 1",
+
       "DUPLICATE, 1"
   })
-  public void testValidate_givenDifferentLegalFirstName_shouldReturnResults(String legalFirstName, int expectedErrors) {
+  public void testValidate_givenDifferentLegalFirstName_shouldReturnResults(String legalFirstName, final int expectedErrors) {
     if ("null".equals(legalFirstName)) {
       legalFirstName = null;
     }
-    when(service.getPenNameTexts()).thenReturn(penNameTexts);
-    PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(false).transactionID(UUID.randomUUID().toString()).legalFirstName(legalFirstName).build();
-    var result = rule.validate(payload);
+    when(this.service.getPenNameTexts()).thenReturn(penNameTexts);
+    final PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(false).transactionID(UUID.randomUUID().toString()).legalFirstName(legalFirstName).build();
+    final var result = this.rule.validate(payload);
     assertThat(result).size().isEqualTo(expectedErrors);
   }
 }
