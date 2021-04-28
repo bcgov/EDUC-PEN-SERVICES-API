@@ -33,6 +33,10 @@ public enum MatchReasonCodes {
    */
   DR,
   /**
+   * Ministry match reason codes.
+   */
+  MINISTRY,
+  /**
    * Mi match reason codes.
    */
   MI,
