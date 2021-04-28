@@ -9,7 +9,7 @@ public enum StudentMergeSourceCodes {
   /**
    * Ministry Identified
    */
-  MI("MI");
+  MI("MINISTRY");
 
   /**
    * The Code.
