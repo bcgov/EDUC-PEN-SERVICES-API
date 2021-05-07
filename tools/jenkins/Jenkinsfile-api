@@ -14,21 +14,21 @@ pipeline{
       OWNER = 'bcgov'
       JOB_NAME = 'master'
       TAG = 'latest'
-      TARGET_ENV = 'dev'
-      STAGING_ENV = 'Dev'
-      TARGET_ENVIRONMENT = "${NAMESPACE}-${TARGET_ENV}"
+     TARGET_ENV = 'dev'
+     STAGING_ENV = 'Dev'
+     TARGET_ENVIRONMENT = "${NAMESPACE}-${TARGET_ENV}"
 
-      APP_DOMAIN = 'pathfinder.gov.bc.ca'
-      SOURCE_REPO_REF = 'master'
-      SOURCE_REPO_URL = 'https://github.com/${OWNER}/${REPO_NAME}.git'
-      DC_URL = "https://raw.githubusercontent.com/${OWNER}/${REPO_NAME}/master/tools/openshift/api.dc.yaml"
-      MIN_REPLICAS = "1"
-      MAX_REPLICAS = "1"
-      MIN_CPU = "75m"
-      MAX_CPU = "150m"
-      MIN_MEM = "400Mi"
-      MAX_MEM = "800Mi"
-  }
+     APP_DOMAIN = 'pathfinder.gov.bc.ca'
+     SOURCE_REPO_REF = 'master'
+     SOURCE_REPO_URL = 'https://github.com/${OWNER}/${REPO_NAME}.git'
+     DC_URL = "https://raw.githubusercontent.com/${OWNER}/${REPO_NAME}/master/tools/openshift/api.dc.yaml"
+     MIN_REPLICAS = "1"
+     MAX_REPLICAS = "1"
+     MIN_CPU = "100m"
+     MAX_CPU = "200m"
+     MIN_MEM = "400Mi"
+     MAX_MEM = "800Mi"
+   }
   stages{
     stage('Initialize') {
       steps {
