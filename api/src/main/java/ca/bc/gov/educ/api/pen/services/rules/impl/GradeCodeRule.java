@@ -122,14 +122,14 @@ public class GradeCodeRule extends BaseRule {
     final var gradeCodes = this.restUtils.getGradeCodes();
     final String gradeCode = validationPayload.getGradeCode();
     if (StringUtils.isBlank(gradeCode)) {
-      results.add(this.createValidationEntity(ERROR, GRADE_CD_ERR, GRADE_CODE));
+      results.add(this.createValidationEntity(WARNING, GRADE_CD_ERR, GRADE_CODE));
     } else {
       final String finalGradeCode = gradeCode.trim();
       final long filteredCount = gradeCodes.stream().filter(gradeCode1 -> LocalDateTime.now().isAfter(gradeCode1.getEffectiveDate())
           && LocalDateTime.now().isBefore(gradeCode1.getExpiryDate())
           && finalGradeCode.equalsIgnoreCase(gradeCode1.getGradeCode())).count();
       if (filteredCount < 1) {
-        results.add(this.createValidationEntity(ERROR, GRADE_CD_ERR, GRADE_CODE));
+        results.add(this.createValidationEntity(WARNING, GRADE_CD_ERR, GRADE_CODE));
       }
     }
     if (results.isEmpty() && this.noDOBErrorReported(validationPayload.getIssueList())) {
