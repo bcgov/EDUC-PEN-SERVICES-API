@@ -75,8 +75,8 @@ public class PenServicesApiResourceApplication {
     @Override
     public void configure(final WebSecurity web) {
       web.ignoring().antMatchers("/v3/api-docs/**",
-          "/actuator/health", "/actuator/prometheus", "/actuator/**",
-          "/swagger-ui/**");
+        "/actuator/health", "/actuator/prometheus", "/actuator/metrics/**",
+        "/swagger-ui/**");
     }
 
     @Override
