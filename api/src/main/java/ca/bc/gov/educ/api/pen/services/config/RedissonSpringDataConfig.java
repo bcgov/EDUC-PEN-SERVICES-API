@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.pen.services.config;
 
 import ca.bc.gov.educ.api.pen.services.properties.ApplicationProperties;
+import lombok.val;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.StringCodec;
@@ -8,11 +9,13 @@ import org.redisson.config.Config;
 import org.redisson.spring.data.connection.RedissonConnectionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  * The type Redisson spring data config.
  */
 @Configuration
+@Profile("!testWebclient")
 public class RedissonSpringDataConfig {
 
   /**
@@ -48,7 +51,7 @@ public class RedissonSpringDataConfig {
   @Bean(destroyMethod = "shutdown")
   public RedissonClient redisson() {
     final RedissonClient redisson;
-    final Config config = new Config();
+    val config = new Config();
     if ("local".equals(this.applicationProperties.getEnvironment())) {
       config.useSingleServer()
           .setAddress(this.applicationProperties.getRedisUrl());
