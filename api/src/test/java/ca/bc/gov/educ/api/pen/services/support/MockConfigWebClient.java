@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.pen.services.messaging.MessageSubscriber;
 import ca.bc.gov.educ.api.pen.services.messaging.NatsConnection;
 import ca.bc.gov.educ.api.pen.services.messaging.jetstream.Publisher;
 import ca.bc.gov.educ.api.pen.services.messaging.jetstream.Subscriber;
+import ca.bc.gov.educ.api.pen.services.service.PenService;
 import ca.bc.gov.educ.api.pen.services.service.events.EventHandlerService;
 import io.nats.client.Connection;
 import org.mockito.Mockito;
@@ -87,5 +88,11 @@ public class MockConfigWebClient {
   @Primary
   public EventHandlerService eventHandlerService() {
     return Mockito.mock(EventHandlerService.class);
+  }
+
+  @Bean
+  @Primary
+  public PenService penService() {
+    return Mockito.mock(PenService.class);
   }
 }
