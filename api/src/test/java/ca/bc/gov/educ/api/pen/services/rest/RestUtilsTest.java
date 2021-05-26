@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.pen.services.rest;
 
+import ca.bc.gov.educ.api.pen.services.PenServicesApiResourceApplication;
 import ca.bc.gov.educ.api.pen.services.struct.Student;
+import ca.bc.gov.educ.api.pen.services.support.TestRedisConfiguration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.val;
 import org.junit.After;
@@ -26,7 +28,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = {TestRedisConfiguration.class, PenServicesApiResourceApplication.class})
 @ActiveProfiles("testWebclient")
 public class RestUtilsTest {
 
