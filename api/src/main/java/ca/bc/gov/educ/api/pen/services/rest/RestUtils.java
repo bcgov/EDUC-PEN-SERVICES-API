@@ -6,9 +6,7 @@ import ca.bc.gov.educ.api.pen.services.struct.v1.GenderCode;
 import ca.bc.gov.educ.api.pen.services.struct.v1.GradeCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.threads.EnhancedQueueExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -20,10 +18,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -34,9 +30,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Component
 @Slf4j
 public class RestUtils {
-  private final Executor bgTask = new EnhancedQueueExecutor.Builder()
-      .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("bg-task-executor-%d").build())
-      .setCorePoolSize(1).setMaximumPoolSize(2).setKeepAliveTime(Duration.ofSeconds(60)).build();
   /**
    * The constant GRADE_CODES.
    */
@@ -92,16 +85,12 @@ public class RestUtils {
    */
   @PostConstruct
   public void init() {
-    this.bgTask.execute(() -> {
-      try {
-        this.setGenderCodesMap();
-        log.info("Called student api and loaded {} gender codes", this.genderCodesMap.values().size());
-        this.setGradeCodesMap();
-        log.info("Called student api and loaded {} grade codes", this.gradeCodesMap.values().size());
-      } catch (final Exception ex) {
-        log.error("Exception ex", ex);
-      }
-    });
+    if (this.props.getIsHttpRampUp()) {
+      this.setGenderCodesMap();
+      log.info("Called student api and loaded {} gender codes", this.genderCodesMap.values().size());
+      this.setGradeCodesMap();
+      log.info("Called student api and loaded {} grade codes", this.gradeCodesMap.values().size());
+    }
   }
 
   /**

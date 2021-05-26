@@ -65,4 +65,7 @@ public class ApplicationProperties {
    */
   @Value("${nats.connectionName}")
   private String connectionName;
+
+  @Value("${ramp.up.http}")
+  private Boolean isHttpRampUp;
 }
