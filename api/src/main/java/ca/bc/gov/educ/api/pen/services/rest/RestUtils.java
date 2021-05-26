@@ -7,6 +7,7 @@ import ca.bc.gov.educ.api.pen.services.struct.v1.GradeCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -20,7 +21,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -85,7 +85,7 @@ public class RestUtils {
    */
   @PostConstruct
   public void init() {
-    if (this.props.getIsHttpRampUp()) {
+    if (this.props.getIsHttpRampUp() != null && this.props.getIsHttpRampUp()) {
       this.setGenderCodesMap();
       log.info("Called student api and loaded {} gender codes", this.genderCodesMap.values().size());
       this.setGradeCodesMap();
@@ -99,7 +99,7 @@ public class RestUtils {
    * @return the gender codes from student api
    */
   public List<GenderCode> getGenderCodes() {
-    final Lock readLock = this.genderLock.readLock();
+    val readLock = this.genderLock.readLock();
     try {
       readLock.lock();
       return this.genderCodesMap.get(GENDER_CODES);
@@ -114,7 +114,7 @@ public class RestUtils {
    * @return the grade codes
    */
   public List<GradeCode> getGradeCodes() {
-    final Lock readLock = this.gradeLock.readLock();
+    val readLock = this.gradeLock.readLock();
     try {
       readLock.lock();
       return this.gradeCodesMap.get(GRADE_CODES);
@@ -139,12 +139,12 @@ public class RestUtils {
    * Sets gender codes map.
    */
   public void setGenderCodesMap() {
-    final Lock writeLock = this.genderLock.writeLock();
+    val writeLock = this.genderLock.writeLock();
     try {
       writeLock.lock();
       this.genderCodesMap.clear();
       final List<GenderCode> genderCodes = this.webClient.get().uri(this.props.getStudentApiURL(), uri -> uri.path("/gender-codes").build())
-          .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToFlux(GenderCode.class).collectList().block();
+        .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).retrieve().bodyToFlux(GenderCode.class).collectList().block();
       this.genderCodesMap.put(GENDER_CODES, genderCodes);
     } finally {
       writeLock.unlock();
@@ -156,7 +156,7 @@ public class RestUtils {
    * Sets grade codes map.
    */
   public void setGradeCodesMap() {
-    final Lock writeLock = this.gradeLock.writeLock();
+    val writeLock = this.gradeLock.writeLock();
     try {
       writeLock.lock();
       this.gradeCodesMap.clear();
@@ -181,24 +181,24 @@ public class RestUtils {
     criteriaList.add(criteria);
     final List<Search> searches = new LinkedList<>();
     searches.add(Search.builder().searchCriteriaList(criteriaList).build());
-    final ObjectMapper objectMapper = new ObjectMapper();
-    final String criteriaJSON = objectMapper.writeValueAsString(searches);
+    val objectMapper = new ObjectMapper();
+    val criteriaJSON = objectMapper.writeValueAsString(searches);
     final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(this.props.getStudentApiURL() + "/paginated")
-        .queryParam("searchCriteriaList", criteriaJSON)
-        .queryParam("pageSize", 1)
-        .queryParam("sort", "{\"pen\":\"DESC\"}");
+      .queryParam("searchCriteriaList", criteriaJSON)
+      .queryParam("pageSize", 1)
+      .queryParam("sort", "{\"pen\":\"DESC\"}");
 
     final var url = builder.toUriString();
     log.info("url is :: {}", url);
     final ParameterizedTypeReference<RestPageImpl<Student>> responseType = new ParameterizedTypeReference<>() {
     };
     final var studentResponse = this.webClient.get()
-        .uri(url)
-        .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        .retrieve().bodyToMono(responseType).block();
+      .uri(url)
+      .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+      .retrieve().bodyToMono(responseType).block();
     final var optionalStudent = Objects.requireNonNull(studentResponse).getContent().stream().findFirst();
     if (optionalStudent.isPresent()) {
-      final var firstStudent = optionalStudent.get();
+      val firstStudent = optionalStudent.get();
       return Integer.parseInt(firstStudent.getPen().substring(0, 8));
     }
     log.warn("PEN could not be retrieved, returning 0 for transactionID :: {}", transactionID);
