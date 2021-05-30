@@ -36,7 +36,7 @@
     <guava.version>30.1.1-jre</guava.version>
     <ojdbc.version>12.2.0.1</ojdbc.version>
     <embedded-redis.version>0.7.3</embedded-redis.version>
-    <redisson-spring-data.version>3.15.4</redisson-spring-data.version>
+    <redisson.version>3.15.1</redisson.version><!-- DO NOT CHANGE -->
   </properties>
 
   <parent>
@@ -186,13 +186,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.springframework.data</groupId>
-      <artifactId>spring-data-redis</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.redisson</groupId>
-      <artifactId>redisson-spring-data-24</artifactId>
-      <version>${redisson-spring-data.version}</version>
+      <artifactId>redisson-spring-boot-starter</artifactId>
+      <version>${redisson.version}</version>
     </dependency>
     <dependency>
       <groupId>it.ozimov</groupId>
