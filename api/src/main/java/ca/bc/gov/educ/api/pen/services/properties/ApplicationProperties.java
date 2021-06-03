@@ -68,4 +68,7 @@ public class ApplicationProperties {
 
   @Value("${ramp.up.http}")
   private Boolean isHttpRampUp;
+
+  @Value("${url.api.school}")
+  private String schoolApiURL;
 }

@@ -6,13 +6,17 @@ import ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssu
 import ca.bc.gov.educ.api.pen.services.model.PENNameText;
 import ca.bc.gov.educ.api.pen.services.service.PENNameTextService;
 import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationIssue;
+import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
+import com.google.common.base.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode.ERROR;
@@ -36,7 +40,7 @@ public abstract class BaseRule implements Rule {
   /**
    * The Not allowed chars.
    */
-  protected static List<String> notAllowedChars = Arrays.asList("^", "_", "'");
+  protected static List<String> notAllowedChars = Arrays.asList("^", "_");
   /**
    * The Not allowed chars to start with.
    */
@@ -57,9 +61,8 @@ public abstract class BaseRule implements Rule {
    * @return the boolean
    */
   protected boolean fieldContainsInvalidCharacters(final String fieldValue, final List<String> notAllowedChars) {
-    for (final Character character : fieldValue.toCharArray()) {
-      final String letter = String.valueOf(character);
-      if (notAllowedChars.contains(letter)) {
+    for (val character : fieldValue.toCharArray()) {
+      if (notAllowedChars.contains(String.valueOf(character))) {
         return true;
       }
     }
@@ -85,7 +88,7 @@ public abstract class BaseRule implements Rule {
   }
 
   protected boolean fieldContainsRepeatedCharacters(final String fieldValue){
-    if (StringUtils.isBlank(fieldValue) || fieldValue.length() < 2) {
+    if (StringUtils.length(fieldValue) < 2) {
       return false;
     }
 
@@ -274,10 +277,29 @@ public abstract class BaseRule implements Rule {
    */
   protected void doValidate(final boolean isInteractive, final List<PenRequestStudentValidationIssue> results, final String fieldValue, final PenRequestStudentValidationFieldCode fieldCode, final PENNameTextService penNameTextService) {
     if (StringUtils.isNotBlank(fieldValue)) {
-      this.defaultValidationForNameFields(results, fieldValue, fieldCode);
+      if (StringUtils.equals("'", fieldValue)) {
+        results.add(this.createValidationEntity(ERROR, APOSTROPHE, fieldCode));
+      } else {
+        this.defaultValidationForNameFields(results, fieldValue, fieldCode);
+      }
     }
     if (results.isEmpty()) {
       this.checkFieldValueExactMatchWithInvalidText(results, fieldValue, fieldCode, isInteractive, penNameTextService.getPenNameTexts());
     }
+  }
+
+  protected List<PenRequestStudentValidationIssue> checkForInvalidTextAndOneChar(final PenRequestStudentValidationPayload validationPayload, final Stopwatch stopwatch, final List<PenRequestStudentValidationIssue> results, final String fieldValue, final PenRequestStudentValidationFieldCode penRequestStudentValidationFieldCode, final PENNameTextService penNameTextService) {
+    //PreReq: Skip this check if any of these issues has been reported for the current field: V2, V3, V4, V5, V6, V7, V8
+    // to achieve above we do an empty check here and proceed only if there were no validation error till now, for this field.
+    if (results.isEmpty()) {
+      this.checkFieldValueExactMatchWithInvalidText(results, fieldValue, penRequestStudentValidationFieldCode, validationPayload.getIsInteractive(), penNameTextService.getPenNameTexts());
+    }
+    if (results.isEmpty() && fieldValue.trim().length() == 1) {
+      results.add(this.createValidationEntity(WARNING, ONE_CHAR_NAME, penRequestStudentValidationFieldCode));
+    }
+    log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
+    stopwatch.stop();
+    log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    return results;
   }
 }

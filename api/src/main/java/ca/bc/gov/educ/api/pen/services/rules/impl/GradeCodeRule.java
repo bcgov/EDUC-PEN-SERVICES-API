@@ -8,6 +8,7 @@ import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayl
 import com.google.common.base.Stopwatch;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.PostConstruct;
@@ -22,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationFieldCode.BIRTH_DATE;
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationFieldCode.GRADE_CODE;
@@ -82,13 +82,11 @@ public class GradeCodeRule extends BaseRule {
    * 11: 15 - 19
    * 12: 16 - 21
    * <p>
-   * EL: under 7
    * SU: 12 and up
    * GA: 19 and up
    */
   @PostConstruct
   public void init() {
-    this.gradeAgeRangeMap.put("EL", GradeAgeRange.builder().lowerRange(0).upperRange(7).build()); // no lower range so assuming baby is just born.
     this.gradeAgeRangeMap.put("GA", GradeAgeRange.builder().lowerRange(19).upperRange(1000).build()); // no upper range assuming no human lives for 1000 years.
     this.gradeAgeRangeMap.put("SU", GradeAgeRange.builder().lowerRange(12).upperRange(1000).build()); // no upper range assuming no human lives for 1000 years.
     this.gradeAgeRangeMap.put("EU", GradeAgeRange.builder().lowerRange(4).upperRange(1000).build()); // no upper range assuming no human lives for 1000 years.
@@ -121,15 +119,13 @@ public class GradeCodeRule extends BaseRule {
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
     final var gradeCodes = this.restUtils.getGradeCodes();
     final String gradeCode = validationPayload.getGradeCode();
-    if (StringUtils.isBlank(gradeCode)) {
-      results.add(this.createValidationEntity(WARNING, GRADE_CD_ERR, GRADE_CODE));
-    } else {
+    if (StringUtils.isNotBlank(gradeCode)) {
       final String finalGradeCode = gradeCode.trim();
-      final long filteredCount = gradeCodes.stream().filter(gradeCode1 -> LocalDateTime.now().isAfter(gradeCode1.getEffectiveDate())
-          && LocalDateTime.now().isBefore(gradeCode1.getExpiryDate())
-          && finalGradeCode.equalsIgnoreCase(gradeCode1.getGradeCode())).count();
-      if (filteredCount < 1) {
-        results.add(this.createValidationEntity(WARNING, GRADE_CD_ERR, GRADE_CODE));
+      val isGradeCodeValid = gradeCodes.stream().anyMatch(gradeCode1 -> LocalDateTime.now().isAfter(gradeCode1.getEffectiveDate())
+        && LocalDateTime.now().isBefore(gradeCode1.getExpiryDate())
+        && finalGradeCode.equalsIgnoreCase(gradeCode1.getGradeCode()));
+      if (!isGradeCodeValid) {
+        results.add(this.createValidationEntity(validationPayload.getIsInteractive() ? ERROR : WARNING, GRADE_CD_ERR, GRADE_CODE));
       }
     }
     if (results.isEmpty() && this.noDOBErrorReported(validationPayload.getIssueList())) {
@@ -171,7 +167,6 @@ public class GradeCodeRule extends BaseRule {
    * 11: 15 - 19
    * 12: 16 - 21
    *
-   * EL: under 7
    * SU: 12 and up
    * GA: 19 and up
    *
@@ -208,9 +203,9 @@ public class GradeCodeRule extends BaseRule {
    * @return the int
    */
   protected int calculateAge(final String dob) {
-    final int schoolYear = this.getSchoolYear(this.getCurrentDate());
-    final LocalDate schoolDate = LocalDate.parse(schoolYear + "-09-30");
-    final var dobDate = LocalDate.parse(dob, DateTimeFormatter.ofPattern("uuuuMMdd").withResolverStyle(ResolverStyle.STRICT));
+    val schoolYear = this.getSchoolYear(this.getCurrentDate());
+    val schoolDate = LocalDate.parse(schoolYear + "-09-30");
+    val dobDate = LocalDate.parse(dob, DateTimeFormatter.ofPattern("uuuuMMdd").withResolverStyle(ResolverStyle.STRICT));
     return Period.between(dobDate, schoolDate).getYears();
   }
 
@@ -237,8 +232,8 @@ public class GradeCodeRule extends BaseRule {
    * @return the boolean
    */
   private boolean noDOBErrorReported(final List<PenRequestStudentValidationIssue> issueList) {
-    final var result = issueList.stream().filter(element -> element.getPenRequestBatchValidationFieldCode().equals(BIRTH_DATE.getCode())).collect(Collectors.toList());
-    return result.isEmpty();
+    return issueList.stream().noneMatch(element -> element.getPenRequestBatchValidationFieldCode().equals(BIRTH_DATE.getCode())
+      && ERROR.toString().equals(element.getPenRequestBatchValidationIssueSeverityCode()));
   }
 
   /**

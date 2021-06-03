@@ -14,9 +14,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationFieldCode.*;
+import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode.ERROR;
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode.WARNING;
-import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueTypeCode.EMBEDDED_MID;
-import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueTypeCode.REPEAT_MID;
+import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueTypeCode.*;
 
 
 /**
@@ -52,22 +52,28 @@ public class LegalMiddleNameRule extends BaseRule {
     var legalMiddleName = validationPayload.getLegalMiddleNames();
     if (StringUtils.isNotBlank(legalMiddleName)) {
       legalMiddleName = legalMiddleName.trim();
-      this.defaultValidationForNameFields(results, legalMiddleName, LEGAL_MID);
-    }
-    if (results.isEmpty() && StringUtils.isNotBlank(legalMiddleName)) {
-      this.checkFieldValueExactMatchWithInvalidText(results, legalMiddleName, LEGAL_MID, validationPayload.getIsInteractive(), this.penNameTextService.getPenNameTexts());
-    }
-    if (results.isEmpty() && StringUtils.isNotBlank(legalMiddleName)
-        && this.legalFirstNameHasNoErrors(validationPayload) && this.legalLastNameHasNoErrors(validationPayload)
+      if (StringUtils.equals("'", legalMiddleName)) {
+        results.add(this.createValidationEntity(ERROR, APOSTROPHE, LEGAL_MID));
+      } else {
+        this.defaultValidationForNameFields(results, legalMiddleName, LEGAL_MID);
+      }
+      if (results.isEmpty()) {
+        this.checkFieldValueExactMatchWithInvalidText(results, legalMiddleName, LEGAL_MID, validationPayload.getIsInteractive(), this.penNameTextService.getPenNameTexts());
+      }
+      if (results.isEmpty()
+        && this.legalFirstNameHasNoErrors(validationPayload)
+        && this.legalLastNameHasNoErrors(validationPayload)
         && (legalMiddleName.equals(validationPayload.getLegalFirstName()) || legalMiddleName.equals(validationPayload.getLegalLastName()))) {
-      results.add(this.createValidationEntity(WARNING, REPEAT_MID, LEGAL_MID));
-    }
-    if (results.isEmpty() && StringUtils.isNotBlank(legalMiddleName)
+        results.add(this.createValidationEntity(WARNING, REPEAT_MID, LEGAL_MID));
+      }
+      if (results.isEmpty()
         && this.legalFirstNameHasNoErrors(validationPayload)
         && StringUtils.isNotBlank(validationPayload.getLegalFirstName())
         && validationPayload.getLegalFirstName().contains(legalMiddleName)) {
-      results.add(this.createValidationEntity(WARNING, EMBEDDED_MID, LEGAL_MID));
+        results.add(this.createValidationEntity(WARNING, EMBEDDED_MID, LEGAL_MID));
+      }
     }
+
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
     log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));

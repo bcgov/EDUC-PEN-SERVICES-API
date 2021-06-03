@@ -10,11 +10,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationFieldCode.LEGAL_FIRST;
+import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode.ERROR;
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode.WARNING;
-import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueTypeCode.*;
+import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueTypeCode.APOSTROPHE;
+import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueTypeCode.BLANK_FIELD;
 
 
 /**
@@ -49,24 +50,13 @@ public class LegalFirstNameRule extends BaseLastNameFirstNameRule {
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
     final var legalFirstName = validationPayload.getLegalFirstName();
     if (StringUtils.isBlank(legalFirstName)) {
-      results.add(this.createValidationEntity(WARNING, BLANK_FIELD, LEGAL_FIRST));
+      results.add(this.createValidationEntity(validationPayload.getIsInteractive() ? WARNING : ERROR, BLANK_FIELD, LEGAL_FIRST));
     } else if (legalFirstName.trim().equals("'")) {
-      results.add(this.createValidationEntity(WARNING, APOSTROPHE, LEGAL_FIRST));
+      results.add(this.createValidationEntity(ERROR, APOSTROPHE, LEGAL_FIRST));
     } else {
       this.defaultValidationForNameFields(results, legalFirstName, LEGAL_FIRST);
     }
-    //PreReq: Skip this check if any of these issues has been reported for the current field: V2, V3, V4, V5, V6, V7, V8
-    // to achieve above we do an empty check here and proceed only if there were no validation error till now, for this field. V9 check.
-    if (results.isEmpty()) {
-      this.checkFieldValueExactMatchWithInvalidText(results, legalFirstName, LEGAL_FIRST, validationPayload.getIsInteractive(), this.penNameTextService.getPenNameTexts());
-    }
-    if (results.isEmpty() && legalFirstName.trim().length() == 1) { // if we dont have any validation
-      results.add(this.createValidationEntity(WARNING, ONE_CHAR_NAME, LEGAL_FIRST));
-    }
-    log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
-    stopwatch.stop();
-    log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
-    return results;
+    return this.checkForInvalidTextAndOneChar(validationPayload, stopwatch, results, legalFirstName, LEGAL_FIRST, this.penNameTextService);
   }
 
 

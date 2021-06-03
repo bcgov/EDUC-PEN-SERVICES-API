@@ -18,6 +18,13 @@ import java.util.List;
 @Builder
 public class PenRequestStudentValidationPayload {
 
+  public boolean getIsInteractive() {
+    if (this.isInteractive != null) {
+      return this.isInteractive;
+    }
+    return false;
+  }
+
   /**
    * The Is interactive.
    */

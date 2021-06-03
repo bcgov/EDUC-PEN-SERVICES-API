@@ -39,6 +39,10 @@ public enum PenRequestStudentValidationIssueTypeCode {
    */
   DOB_FUTURE("DOB_FUTURE"),
   /**
+   * Dob too young pen request student validation issue type code.
+   */
+  DOB_TOO_YOUNG("DOBTOOYOUNG"),
+  /**
    * Embedded mid pen request  student validation issue type code.
    */
   EMBEDDED_MID("EMBEDDEDMID"),

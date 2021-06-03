@@ -7,6 +7,7 @@ import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayl
 import com.google.common.base.Stopwatch;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
@@ -56,10 +57,10 @@ public class GenderRule extends BaseRule {
       results.add(this.createValidationEntity(ERROR, GENDER_ERR, GENDER));
     } else {
       final String finalGenderCode = genderCode.trim();
-      final long filteredCount = genderCodes.stream().filter(gender -> LocalDateTime.now().isAfter(gender.getEffectiveDate())
-          && LocalDateTime.now().isBefore(gender.getExpiryDate())
-          && finalGenderCode.equalsIgnoreCase(gender.getGenderCode())).count();
-      if (filteredCount < 1) {
+      val isValidGenderCode = genderCodes.stream().anyMatch(gender -> LocalDateTime.now().isAfter(gender.getEffectiveDate())
+        && LocalDateTime.now().isBefore(gender.getExpiryDate())
+        && finalGenderCode.equalsIgnoreCase(gender.getGenderCode()));
+      if (!isValidGenderCode) {
         results.add(this.createValidationEntity(ERROR, GENDER_ERR, GENDER));
       }
     }

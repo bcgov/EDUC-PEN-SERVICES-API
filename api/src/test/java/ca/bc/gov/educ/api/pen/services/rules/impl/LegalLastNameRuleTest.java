@@ -43,10 +43,10 @@ public class LegalLastNameRuleTest {
   @Before
   public void setup() throws IOException {
     MockitoAnnotations.initMocks(this);
-    rule = new LegalLastNameRule(service);
+    this.rule = new LegalLastNameRule(this.service);
     if (penNameTexts == null) {
       final File file = new File(
-          Objects.requireNonNull(getClass().getClassLoader().getResource("pen_names_text_sample.json")).getFile()
+        Objects.requireNonNull(this.getClass().getClassLoader().getResource("pen_names_text_sample.json")).getFile()
       );
       penNameTexts = new ObjectMapper().readValue(file, new TypeReference<>() {
       });
@@ -61,40 +61,40 @@ public class LegalLastNameRuleTest {
    */
   @Test
   @Parameters({
-      "null, 1",
-      ", 1",
-      "JJ, 1",
-      "JJXXY, 0",
-      "JJJ, 1",
-      "JJJJ, 1",
-      "XX, 1",
-      "ZZ, 1",
-      "BLANK, 1",
-      "AVAILABLE, 1",
-      "ABC, 1",
-      "mishra, 0",
-      "ALIAS, 1",
-      "ASD, 1",
-      "BITCH,1",
-      "BRING, 1",
-      "CASH ONLY, 1",
-      "DATA, 1",
-      "DOE, 1",
-      "DOESN'T HAVE ONE, 2",
-      "DS TAM, 1",
-      "FICTITIOUS, 1",
-      "FANCYPANTS, 1",
-      "ESTATE, 1",
-      "DUMMY, 1",
-      "DUPLICATE, 1"
+    "null, 1",
+    ", 1",
+    "JJ, 1",
+    "JJXXY, 0",
+    "JJJ, 1",
+    "JJJJ, 1",
+    "XX, 1",
+    "ZZ, 1",
+    "BLANK, 1",
+    "AVAILABLE, 1",
+    "ABC, 1",
+    "mishra, 0",
+    "ALIAS, 1",
+    "ASD, 1",
+    "BITCH,1",
+    "BRING, 1",
+    "CASH ONLY, 1",
+    "DATA, 1",
+    "DOE, 1",
+    "DOESN'T HAVE ONE, 1",
+    "DS TAM, 1",
+    "FICTITIOUS, 1",
+    "FANCYPANTS, 1",
+    "ESTATE, 1",
+    "DUMMY, 1",
+    "DUPLICATE, 1"
   })
-  public void testValidate_givenDifferentLegalLastName_shouldReturnResults(String legalLastName, int expectedErrors) {
+  public void testValidate_givenDifferentLegalLastName_shouldReturnResults(String legalLastName, final int expectedErrors) {
     if ("null".equals(legalLastName)) {
       legalLastName = null;
     }
-    when(service.getPenNameTexts()).thenReturn(penNameTexts);
-    PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(false).transactionID(UUID.randomUUID().toString()).legalLastName(legalLastName).build();
-    var result = rule.validate(payload);
+    when(this.service.getPenNameTexts()).thenReturn(penNameTexts);
+    final PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(false).transactionID(UUID.randomUUID().toString()).legalLastName(legalLastName).build();
+    final var result = this.rule.validate(payload);
     assertThat(result).size().isEqualTo(expectedErrors);
   }
 }
