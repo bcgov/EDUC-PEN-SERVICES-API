@@ -99,4 +99,15 @@ public class LegalFirstNameRuleTest {
     final var result = this.rule.validate(payload);
     assertThat(result).size().isEqualTo(expectedErrors);
   }
+
+  @Test
+  @Parameters({"true, WARNING",
+    "false, ERROR"})
+  public void testValidate_givenLegalFirstNameBlankInDifferentMode_shouldReturnResultsWithWarningOrError(boolean isInteractive, String issueSeverityCode) {
+    when(this.service.getPenNameTexts()).thenReturn(penNameTexts);
+    final PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(isInteractive).transactionID(UUID.randomUUID().toString()).legalFirstName("").build();
+    final var result = this.rule.validate(payload);
+    assertThat(result).size().isEqualTo(1);
+    assertThat(result.get(0).getPenRequestBatchValidationIssueSeverityCode()).isEqualTo(issueSeverityCode);
+  }
 }

@@ -1,18 +1,23 @@
 package ca.bc.gov.educ.api.pen.services.rules.impl;
 
 import ca.bc.gov.educ.api.pen.services.rest.RestUtils;
+import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
+import java.util.ArrayList;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 
 /**
@@ -21,18 +26,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(JUnitParamsRunner.class)
 public class GradeCodeRuleTest {
 
-  private GradeCodeRule gradeCodeRule;
   /**
    * The Rest utils.
    */
-  @MockBean
+  @Mock
   RestUtils restUtils;
+  private GradeCodeRule gradeCodeRule;
 
   /**
    * Sets up.
    */
   @Before
   public void setUp() {
+    MockitoAnnotations.openMocks(this);
     gradeCodeRule = new GradeCodeRule(restUtils);
   }
 
@@ -44,15 +50,15 @@ public class GradeCodeRuleTest {
    */
   @Test
   @Parameters({
-      "20200601, 2020",
-      "20200531, 2019",
-      "20201031, 2020",
-      "20201130, 2020",
-      "20201231, 2020",
-      "20200131, 2019",
-      "20200229, 2019",
-      "20200331, 2019",
-      "20200430, 2019"
+    "20200601, 2020",
+    "20200531, 2019",
+    "20201031, 2020",
+    "20201130, 2020",
+    "20201231, 2020",
+    "20200131, 2019",
+    "20200229, 2019",
+    "20200331, 2019",
+    "20200430, 2019"
   })
   public void testGetSchoolYear_givenDifferentInputs_shouldReturnCalculatedYear(String currentDate, int expectedYear) {
     var date = LocalDate.parse(currentDate, DateTimeFormatter.ofPattern("uuuuMMdd").withResolverStyle(ResolverStyle.STRICT));
@@ -71,18 +77,18 @@ public class GradeCodeRuleTest {
    */
   @Test
   @Parameters({
-      "20210101, 20110808,9",
-      "20210201, 20110808,9",
-      "20210331, 20110808,9",
-      "20210430, 20110808,9",
-      "20210531, 20110808,9",
-      "20210601, 20110808,10",
-      "20210701, 20110808,10",
-      "20210801, 20110808,10",
-      "20210930, 20110808,10",
-      "20211001, 20110808,10",
-      "20211101, 20110808,10",
-      "20211231, 20110808,10"
+    "20210101, 20110808,9",
+    "20210201, 20110808,9",
+    "20210331, 20110808,9",
+    "20210430, 20110808,9",
+    "20210531, 20110808,9",
+    "20210601, 20110808,10",
+    "20210701, 20110808,10",
+    "20210801, 20110808,10",
+    "20210930, 20110808,10",
+    "20211001, 20110808,10",
+    "20211101, 20110808,10",
+    "20211231, 20110808,10"
   })
   public void testCalculateAge_givenConditions_shouldReturn9Years(String currentDate, String dob, int expectedAge) {
     var date = LocalDate.parse(currentDate, DateTimeFormatter.ofPattern("uuuuMMdd").withResolverStyle(ResolverStyle.STRICT));
@@ -91,4 +97,14 @@ public class GradeCodeRuleTest {
     assertThat(age).isEqualTo(expectedAge);
   }
 
+  @Test
+  @Parameters({"true, ERROR",
+    "false, WARNING"})
+  public void testValidate_givenLegalFirstNameBlankInDifferentMode_shouldReturnResultsWithWarningOrError(boolean isInteractive, String issueSeverityCode) {
+    when(this.restUtils.getGradeCodes()).thenReturn(new ArrayList<>());
+    final PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(isInteractive).transactionID(UUID.randomUUID().toString()).gradeCode("AA").build();
+    final var result = this.gradeCodeRule.validate(payload);
+    assertThat(result).size().isEqualTo(1);
+    assertThat(result.get(0).getPenRequestBatchValidationIssueSeverityCode()).isEqualTo(issueSeverityCode);
+  }
 }
