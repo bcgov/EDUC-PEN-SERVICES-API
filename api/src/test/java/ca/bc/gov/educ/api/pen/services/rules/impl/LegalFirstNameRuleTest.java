@@ -61,34 +61,34 @@ public class LegalFirstNameRuleTest {
    */
   @Test
   @Parameters({
-      "LLLLL, 1",
-      "null, 1",
-      "JJ, 1",
-      "JJXXY, 0",
-      "JJJ, 1",
-      "JJJJ, 1",
-      ", 1",
-      "XX, 1",
-      "ZZ, 1",
-      "BLANK, 1",
-      "AVAILABLE, 1",
-      "ABC, 1",
-      "mishra, 0",
-      "ALIAS, 1",
-      "ASD, 1",
-      "BITCH,1",
-      "BRING, 1",
-      "CASH ONLY, 1",
-      "DATA, 1",
-      "DOE, 1",
-      "DOESN'T HAVE ONE, 2",
-      "DS TAM, 1",
-      "FICTITIOUS, 1",
-      "FANCYPANTS, 1",
-      "ESTATE, 1",
-      "DUMMY, 1",
+    "LLLLL, 1",
+    "null, 1",
+    "JJ, 1",
+    "JJXXY, 0",
+    "JJJ, 1",
+    "JJJJ, 1",
+    ", 1",
+    "XX, 1",
+    "ZZ, 1",
+    "BLANK, 1",
+    "AVAILABLE, 1",
+    "ABC, 1",
+    "mishra, 0",
+    "ALIAS, 1",
+    "ASD, 1",
+    "BITCH,1",
+    "BRING, 1",
+    "CASH ONLY, 1",
+    "DATA, 1",
+    "DOE, 1",
+    "DOESN'T HAVE ONE, 1",
+    "DS TAM, 1",
+    "FICTITIOUS, 1",
+    "FANCYPANTS, 1",
+    "ESTATE, 1",
+    "DUMMY, 1",
 
-      "DUPLICATE, 1"
+    "DUPLICATE, 1"
   })
   public void testValidate_givenDifferentLegalFirstName_shouldReturnResults(String legalFirstName, final int expectedErrors) {
     if ("null".equals(legalFirstName)) {
@@ -98,5 +98,16 @@ public class LegalFirstNameRuleTest {
     final PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(false).transactionID(UUID.randomUUID().toString()).legalFirstName(legalFirstName).build();
     final var result = this.rule.validate(payload);
     assertThat(result).size().isEqualTo(expectedErrors);
+  }
+
+  @Test
+  @Parameters({"true, WARNING",
+    "false, ERROR"})
+  public void testValidate_givenLegalFirstNameBlankInDifferentMode_shouldReturnResultsWithWarningOrError(boolean isInteractive, String issueSeverityCode) {
+    when(this.service.getPenNameTexts()).thenReturn(penNameTexts);
+    final PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(isInteractive).transactionID(UUID.randomUUID().toString()).legalFirstName("").build();
+    final var result = this.rule.validate(payload);
+    assertThat(result).size().isEqualTo(1);
+    assertThat(result.get(0).getPenRequestBatchValidationIssueSeverityCode()).isEqualTo(issueSeverityCode);
   }
 }

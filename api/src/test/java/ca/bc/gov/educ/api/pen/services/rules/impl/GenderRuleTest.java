@@ -45,11 +45,11 @@ public class GenderRuleTest {
    */
   @Before
   public void setup() throws IOException {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     rule = new GenderRule(restUtils);
     if (genderCodes == null) {
       final File file = new File(
-          Objects.requireNonNull(getClass().getClassLoader().getResource("gender_codes.json")).getFile()
+        Objects.requireNonNull(this.getClass().getClassLoader().getResource("gender_codes.json")).getFile()
       );
       genderCodes = new ObjectMapper().readValue(file, new TypeReference<>() {
       });
@@ -64,41 +64,41 @@ public class GenderRuleTest {
    */
   @Test
   @Parameters({
-      "null, 1",
-      ", 1",
-      "     , 1",
-      "A, 1",
-      "a, 1",
-      "L, 1",
-      "M, 0",
-      "X, 0",
-      "U, 0",
-      "F, 0",
-      "B, 1",
-      "D, 1",
-      "E, 1",
-      "G, 1",
-      "H, 1",
-      "I, 1",
-      "K, 1",
-      "O, 1",
-      "P, 1",
-      "Q, 1",
-      "R, 1",
-      "S, 1",
-      "T, 1",
-      "V, 1",
-      "W, 1",
-      "Y, 1",
-      "Z, 1",
+    "null, 1",
+    ", 1",
+    "     , 1",
+    "A, 1",
+    "a, 1",
+    "L, 1",
+    "M, 0",
+    "X, 0",
+    "U, 0",
+    "F, 0",
+    "B, 1",
+    "D, 1",
+    "E, 1",
+    "G, 1",
+    "H, 1",
+    "I, 1",
+    "K, 1",
+    "O, 1",
+    "P, 1",
+    "Q, 1",
+    "R, 1",
+    "S, 1",
+    "T, 1",
+    "V, 1",
+    "W, 1",
+    "Y, 1",
+    "Z, 1",
   })
-  public void testValidate_givenDifferentGenderCodes_shouldReturnResults(String gender, int expectedErrors) {
+  public void testValidate_givenDifferentGenderCodes_shouldReturnResults(String gender, final int expectedErrors) {
     if ("null".equals(gender)) {
       gender = null;
     }
     when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().transactionID(UUID.randomUUID().toString()).genderCode(gender).build();
-    var result = rule.validate(payload);
+    final PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().transactionID(UUID.randomUUID().toString()).genderCode(gender).build();
+    final var result = rule.validate(payload);
     assertThat(result).size().isEqualTo(expectedErrors);
   }
 }

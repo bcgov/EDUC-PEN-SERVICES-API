@@ -136,8 +136,9 @@ public class RulesConfig {
    */
   @Bean
   @Order(10)
-  public Rule birthDateRule() {
-    return new BirthDateRule();
+  @Autowired
+  public Rule birthDateRule(final RestUtils restUtils) {
+    return new BirthDateRule(restUtils);
   }
 
   /**

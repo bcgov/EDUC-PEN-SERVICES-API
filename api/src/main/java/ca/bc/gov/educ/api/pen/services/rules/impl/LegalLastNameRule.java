@@ -10,13 +10,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationFieldCode.LEGAL_LAST;
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode.ERROR;
-import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode.WARNING;
+import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueTypeCode.APOSTROPHE;
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueTypeCode.BLANK_FIELD;
-import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueTypeCode.ONE_CHAR_NAME;
 
 
 /**
@@ -51,21 +49,12 @@ public class LegalLastNameRule extends BaseLastNameFirstNameRule {
     final var legalLastName = validationPayload.getLegalLastName();
     if (StringUtils.isBlank(legalLastName)) {
       results.add(this.createValidationEntity(ERROR, BLANK_FIELD, LEGAL_LAST));
+    } else if (StringUtils.equals("'", legalLastName)) {
+      results.add(this.createValidationEntity(ERROR, APOSTROPHE, LEGAL_LAST));
     } else {
       this.defaultValidationForNameFields(results, legalLastName, LEGAL_LAST);
     }
-    //PreReq: Skip this check if any of these issues has been reported for the current field: V2, V3, V4, V5, V6, V7, V8
-    // to achieve above we do an empty check here and proceed only if there were no validation error till now, for this field.
-    if (results.isEmpty()) {
-      this.checkFieldValueExactMatchWithInvalidText(results, legalLastName, LEGAL_LAST, validationPayload.getIsInteractive(), this.penNameTextService.getPenNameTexts());
-    }
-    if (results.isEmpty() && legalLastName.trim().length() == 1) {
-      results.add(this.createValidationEntity(WARNING, ONE_CHAR_NAME, LEGAL_LAST));
-    }
-    log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
-    stopwatch.stop();
-    log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
-    return results;
+    return this.checkForInvalidTextAndOneChar(validationPayload, stopwatch, results, legalLastName, LEGAL_LAST, this.penNameTextService);
   }
 
 

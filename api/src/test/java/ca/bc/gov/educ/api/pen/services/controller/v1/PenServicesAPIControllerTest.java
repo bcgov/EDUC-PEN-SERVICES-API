@@ -11,11 +11,13 @@ import ca.bc.gov.educ.api.pen.services.rest.RestUtils;
 import ca.bc.gov.educ.api.pen.services.struct.v1.GenderCode;
 import ca.bc.gov.educ.api.pen.services.struct.v1.GradeCode;
 import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
+import ca.bc.gov.educ.api.pen.services.struct.v1.School;
 import ca.bc.gov.educ.api.pen.services.support.TestRedisConfiguration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +31,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,11 +38,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
-import static ca.bc.gov.educ.api.pen.services.constants.v1.URL.MERGES;
-import static ca.bc.gov.educ.api.pen.services.constants.v1.URL.PEN_SERVICES;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -59,7 +61,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Slf4j
-@SuppressWarnings({"java:S112", "java:S100", "java:S1192","java:S2699"})
+@SuppressWarnings("java:S5976")
 public class PenServicesAPIControllerTest {
 
   private List<GenderCode> genderCodes;
@@ -98,24 +100,25 @@ public class PenServicesAPIControllerTest {
   @Before
   public void setUp() throws IOException {
     MockitoAnnotations.openMocks(this);
-    if (genderCodes == null) {
+    if (this.genderCodes == null) {
       final File file = new File(
-          Objects.requireNonNull(getClass().getClassLoader().getResource("gender_codes.json")).getFile()
+        Objects.requireNonNull(this.getClass().getClassLoader().getResource("gender_codes.json")).getFile()
       );
-      genderCodes = new ObjectMapper().readValue(file, new TypeReference<>() {
+      this.genderCodes = new ObjectMapper().readValue(file, new TypeReference<>() {
       });
     }
-    if (gradeCodes == null) {
+    if (this.gradeCodes == null) {
       final File file = new File(
-          Objects.requireNonNull(getClass().getClassLoader().getResource("grade_codes.json")).getFile()
+        Objects.requireNonNull(this.getClass().getClassLoader().getResource("grade_codes.json")).getFile()
       );
-      gradeCodes = new ObjectMapper().readValue(file, new TypeReference<>() {
+      this.gradeCodes = new ObjectMapper().readValue(file, new TypeReference<>() {
       });
     }
-    penRequestBatchValidationFieldCodeRepo.save(createPenRequestBatchValidationFieldCodeData());
-    penRequestBatchValidationIssueSeverityCodeRepo.save(createPenRequestBatchValidationSeverityCodeData());
-    penRequestBatchValidationIssueTypeCodeRepo.save(createPenRequestBatchValidationTypeCodeData());
-
+    this.penRequestBatchValidationFieldCodeRepo.save(this.createPenRequestBatchValidationFieldCodeData());
+    this.penRequestBatchValidationIssueSeverityCodeRepo.save(this.createPenRequestBatchValidationSeverityCodeData());
+    this.penRequestBatchValidationIssueTypeCodeRepo.save(this.createPenRequestBatchValidationTypeCodeData());
+    val school = Optional.of(School.builder().schoolName("testSchool").schoolCategoryCode("02").build());
+    when(this.restUtils.getSchoolByMincode(any())).thenReturn(school);
   }
 
   /**
@@ -123,9 +126,9 @@ public class PenServicesAPIControllerTest {
    */
   @After
   public void after() {
-    penRequestBatchValidationFieldCodeRepo.deleteAll();
-    penRequestBatchValidationIssueSeverityCodeRepo.deleteAll();
-    penRequestBatchValidationIssueTypeCodeRepo.deleteAll();
+    this.penRequestBatchValidationFieldCodeRepo.deleteAll();
+    this.penRequestBatchValidationIssueSeverityCodeRepo.deleteAll();
+    this.penRequestBatchValidationIssueTypeCodeRepo.deleteAll();
   }
 
   /**
@@ -135,15 +138,17 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenValidPayload_shouldReturnStatusOkWithBlankArray() throws Exception {
-    String payload = validationPayloadAsJSONString(createValidationPayload());
+    final String payload = this.validationPayloadAsJSONString(this.createValidationPayload());
     log.info(payload);
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(payload))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
+
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(payload))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
 
   }
 
@@ -154,15 +159,16 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidSubmittedPEN_shouldReturnStatusOkWithValidationResults() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setSubmittedPen("120164446");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    when(this.restUtils.getSchoolByMincode(anyString())).thenReturn(Optional.of(School.builder().schoolName("testSchool").schoolCategoryCode("02").build()));
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -173,15 +179,16 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenBlankLegalSurname_shouldReturnStatusOkWithValidationResults() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalLastName("");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    when(this.restUtils.getSchoolByMincode(anyString())).thenReturn(Optional.of(School.builder().schoolName("testSchool").schoolCategoryCode("02").build()));
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -192,15 +199,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidLegalSurnameWhichMatchedTheBlockedName_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalLastName("AVAILABLE");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -211,15 +218,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidLegalSurnameWhichMatchedTheBlockedName_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalLastName("BLANK");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -230,15 +237,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenOneCharLegalSurname_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalLastName("B");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -249,15 +256,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenBlankLegalFirstName_shouldReturnStatusOkWithIssueTypeCodeBlankField() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -268,15 +275,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenApostropheInLegalFirstName_shouldReturnStatusOkWithIssueTypeCodeApostrophe() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("'");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -287,15 +294,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidLegalFirstNameWhichMatchedTheBlockedName_shouldReturnStatusOkWithIssueTypeCodeBlockedName() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("AVAILABLE");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -306,15 +313,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidLegalFirstName_shouldReturnStatusOkWithValidationResultsAsWarningIssueTypeCodeBLANKINNAME() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("DS TAM");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -325,15 +332,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenOneCharLegalFirstName_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("B");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -344,15 +351,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidCharInLegalFirstName_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("OK^");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -363,15 +370,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidCharInLegalFirstName2_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("OK_");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -382,15 +389,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidCharInLegalFirstName3_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("OK'");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
 
   }
 
@@ -401,15 +408,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidCharInLegalFirstName4_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("*OK");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -420,15 +427,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidCharInLegalFirstName5_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("_O'");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
 
   }
 
@@ -439,15 +446,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidCharInLegalFirstName6_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("-OK'");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -458,15 +465,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidCharInLegalFirstName7_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("\"OK'");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -477,15 +484,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidCharInLegalFirstName8_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("XXOK'");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -496,15 +503,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidCharInLegalFirstName9_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("ZZOK'");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -515,16 +522,16 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenSameLegalMidAsLegalFirst_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalFirstName("MARCO");
     payload.setLegalMiddleNames("MARCO");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -535,16 +542,16 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenSameLegalMidAsLegalLast_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setLegalLastName("MARCO");
     payload.setLegalMiddleNames("MARCO");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -555,15 +562,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidGenderCode_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setGenderCode("O");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -574,15 +581,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenBlankGenderCode_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setGenderCode("");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -593,15 +600,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidPostalCode_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setPostalCode("123456");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -612,15 +619,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenDOBInInvalidFormat_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setDob("2020-02-02"); // it expects to be YYYYMMDD
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -631,15 +638,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenBlankDOB_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setDob(""); // it expects to be YYYYMMDD
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -650,15 +657,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenDOBEarlierTo1900_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setDob("18990101"); // it expects to be YYYYMMDD
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -669,15 +676,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenDOBLaterThanCurrentDate_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setDob("29990101"); // it expects to be YYYYMMDD
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -688,15 +695,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInvalidGradeCode_shouldReturnStatusOkWithValidationResultsAsError() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setGradeCode("XX");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
-            .content(validationPayloadAsJSONString(payload))).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+        .content(this.validationPayloadAsJSONString(payload))).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
   }
 
   /**
@@ -706,15 +713,15 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInappropriateAgeForGradeCode_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setGradeCode("01");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -725,16 +732,16 @@ public class PenServicesAPIControllerTest {
    */
   @Test
   public void testValidateStudentData_givenInappropriateAgeForGradeCode2_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
-    var payload = createValidationPayload();
+    final var payload = this.createValidationPayload();
     payload.setDob(LocalDate.now().toString().replaceAll("-", ""));
     payload.setGradeCode("01");
-    when(restUtils.getGenderCodes()).thenReturn(genderCodes);
-    when(restUtils.getGradeCodes()).thenReturn(gradeCodes);
-    mockMvc
-        .perform(post(STUDENT_REQUEST_URL)
-                .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
-            .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(validationPayloadAsJSONString(payload)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+    when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
+    when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
+    this.mockMvc
+      .perform(post(STUDENT_REQUEST_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
+        .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -777,7 +784,7 @@ public class PenServicesAPIControllerTest {
             .updateDate(LocalDateTime.now()).createUser("TEST").updateUser("TEST").build();
   }
 
-  private String validationPayloadAsJSONString(PenRequestStudentValidationPayload payload) throws JsonProcessingException {
+  private String validationPayloadAsJSONString(final PenRequestStudentValidationPayload payload) throws JsonProcessingException {
     return new ObjectMapper().writeValueAsString(payload);
   }
 

@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.pen.services.properties.ApplicationProperties;
 import ca.bc.gov.educ.api.pen.services.struct.*;
 import ca.bc.gov.educ.api.pen.services.struct.v1.GenderCode;
 import ca.bc.gov.educ.api.pen.services.struct.v1.GradeCode;
+import ca.bc.gov.educ.api.pen.services.struct.v1.School;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +69,8 @@ public class RestUtils {
    */
   private final WebClient webClient;
 
+  private final Map<String, School> schoolMap = new ConcurrentHashMap<>();
+
   /**
    * Instantiates a new Rest utils.
    *
@@ -90,7 +93,44 @@ public class RestUtils {
       log.info("Called student api and loaded {} gender codes", this.genderCodesMap.values().size());
       this.setGradeCodesMap();
       log.info("Called student api and loaded {} grade codes", this.gradeCodesMap.values().size());
+      this.populateSchoolMap();
     }
+  }
+
+  /**
+   * Gets school by min code.
+   *
+   * @param mincode the mincode
+   * @return the school by min code
+   */
+  public Optional<School> getSchoolByMincode(final String mincode) {
+    return Optional.ofNullable(this.schoolMap.get(mincode));
+  }
+
+  /**
+   * Populate school map.
+   */
+  public void populateSchoolMap() {
+    for (val school : this.getSchools()) {
+      this.schoolMap.putIfAbsent(school.getDistNo() + school.getSchlNo(), school);
+    }
+    log.info("loaded  {} schools to memory", this.schoolMap.values().size());
+  }
+
+  /**
+   * Gets schools.
+   *
+   * @return the schools
+   */
+  public List<School> getSchools() {
+    log.info("calling school api to load schools to memory");
+    return this.webClient.get()
+      .uri(this.props.getSchoolApiURL())
+      .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+      .retrieve()
+      .bodyToFlux(School.class)
+      .collectList()
+      .block();
   }
 
   /**
@@ -99,13 +139,7 @@ public class RestUtils {
    * @return the gender codes from student api
    */
   public List<GenderCode> getGenderCodes() {
-    val readLock = this.genderLock.readLock();
-    try {
-      readLock.lock();
-      return this.genderCodesMap.get(GENDER_CODES);
-    } finally {
-      readLock.unlock();
-    }
+    return this.genderCodesMap.get(GENDER_CODES);
   }
 
   /**
@@ -114,13 +148,7 @@ public class RestUtils {
    * @return the grade codes
    */
   public List<GradeCode> getGradeCodes() {
-    val readLock = this.gradeLock.readLock();
-    try {
-      readLock.lock();
       return this.gradeCodesMap.get(GRADE_CODES);
-    } finally {
-      readLock.unlock();
-    }
   }
 
   /**
@@ -132,6 +160,7 @@ public class RestUtils {
     log.info("started reloading cache..");
     this.setGenderCodesMap();
     this.setGradeCodesMap();
+    this.populateSchoolMap();
     log.info("reloading cache completed..");
   }
 
