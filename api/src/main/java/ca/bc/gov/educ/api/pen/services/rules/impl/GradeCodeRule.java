@@ -127,9 +127,9 @@ public class GradeCodeRule extends BaseRule {
       if (!isGradeCodeValid) {
         results.add(this.createValidationEntity(validationPayload.getIsInteractive() ? ERROR : WARNING, GRADE_CD_ERR, GRADE_CODE));
       }
-    }
-    if (results.isEmpty() && this.noDOBErrorReported(validationPayload.getIssueList())) {
-      this.checkForYoungAndOld(results, gradeCode, validationPayload);
+      if (results.isEmpty() && this.noDOBErrorReported(validationPayload.getIssueList())) {
+        this.checkForYoungAndOld(results, gradeCode, validationPayload);
+      }
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
