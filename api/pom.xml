@@ -20,6 +20,7 @@
       src/main/java/ca/bc/gov/educ/api/pen/services/messaging/**,
       src/main/java/ca/bc/gov/educ/api/pen/services/constants/**,
       src/main/java/ca/bc/gov/educ/api/pen/services/exception/**,
+      src/main/java/ca/bc/gov/educ/api/pen/services/helpers/**,
       src/main/java/ca/bc/gov/educ/api/pen/services/PenServicesApiResourceApplication.java,
       src/test/**,
     </sonar.exclusions>

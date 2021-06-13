@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.pen.services.messaging;
 
+import ca.bc.gov.educ.api.pen.services.helpers.LogHelper;
 import ca.bc.gov.educ.api.pen.services.orchestrator.base.EventHandler;
 import ca.bc.gov.educ.api.pen.services.service.events.EventHandlerDelegatorService;
 import ca.bc.gov.educ.api.pen.services.struct.v1.Event;
@@ -115,6 +116,7 @@ public class MessageSubscriber {
         log.info("Message received is :: {} ", message);
         try {
           final var eventString = new String(message.getData());
+          LogHelper.logMessagingEventDetails(eventString);
           final var event = JsonUtil.getJsonObjectFromString(Event.class, eventString);
           this.eventHandlerDelegatorService.handleEvent(event, message);
           log.debug("Event is :: {}", event);

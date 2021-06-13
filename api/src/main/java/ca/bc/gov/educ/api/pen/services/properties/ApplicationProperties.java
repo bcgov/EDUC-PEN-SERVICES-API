@@ -20,6 +20,7 @@ public class ApplicationProperties {
    */
   public static final String PEN_SERVICES_API = "PEN-SERVICES-API";
   public static final String STREAM_NAME = "PEN_SERVICES_EVENTS";
+  public static final String CORRELATION_ID = "correlationID";
   /**
    * The Client id.
    */
