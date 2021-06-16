@@ -101,11 +101,11 @@ public class LegalFirstNameRuleTest {
   }
 
   @Test
-  @Parameters({"true, WARNING",
-    "false, ERROR"})
-  public void testValidate_givenLegalFirstNameBlankInDifferentMode_shouldReturnResultsWithWarningOrError(boolean isInteractive, String issueSeverityCode) {
+  @Parameters({"true, WARNING,",
+    "false, ERROR,", "false, ERROR,XXAS", "false, ERROR,ZZAS", "true, WARNING,XXAS", "true, WARNING,ZZAS"})
+  public void testValidate_givenLegalFirstNameBlankInDifferentMode_shouldReturnResultsWithWarningOrError(boolean isInteractive, String issueSeverityCode, String firstName) {
     when(this.service.getPenNameTexts()).thenReturn(penNameTexts);
-    final PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(isInteractive).transactionID(UUID.randomUUID().toString()).legalFirstName("").build();
+    final PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(isInteractive).transactionID(UUID.randomUUID().toString()).legalFirstName(firstName).build();
     final var result = this.rule.validate(payload);
     assertThat(result).size().isEqualTo(1);
     assertThat(result.get(0).getPenRequestBatchValidationIssueSeverityCode()).isEqualTo(issueSeverityCode);

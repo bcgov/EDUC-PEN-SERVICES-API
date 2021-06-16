@@ -87,14 +87,14 @@ public abstract class BaseRule implements Rule {
     return false;
   }
 
-  protected boolean fieldContainsRepeatedCharacters(final String fieldValue){
+  protected boolean fieldContainsRepeatedCharacters(final String fieldValue) {
     if (StringUtils.length(fieldValue) < 2) {
       return false;
     }
 
-    final Character firstChar= fieldValue.charAt(0);
-    for(final Character character : fieldValue.toCharArray()){
-      if(!firstChar.equals(character)){
+    final Character firstChar = fieldValue.charAt(0);
+    for (final Character character : fieldValue.toCharArray()) {
+      if (!firstChar.equals(character)) {
         return false;
       }
     }
@@ -110,15 +110,15 @@ public abstract class BaseRule implements Rule {
    * @return the entity
    */
   protected PenRequestStudentValidationIssue createValidationEntity(
-      final PenRequestStudentValidationIssueSeverityCode issueSeverityCode,
-      final PenRequestStudentValidationIssueTypeCode issueTypeCode,
-      final PenRequestStudentValidationFieldCode fieldCode) {
+    final PenRequestStudentValidationIssueSeverityCode issueSeverityCode,
+    final PenRequestStudentValidationIssueTypeCode issueTypeCode,
+    final PenRequestStudentValidationFieldCode fieldCode) {
 
     return PenRequestStudentValidationIssue.builder()
-        .penRequestBatchValidationIssueSeverityCode(issueSeverityCode.toString())
-        .penRequestBatchValidationIssueTypeCode(issueTypeCode.getCode())
-        .penRequestBatchValidationFieldCode(fieldCode.getCode())
-        .build();
+      .penRequestBatchValidationIssueSeverityCode(issueSeverityCode.toString())
+      .penRequestBatchValidationIssueTypeCode(issueTypeCode.getCode())
+      .penRequestBatchValidationFieldCode(fieldCode.getCode())
+      .build();
   }
 
   /**
@@ -163,12 +163,13 @@ public abstract class BaseRule implements Rule {
    * |    | Check: Field starts with XX or ZZ                                                          |                                                                     |         |             |
    * </pre>
    *
-   * @param results    the results
-   * @param fieldValue the field value
-   * @param fieldCode  the field code
+   * @param results       the results
+   * @param fieldValue    the field value
+   * @param fieldCode     the field code
+   * @param isInteractive if it is interactive or batch mode
    */
   protected void defaultValidationForNameFields(@NonNull final List<PenRequestStudentValidationIssue> results, @NonNull String fieldValue,
-                                                @NonNull final PenRequestStudentValidationFieldCode fieldCode) {
+                                                @NonNull final PenRequestStudentValidationFieldCode fieldCode, boolean isInteractive) {
     fieldValue = fieldValue.trim();
     if (this.fieldContainsInvalidCharacters(fieldValue, notAllowedChars)) {
       results.add(this.createValidationEntity(ERROR, INV_CHARS, fieldCode));
@@ -180,7 +181,7 @@ public abstract class BaseRule implements Rule {
       results.add(this.createValidationEntity(WARNING, BLANK_IN_NAME, fieldCode));
     }
     if (this.fieldStartsWithInvertedPrefix(fieldValue)) {
-      results.add(this.createValidationEntity(WARNING, INV_PREFIX, fieldCode));
+      results.add(this.createValidationEntity(isInteractive ? WARNING : ERROR, INV_PREFIX, fieldCode));
     }
 
   }
@@ -203,11 +204,11 @@ public abstract class BaseRule implements Rule {
   protected void checkFieldValueExactMatchWithInvalidText(final List<PenRequestStudentValidationIssue> results, final String fieldValue, final PenRequestStudentValidationFieldCode fieldCode, final boolean isInteractive, final List<PENNameText> penNameTexts) {
     if (fieldValue != null && fieldCode != null && penNameTexts != null) {
       final var filteredList = penNameTexts.stream().filter(el ->
-          (el.getEffectiveDate() != null && el.getExpiryDate() != null
-              && el.getEffectiveDate().isBefore(LocalDateTime.now())
-              && el.getExpiryDate().isAfter(LocalDateTime.now())
-              && fieldValue.equalsIgnoreCase(el.getInvalidText())))
-          .collect(Collectors.toList());
+        (el.getEffectiveDate() != null && el.getExpiryDate() != null
+          && el.getEffectiveDate().isBefore(LocalDateTime.now())
+          && el.getExpiryDate().isAfter(LocalDateTime.now())
+          && fieldValue.equalsIgnoreCase(el.getInvalidText())))
+        .collect(Collectors.toList());
       if (!filteredList.isEmpty()) {
         final boolean isError;
         switch (fieldCode) {
@@ -280,7 +281,7 @@ public abstract class BaseRule implements Rule {
       if (StringUtils.equals("'", fieldValue)) {
         results.add(this.createValidationEntity(ERROR, APOSTROPHE, fieldCode));
       } else {
-        this.defaultValidationForNameFields(results, fieldValue, fieldCode);
+        this.defaultValidationForNameFields(results, fieldValue, fieldCode, isInteractive);
       }
     }
     if (results.isEmpty()) {
