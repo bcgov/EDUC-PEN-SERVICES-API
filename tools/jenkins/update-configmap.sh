@@ -66,7 +66,7 @@ curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scope
   -d "{\"description\": \"Validate Student Demographics from both batch and interactive\",\"id\": \"VALIDATE_STUDENT_DEMOGRAPHICS\",\"name\": \"VALIDATE_STUDENT_DEMOGRAPHICS\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
 
 echo
-echo Writing scope VALIDATE_STUDENT_DEMOGRAPHICS
+echo Writing scope GET_NEXT_PEN_NUMBER
 curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scopes" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TKN" \
