@@ -127,6 +127,18 @@ curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scope
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TKN" \
   -d "{\"description\": \"Scope to start processing split pen saga\",\"id\": \"STUDENT_SPLIT_PEN_SAGA\",\"name\": \"STUDENT_SPLIT_PEN_SAGA\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+echo
+echo Writing scope READ_PEN_SERVICES_MACRO
+curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scopes" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TKN" \
+  -d "{\"description\": \"Scope to read PEN SERVICES Macros\",\"id\": \"READ_PEN_SERVICES_MACRO\",\"name\": \"READ_PEN_SERVICES_MACRO\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+echo
+echo Writing scope WRITE_PEN_SERVICES_MACRO
+curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scopes" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TKN" \
+  -d "{\"description\": \"Scope to write PEN SERVICES Macros\",\"id\": \"WRITE_PEN_SERVICES_MACRO\",\"name\": \"WRITE_PEN_SERVICES_MACRO\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
 
 ###########################################################
 #Setup for config-map

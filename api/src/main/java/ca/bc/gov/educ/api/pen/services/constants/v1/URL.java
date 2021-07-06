@@ -16,6 +16,14 @@ public final class URL {
    * The constant PEN_SERVICES.
    */
   public static final String PEN_SERVICES = "/api/v1/pen-services";
+  /**
+   * The constant PEN_SERVICES_MACRO
+   */
+  public static final String PEN_SERVICES_MACRO = "/pen-services-macro";
+  /**
+   * The constant MACRO_ID
+   */
+  public static final String MACRO_ID = "/{macroId}";
 
   /**
    * Instantiates a new Url.
