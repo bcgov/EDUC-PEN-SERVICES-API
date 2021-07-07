@@ -57,7 +57,7 @@ public class LegalMiddleNameRule extends BaseRule {
       } else {
         this.defaultValidationForNameFields(results, legalMiddleName, LEGAL_MID, validationPayload.getIsInteractive(), false);
       }
-      if (results.isEmpty()) {
+      if (resultsContainNoError(results)) {
         this.checkFieldValueExactMatchWithInvalidText(results, legalMiddleName, LEGAL_MID, validationPayload.getIsInteractive(), this.penNameTextService.getPenNameTexts());
       }
       if (results.isEmpty()

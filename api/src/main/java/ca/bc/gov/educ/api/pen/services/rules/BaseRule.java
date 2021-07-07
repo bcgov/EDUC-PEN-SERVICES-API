@@ -173,17 +173,13 @@ public abstract class BaseRule implements Rule {
     fieldValue = fieldValue.trim();
     if (this.fieldContainsInvalidCharacters(fieldValue, notAllowedChars)) {
       results.add(this.createValidationEntity(ERROR, INV_CHARS, fieldCode));
-    }
-    if (this.fieldBeginsWithInvalidCharacters(fieldValue, notAllowedCharsToStartWith)) {
+    }else if (this.fieldBeginsWithInvalidCharacters(fieldValue, notAllowedCharsToStartWith)) {
       results.add(this.createValidationEntity(ERROR, BEGIN_INVALID, fieldCode));
-    }
-    if (spaceCheck && this.fieldContainsSpace(fieldValue)) {
+    }else if (this.fieldStartsWithInvertedPrefix(fieldValue)) {
+      results.add(this.createValidationEntity(isInteractive ? WARNING : ERROR, INV_PREFIX, fieldCode));
+    }else if (spaceCheck && this.fieldContainsSpace(fieldValue)) {
       results.add(this.createValidationEntity(WARNING, BLANK_IN_NAME, fieldCode));
     }
-    if (this.fieldStartsWithInvertedPrefix(fieldValue)) {
-      results.add(this.createValidationEntity(isInteractive ? WARNING : ERROR, INV_PREFIX, fieldCode));
-    }
-
   }
 
 
@@ -260,8 +256,9 @@ public abstract class BaseRule implements Rule {
       results.add(this.createValidationEntity(WARNING, BLOCKED_NAME, fieldCode));
     } else {
       if (isError) {
+        results.clear();
         results.add(this.createValidationEntity(ERROR, BLOCKED_NAME, fieldCode));
-      } else {
+      } else if (results.isEmpty()) {
         results.add(this.createValidationEntity(WARNING, BLOCKED_NAME, fieldCode));
       }
     }
@@ -284,18 +281,22 @@ public abstract class BaseRule implements Rule {
         this.defaultValidationForNameFields(results, fieldValue, fieldCode, isInteractive, spaceCheck);
       }
     }
-    if (results.isEmpty()) {
+    if (resultsContainNoError(results)) {
       this.checkFieldValueExactMatchWithInvalidText(results, fieldValue, fieldCode, isInteractive, penNameTextService.getPenNameTexts());
     }
+  }
+
+  protected boolean resultsContainNoError(final List<PenRequestStudentValidationIssue> results){
+    return results.stream().noneMatch(el -> el.getPenRequestBatchValidationIssueSeverityCode().equals(ERROR.toString()));
   }
 
   protected List<PenRequestStudentValidationIssue> checkForInvalidTextAndOneChar(final PenRequestStudentValidationPayload validationPayload, final Stopwatch stopwatch, final List<PenRequestStudentValidationIssue> results, final String fieldValue, final PenRequestStudentValidationFieldCode penRequestStudentValidationFieldCode, final PENNameTextService penNameTextService) {
     //PreReq: Skip this check if any of these issues has been reported for the current field: V2, V3, V4, V5, V6, V7, V8
     // to achieve above we do an empty check here and proceed only if there were no validation error till now, for this field.
-    if (results.isEmpty()) {
+    if (resultsContainNoError(results)) {
       this.checkFieldValueExactMatchWithInvalidText(results, fieldValue, penRequestStudentValidationFieldCode, validationPayload.getIsInteractive(), penNameTextService.getPenNameTexts());
     }
-    if (results.isEmpty() && fieldValue.trim().length() == 1) {
+    if (resultsContainNoError(results) && fieldValue.trim().length() == 1) {
       results.add(this.createValidationEntity(WARNING, ONE_CHAR_NAME, penRequestStudentValidationFieldCode));
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
