@@ -112,7 +112,7 @@ public class LegalMiddleNameRuleTest {
       "yang,Mingwei,yang, 1",
       "Vel,Marco,Vel, 1",
       "Prakash,Om,Mishra,0",
-      "Om Mishra,Om,Mishra,1",
+      "Om Mishra,Om,Mishra,0",
 
   })
   public void testValidate_givenDifferentLegalMiddleNameAndFirstNameAndLastName_shouldReturnResults(String legalMiddleName, final String legalFirstName, final String legalLastName, final int expectedErrors) {

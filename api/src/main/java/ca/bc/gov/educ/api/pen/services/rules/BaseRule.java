@@ -169,7 +169,7 @@ public abstract class BaseRule implements Rule {
    * @param isInteractive if it is interactive or batch mode
    */
   protected void defaultValidationForNameFields(@NonNull final List<PenRequestStudentValidationIssue> results, @NonNull String fieldValue,
-                                                @NonNull final PenRequestStudentValidationFieldCode fieldCode, boolean isInteractive) {
+                                                @NonNull final PenRequestStudentValidationFieldCode fieldCode, boolean isInteractive, boolean spaceCheck) {
     fieldValue = fieldValue.trim();
     if (this.fieldContainsInvalidCharacters(fieldValue, notAllowedChars)) {
       results.add(this.createValidationEntity(ERROR, INV_CHARS, fieldCode));
@@ -177,7 +177,7 @@ public abstract class BaseRule implements Rule {
     if (this.fieldBeginsWithInvalidCharacters(fieldValue, notAllowedCharsToStartWith)) {
       results.add(this.createValidationEntity(ERROR, BEGIN_INVALID, fieldCode));
     }
-    if (this.fieldContainsSpace(fieldValue)) {
+    if (spaceCheck && this.fieldContainsSpace(fieldValue)) {
       results.add(this.createValidationEntity(WARNING, BLANK_IN_NAME, fieldCode));
     }
     if (this.fieldStartsWithInvertedPrefix(fieldValue)) {
@@ -276,12 +276,12 @@ public abstract class BaseRule implements Rule {
    * @param fieldCode          the field code
    * @param penNameTextService the pen name text service
    */
-  protected void doValidate(final boolean isInteractive, final List<PenRequestStudentValidationIssue> results, final String fieldValue, final PenRequestStudentValidationFieldCode fieldCode, final PENNameTextService penNameTextService) {
+  protected void doValidate(final boolean isInteractive, final List<PenRequestStudentValidationIssue> results, final String fieldValue, final PenRequestStudentValidationFieldCode fieldCode, final PENNameTextService penNameTextService, final boolean spaceCheck) {
     if (StringUtils.isNotBlank(fieldValue)) {
       if (StringUtils.equals("'", fieldValue)) {
         results.add(this.createValidationEntity(ERROR, APOSTROPHE, fieldCode));
       } else {
-        this.defaultValidationForNameFields(results, fieldValue, fieldCode, isInteractive);
+        this.defaultValidationForNameFields(results, fieldValue, fieldCode, isInteractive, spaceCheck);
       }
     }
     if (results.isEmpty()) {

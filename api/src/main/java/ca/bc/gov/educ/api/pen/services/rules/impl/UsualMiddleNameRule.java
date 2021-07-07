@@ -44,7 +44,7 @@ public class UsualMiddleNameRule extends BaseRule {
   public List<PenRequestStudentValidationIssue> validate(final PenRequestStudentValidationPayload validationPayload) {
     final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
-    this.doValidate(validationPayload.getIsInteractive(), results, validationPayload.getUsualMiddleNames(), USUAL_MID, this.penNameTextService);
+    this.doValidate(validationPayload.getIsInteractive(), results, validationPayload.getUsualMiddleNames(), USUAL_MID, this.penNameTextService, false);
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
     log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
