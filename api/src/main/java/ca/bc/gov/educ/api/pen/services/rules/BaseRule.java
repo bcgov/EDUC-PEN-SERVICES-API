@@ -173,17 +173,13 @@ public abstract class BaseRule implements Rule {
     fieldValue = fieldValue.trim();
     if (this.fieldContainsInvalidCharacters(fieldValue, notAllowedChars)) {
       results.add(this.createValidationEntity(ERROR, INV_CHARS, fieldCode));
-    }
-    if (this.fieldBeginsWithInvalidCharacters(fieldValue, notAllowedCharsToStartWith)) {
+    }else if (this.fieldBeginsWithInvalidCharacters(fieldValue, notAllowedCharsToStartWith)) {
       results.add(this.createValidationEntity(ERROR, BEGIN_INVALID, fieldCode));
-    }
-    if (spaceCheck && this.fieldContainsSpace(fieldValue)) {
+    }else if (this.fieldStartsWithInvertedPrefix(fieldValue)) {
+      results.add(this.createValidationEntity(isInteractive ? WARNING : ERROR, INV_PREFIX, fieldCode));
+    }else if (spaceCheck && this.fieldContainsSpace(fieldValue)) {
       results.add(this.createValidationEntity(WARNING, BLANK_IN_NAME, fieldCode));
     }
-    if (this.fieldStartsWithInvertedPrefix(fieldValue)) {
-      results.add(this.createValidationEntity(isInteractive ? WARNING : ERROR, INV_PREFIX, fieldCode));
-    }
-
   }
 
 
@@ -260,8 +256,9 @@ public abstract class BaseRule implements Rule {
       results.add(this.createValidationEntity(WARNING, BLOCKED_NAME, fieldCode));
     } else {
       if (isError) {
+        results.clear();
         results.add(this.createValidationEntity(ERROR, BLOCKED_NAME, fieldCode));
-      } else {
+      } else if (results.isEmpty()) {
         results.add(this.createValidationEntity(WARNING, BLOCKED_NAME, fieldCode));
       }
     }
