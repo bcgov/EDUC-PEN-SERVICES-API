@@ -43,7 +43,7 @@ public class UsualLastNameRule extends BaseLastNameFirstNameRule {
   public List<PenRequestStudentValidationIssue> validate(final PenRequestStudentValidationPayload validationPayload) {
     final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
-    this.doValidate(validationPayload.getIsInteractive(), results, validationPayload.getUsualLastName(), USUAL_LAST, this.penNameTextService);
+    this.doValidate(validationPayload.getIsInteractive(), results, validationPayload.getUsualLastName(), USUAL_LAST, this.penNameTextService, true);
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
     log.info("Completed for {} in {} milli seconds", validationPayload.getTransactionID(), stopwatch.elapsed(TimeUnit.MILLISECONDS));

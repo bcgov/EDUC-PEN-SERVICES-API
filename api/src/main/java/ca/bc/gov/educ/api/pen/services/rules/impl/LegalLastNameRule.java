@@ -52,7 +52,7 @@ public class LegalLastNameRule extends BaseLastNameFirstNameRule {
     } else if (StringUtils.equals("'", legalLastName)) {
       results.add(this.createValidationEntity(ERROR, APOSTROPHE, LEGAL_LAST));
     } else {
-      this.defaultValidationForNameFields(results, legalLastName, LEGAL_LAST, validationPayload.getIsInteractive());
+      this.defaultValidationForNameFields(results, legalLastName, LEGAL_LAST, validationPayload.getIsInteractive(), true);
     }
     return this.checkForInvalidTextAndOneChar(validationPayload, stopwatch, results, legalLastName, LEGAL_LAST, this.penNameTextService);
   }
