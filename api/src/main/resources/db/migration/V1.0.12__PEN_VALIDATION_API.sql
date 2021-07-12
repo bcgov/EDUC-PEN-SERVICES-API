@@ -1,0 +1,4 @@
+--PEN Request Batch Student Status Codes
+UPDATE PEN_REQUEST_BATCH_VALIDATION_FIELD_CODE
+SET    LABEL = 'Gender'
+WHERE  CODE = 'GENDER';
