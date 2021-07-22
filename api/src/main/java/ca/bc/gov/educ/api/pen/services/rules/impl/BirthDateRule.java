@@ -66,7 +66,7 @@ public class BirthDateRule extends BaseRule {
         results.add(this.createValidationEntity(ERROR, DOB_INVALID, BIRTH_DATE));
       }
     }
-    if (results.isEmpty()) {
+    if (results.isEmpty() && StringUtils.isNotBlank(validationPayload.getMincode())) {
       this.validateDOBForOffshoreAndIndependentSchool(results, dobDate, validationPayload);
       this.validateDOBForPublicSchool(results, dobDate, validationPayload);
     }
