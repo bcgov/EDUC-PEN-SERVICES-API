@@ -80,7 +80,7 @@ public class BirthDateRuleTest {
       when(restUtils.getSchoolByMincode(any())).thenReturn(schoolOptional);
     }
 
-    final PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().transactionID(UUID.randomUUID().toString()).dob(dob).build();
+    final PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().transactionID(UUID.randomUUID().toString()).mincode("10200001").dob(dob).build();
     final var result = birthDateRule.validate(payload);
     assertThat(result).size().isEqualTo(expectedErrors);
   }
