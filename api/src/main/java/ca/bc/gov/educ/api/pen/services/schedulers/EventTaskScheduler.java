@@ -1,26 +1,23 @@
 package ca.bc.gov.educ.api.pen.services.schedulers;
 
 import ca.bc.gov.educ.api.pen.services.constants.SagaStatusEnum;
+import ca.bc.gov.educ.api.pen.services.helpers.LogHelper;
 import ca.bc.gov.educ.api.pen.services.model.Saga;
 import ca.bc.gov.educ.api.pen.services.orchestrator.base.Orchestrator;
 import ca.bc.gov.educ.api.pen.services.repository.SagaRepository;
-import ca.bc.gov.educ.api.pen.services.util.ThreadFactoryBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import org.jboss.threads.EnhancedQueueExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -35,12 +32,6 @@ public class EventTaskScheduler {
    */
   @Getter(PRIVATE)
   private final Map<String, Orchestrator> sagaOrchestrators = new HashMap<>();
-  /**
-   * The Task executor.
-   */
-  private final Executor taskExecutor = new EnhancedQueueExecutor.Builder()
-      .setThreadFactory(new ThreadFactoryBuilder().withNameFormat("async-executor-%d").get())
-      .setCorePoolSize(2).setMaximumPoolSize(10).setKeepAliveTime(Duration.ofSeconds(60)).build();
   /**
    * The Saga repository.
    */
@@ -73,7 +64,7 @@ public class EventTaskScheduler {
   public void findAndProcessUncompletedSagas() {
     final List<Saga> sagas = this.getSagaRepository().findAllByStatusIn(this.getStatusFilters());
     if (!sagas.isEmpty()) {
-      this.taskExecutor.execute(() -> this.processUncompletedSagas(sagas));
+      this.processUncompletedSagas(sagas);
     }
   }
 
@@ -87,6 +78,7 @@ public class EventTaskScheduler {
       if (saga.getCreateDate().isBefore(LocalDateTime.now().minusMinutes(1))
           && this.getSagaOrchestrators().containsKey(saga.getSagaName())) {
         try {
+          this.setRetryCountAndLog(saga);
           this.getSagaOrchestrators().get(saga.getSagaName()).replaySaga(saga);
         } catch (final InterruptedException ex) {
           Thread.currentThread().interrupt();
@@ -112,5 +104,17 @@ public class EventTaskScheduler {
       statuses.add(SagaStatusEnum.STARTED.toString());
       return statuses;
     }
+  }
+
+  private void setRetryCountAndLog(final Saga saga) {
+    Integer retryCount = saga.getRetryCount();
+    if (retryCount == null || retryCount == 0) {
+      retryCount = 1;
+    } else {
+      retryCount += 1;
+    }
+    saga.setRetryCount(retryCount);
+    this.getSagaRepository().save(saga);
+    LogHelper.logSagaRetry(saga);
   }
 }
