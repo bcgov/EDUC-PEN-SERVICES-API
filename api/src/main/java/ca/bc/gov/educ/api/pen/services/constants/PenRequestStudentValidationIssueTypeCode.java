@@ -97,7 +97,11 @@ public enum PenRequestStudentValidationIssueTypeCode {
   /**
    * Invalid name pen request  student validation issue type code.
    */
-  BLOCKED_NAME("BLOCKEDNAME");
+  BLOCKED_NAME("BLOCKEDNAME"),
+  /**
+   * Same name pen request student validation issue type code.
+   */
+  SAME_NAME("SAMENAME");
 
   /**
    * The Code.
