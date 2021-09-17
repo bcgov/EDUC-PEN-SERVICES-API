@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationIssu
 import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
 import com.google.common.base.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.LinkedList;
@@ -14,8 +15,7 @@ import java.util.List;
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationFieldCode.LEGAL_FIRST;
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode.ERROR;
 import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode.WARNING;
-import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueTypeCode.APOSTROPHE;
-import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueTypeCode.BLANK_FIELD;
+import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueTypeCode.*;
 
 
 /**
@@ -49,10 +49,13 @@ public class LegalFirstNameRule extends BaseLastNameFirstNameRule {
     final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
     final var legalFirstName = validationPayload.getLegalFirstName();
+    val legalLastName = validationPayload.getLegalLastName();
     if (StringUtils.isBlank(legalFirstName)) {
       results.add(this.createValidationEntity(validationPayload.getIsInteractive() ? WARNING : ERROR, BLANK_FIELD, LEGAL_FIRST));
     } else if (legalFirstName.trim().equals("'")) {
       results.add(this.createValidationEntity(ERROR, APOSTROPHE, LEGAL_FIRST));
+    } else if (StringUtils.equalsIgnoreCase(legalFirstName, legalLastName)) {
+      results.add(this.createValidationEntity(validationPayload.getIsInteractive() ? WARNING : ERROR, SAME_NAME, LEGAL_FIRST));
     } else {
       this.defaultValidationForNameFields(results, legalFirstName, LEGAL_FIRST, validationPayload.getIsInteractive(), true);
     }

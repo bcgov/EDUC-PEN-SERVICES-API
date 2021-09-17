@@ -42,7 +42,7 @@ public class LegalFirstNameRuleTest {
    */
   @Before
   public void setup() throws IOException {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     this.rule = new LegalFirstNameRule(this.service);
     if (penNameTexts == null) {
       final File file = new File(
@@ -102,10 +102,13 @@ public class LegalFirstNameRuleTest {
 
   @Test
   @Parameters({"true, WARNING,",
-    "false, ERROR,", "false, ERROR,XXAS", "false, ERROR,ZZAS", "true, WARNING,XXAS", "true, WARNING,ZZAS"})
+    "false, ERROR,", "false, ERROR,XXAS", "false, ERROR,ZZAS", "true, WARNING,XXAS", "true, WARNING,ZZAS", "true, WARNING,MISHRA", "false, ERROR,MISHRA"})
   public void testValidate_givenLegalFirstNameBlankInDifferentMode_shouldReturnResultsWithWarningOrError(boolean isInteractive, String issueSeverityCode, String firstName) {
     when(this.service.getPenNameTexts()).thenReturn(penNameTexts);
     final PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(isInteractive).transactionID(UUID.randomUUID().toString()).legalFirstName(firstName).build();
+    if (firstName.equals("MISHRA")) {
+      payload.setLegalLastName("MISHRA");
+    }
     final var result = this.rule.validate(payload);
     assertThat(result).size().isEqualTo(1);
     assertThat(result.get(0).getPenRequestBatchValidationIssueSeverityCode()).isEqualTo(issueSeverityCode);
