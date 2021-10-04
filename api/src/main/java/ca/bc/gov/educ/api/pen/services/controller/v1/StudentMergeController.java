@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -60,6 +61,11 @@ public class StudentMergeController implements StudentMergeEndpoint {
   @Override
   public List<StudentMergeSourceCode> getStudentMergeSourceCodes() {
     return this.getService().getStudentMergeSourceCodesList().stream().map(mapper::toStructure).collect(Collectors.toList());
+  }
+
+  @Override
+  public List<StudentMerge> findStudentMergesBetweenDatesCreated(String createDateStart, String createDateEnd, String mergeDirectionCode) {
+    return this.getService().findStudentMerges(LocalDateTime.parse(createDateStart), LocalDateTime.parse(createDateEnd), mergeDirectionCode).stream().map(mapper::toStructure).collect(Collectors.toList());
   }
 
 }

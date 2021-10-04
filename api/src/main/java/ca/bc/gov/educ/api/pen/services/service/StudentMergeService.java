@@ -106,7 +106,7 @@ public class StudentMergeService {
   private Predicate<StudentMergeEntity> getStudentMergeEntityNotPresentPredicate() {
     return el -> {
       val mergeOptional = this.studentMergeRepo.
-          findByStudentIDAndMergeStudentIDAndStudentMergeDirectionCode(el.getStudentID(), el.getMergeStudentID(), el.getStudentMergeDirectionCode());
+        findByStudentIDAndMergeStudentIDAndStudentMergeDirectionCode(el.getStudentID(), el.getMergeStudentID(), el.getStudentMergeDirectionCode());
       return mergeOptional.isEmpty();
     };
   }
@@ -118,7 +118,7 @@ public class StudentMergeService {
    */
   private Optional<StudentMergeEntity> getStudentMergeEntityIfPresent(final StudentMergeEntity entity) {
     return this.studentMergeRepo.
-            findByStudentIDAndMergeStudentIDAndStudentMergeDirectionCode(entity.getStudentID(), entity.getMergeStudentID(), entity.getStudentMergeDirectionCode());
+      findByStudentIDAndMergeStudentIDAndStudentMergeDirectionCode(entity.getStudentID(), entity.getMergeStudentID(), entity.getStudentMergeDirectionCode());
   }
 
   /**
@@ -134,7 +134,7 @@ public class StudentMergeService {
     if (!updatedList.isEmpty()) {
       this.studentMergeRepo.saveAll(updatedList);
       return Pair.of(updatedList, Optional.of(this.eventRepository.save(this.createServicesEvent(updatedList.get(0).getCreateUser(), updatedList.get(0).getUpdateUser(),
-          JsonUtil.getJsonStringFromObject(updatedList.stream().map(StudentMergeMapper.mapper::toStructure).collect(Collectors.toList())), EventType.CREATE_MERGE, EventOutcome.MERGE_CREATED))));
+        JsonUtil.getJsonStringFromObject(updatedList.stream().map(StudentMergeMapper.mapper::toStructure).collect(Collectors.toList())), EventType.CREATE_MERGE, EventOutcome.MERGE_CREATED))));
     }
     return Pair.of(new ArrayList<>(), Optional.empty());
   }
@@ -152,7 +152,7 @@ public class StudentMergeService {
     if (!updatedList.isEmpty()) {
       this.studentMergeRepo.deleteAll(updatedList);
       return Pair.of(updatedList, Optional.of(this.eventRepository.save(this.createServicesEvent(studentMergeEntities.get(0).getCreateUser(), studentMergeEntities.get(0).getUpdateUser(),
-          JsonUtil.getJsonStringFromObject(updatedList.stream().map(StudentMergeMapper.mapper::toStructure).collect(Collectors.toList())), EventType.DELETE_MERGE, EventOutcome.MERGE_DELETED))));
+        JsonUtil.getJsonStringFromObject(updatedList.stream().map(StudentMergeMapper.mapper::toStructure).collect(Collectors.toList())), EventType.DELETE_MERGE, EventOutcome.MERGE_DELETED))));
     }
     return Pair.of(new ArrayList<>(), Optional.empty());
   }
@@ -172,6 +172,11 @@ public class StudentMergeService {
     }
   }
 
+
+  public List<StudentMergeEntity> findStudentMerges(final LocalDateTime createDateStart, final LocalDateTime createDateEnd, final String mergeDirection) {
+
+    return this.studentMergeRepo.findAllByCreateDateBetweenAndStudentMergeDirectionCode(createDateStart, createDateEnd, mergeDirection.toUpperCase());
+  }
 
   /**
    * Returns the full list of student merge direction codes
@@ -243,15 +248,15 @@ public class StudentMergeService {
    */
   private ServicesEvent createServicesEvent(final String createUser, final String updateUser, final String jsonString, final EventType eventType, final EventOutcome eventOutcome) {
     return ServicesEvent.builder()
-        .createDate(LocalDateTime.now())
-        .updateDate(LocalDateTime.now())
-        .createUser(createUser)
-        .updateUser(updateUser)
-        .eventPayload(jsonString)
-        .eventType(eventType.toString())
-        .eventStatus(DB_COMMITTED.toString())
-        .eventOutcome(eventOutcome.toString())
-        .build();
+      .createDate(LocalDateTime.now())
+      .updateDate(LocalDateTime.now())
+      .createUser(createUser)
+      .updateUser(updateUser)
+      .eventPayload(jsonString)
+      .eventType(eventType.toString())
+      .eventStatus(DB_COMMITTED.toString())
+      .eventOutcome(eventOutcome.toString())
+      .build();
 
   }
 }
