@@ -24,7 +24,7 @@ public final class URL {
    * The constant MACRO_ID
    */
   public static final String MACRO_ID = "/{macroId}";
-
+  public static final String BETWEEN_DATES_CREATED = "/between-dates-created";
   /**
    * Instantiates a new Url.
    */
