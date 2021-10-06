@@ -50,4 +50,6 @@ public interface StudentMergeRepository extends JpaRepository<StudentMergeEntity
   Optional<StudentMergeEntity> findByStudentIDAndMergeStudentIDAndStudentMergeDirectionCode(UUID studentID, UUID mergeStudentID, String mergeDirectionCode);
 
   List<StudentMergeEntity> findAllByCreateDateBetweenAndStudentMergeDirectionCode(LocalDateTime createDateStart, LocalDateTime createDateEnd, String mergeDirectionCode);
+
+  long countAllByCreateDateBetweenAndStudentMergeDirectionCode(LocalDateTime createDateStart, LocalDateTime createDateEnd, String mergeDirectionCode);
 }

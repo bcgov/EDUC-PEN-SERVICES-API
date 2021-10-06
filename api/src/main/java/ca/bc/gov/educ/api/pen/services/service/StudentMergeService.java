@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.pen.services.service;
 
 import ca.bc.gov.educ.api.pen.services.constants.EventOutcome;
 import ca.bc.gov.educ.api.pen.services.constants.EventType;
+import ca.bc.gov.educ.api.pen.services.constants.StatsType;
 import ca.bc.gov.educ.api.pen.services.mapper.v1.StudentMergeMapper;
 import ca.bc.gov.educ.api.pen.services.model.ServicesEvent;
 import ca.bc.gov.educ.api.pen.services.model.StudentMergeDirectionCodeEntity;
@@ -11,6 +12,7 @@ import ca.bc.gov.educ.api.pen.services.repository.ServicesEventRepository;
 import ca.bc.gov.educ.api.pen.services.repository.StudentMergeDirectionCodeTableRepository;
 import ca.bc.gov.educ.api.pen.services.repository.StudentMergeRepository;
 import ca.bc.gov.educ.api.pen.services.repository.StudentMergeSourceCodeTableRepository;
+import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMergeStats;
 import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.val;
@@ -258,5 +260,20 @@ public class StudentMergeService {
       .eventOutcome(eventOutcome.toString())
       .build();
 
+  }
+
+  public StudentMergeStats getMergeStats(final StatsType statsType) {
+    final LocalDateTime currentDate = LocalDateTime.now();
+    if (statsType == StatsType.NUMBER_OF_MERGES_IN_LAST_12_MONTH) {
+      final Map<String, Long> mergeNumbersMap = new LinkedHashMap<>();
+      for (int i = 11; i >= 0; i--) {
+        final LocalDateTime startDate = currentDate.minusMonths(i).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        final LocalDateTime endDate = currentDate.minusMonths(i).withDayOfMonth(currentDate.minusMonths(i).toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        val mergeNumbers = this.studentMergeRepo.countAllByCreateDateBetweenAndStudentMergeDirectionCode(startDate, endDate, "TO");
+        mergeNumbersMap.put(startDate.getMonth().toString(), mergeNumbers);
+      }
+      return StudentMergeStats.builder().numberOfMergesInLastTwelveMonth(mergeNumbersMap).build();
+    }
+    return StudentMergeStats.builder().build();
   }
 }

@@ -1,7 +1,9 @@
 package ca.bc.gov.educ.api.pen.services.endpoint.v1;
 
+import ca.bc.gov.educ.api.pen.services.constants.StatsType;
 import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMerge;
 import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMergeSourceCode;
+import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMergeStats;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.data.repository.query.Param;
@@ -49,4 +51,9 @@ public interface StudentMergeEndpoint {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   List<StudentMerge> findStudentMergesBetweenDatesCreated(@RequestParam("createDateStart") String createDateStart, @RequestParam("createDateEnd") String createDateEnd, @RequestParam(value = "mergeDirectionCode", defaultValue = "TO") String mergeDirectionCode);
 
+  @Transactional(readOnly = true)
+  @GetMapping(MERGES + STATS)
+  @PreAuthorize("hasAuthority('SCOPE_READ_STUDENT_MERGE')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
+  StudentMergeStats getMergeStats(@RequestParam("statsType") StatsType statsType);
 }
