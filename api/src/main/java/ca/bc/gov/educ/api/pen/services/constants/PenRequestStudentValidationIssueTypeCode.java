@@ -101,7 +101,11 @@ public enum PenRequestStudentValidationIssueTypeCode {
   /**
    * Same name pen request student validation issue type code.
    */
-  SAME_NAME("SAMENAME");
+  SAME_NAME("SAMENAME"),
+  /**
+   * Has a number in the name
+   */
+  NUMBER_NAME("NUMBERNAME");
 
   /**
    * The Code.

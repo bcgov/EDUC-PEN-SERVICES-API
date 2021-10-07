@@ -161,6 +161,9 @@ public abstract class BaseRule implements Rule {
    * |    | Check: Field has blanks within the field                                                   |                                                                     |         |             |
    * | V8 | PreReq: Skip this check on LEGALFIRST if V3 already   recorded for LEGALFIRST.             | LEGALLAST, LEGALFIRST, LEGALMID, USUALLAST, USUALFIRST,   USUALMID  | WARNING | INVPREFIX   |
    * |    | Check: Field starts with XX or ZZ                                                          |                                                                     |         |             |
+   * | V24| PreReq: Skip this check if any of these issues has been reported for the current field:    | LEGALLAST, LEGALFIRST, LEGALMID, USUALLAST, USUALFIRST,   USUALMID  | ERROR   | INVPREFIX   |
+   * |    | V2, V3, V4, V5, V6, V7, V8                                                                 |                                                                     |         |             |
+   * |    | Check: Field contains digits 0-9                                                           |                                                                     |         |             |
    * </pre>
    *
    * @param results       the results
@@ -179,6 +182,8 @@ public abstract class BaseRule implements Rule {
       results.add(this.createValidationEntity(isInteractive ? WARNING : ERROR, INV_PREFIX, fieldCode));
     }else if (spaceCheck && this.fieldContainsSpace(fieldValue)) {
       results.add(this.createValidationEntity(WARNING, BLANK_IN_NAME, fieldCode));
+    }else if (resultsContainNoError(results) && fieldValue.trim().matches(".*\\d.*")) {
+      results.add(this.createValidationEntity(isInteractive ? WARNING : ERROR, NUMBER_NAME, fieldCode));
     }
   }
 
