@@ -51,7 +51,7 @@ public class PenServicesAPICustomHealthCheck implements HealthIndicator {
     if (this.natsConnection.getStatus() == Connection.Status.CLOSED) {
       log.warn("Health Check failed for NATS");
       return Health.down().withDetail("NATS", " Connection is Closed.").build();
-    } else if (this.redissonClient == null || !this.redissonClient.getRedisNodes(RedisNodes.CLUSTER).pingAll()) {
+    } else if (this.redissonClient == null || this.redissonClient.getRedisNodes(RedisNodes.CLUSTER) == null || !this.redissonClient.getRedisNodes(RedisNodes.CLUSTER).pingAll()) {
       log.warn("Health Check failed for REDIS");
       return Health.down().withDetail("REDIS", "Connection is not stable across cluster.").build();
     }
