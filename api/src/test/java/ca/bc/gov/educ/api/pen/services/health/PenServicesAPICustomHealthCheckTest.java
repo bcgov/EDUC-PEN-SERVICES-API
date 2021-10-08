@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -79,7 +80,7 @@ public class PenServicesAPICustomHealthCheckTest {
     return new RedisCluster() {
       @Override
       public Collection<RedisClusterMaster> getMasters() {
-        return null;
+        return Collections.emptyList();
       }
 
       @Override
