@@ -70,14 +70,22 @@ public class PenServicesAPICustomHealthCheck implements HealthIndicator {
       int masterPingsFailed = 0;
       int slavePingsFailed = 0;
       for (val master : redisClusterNodes.getMasters()) {
-        val pongResult = master.ping(2, TimeUnit.SECONDS);
-        if (!pongResult) {
+        try {
+          val pongResult = master.ping(2, TimeUnit.SECONDS);
+          if (!pongResult) {
+            masterPingsFailed++;
+          }
+        } catch (Exception e) {
           masterPingsFailed++;
         }
       }
       for (val slave : redisClusterNodes.getSlaves()) {
-        val pongResult = slave.ping(2, TimeUnit.SECONDS);
-        if (!pongResult) {
+        try {
+          val pongResult = slave.ping(2, TimeUnit.SECONDS);
+          if (!pongResult) {
+            slavePingsFailed++;
+          }
+        } catch (Exception e) {
           slavePingsFailed++;
         }
       }
