@@ -4,6 +4,7 @@ import io.nats.client.Connection;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.redisson.api.RedissonClient;
+import org.redisson.api.redisnode.RedisCluster;
 import org.redisson.api.redisnode.RedisNodes;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -69,26 +70,8 @@ public class PenServicesAPICustomHealthCheck implements HealthIndicator {
     if (redisClusterNodes != null && redisClusterNodes.getMasters() != null && redisClusterNodes.getSlaves() != null) {
       int masterPingsFailed = 0;
       int slavePingsFailed = 0;
-      for (val master : redisClusterNodes.getMasters()) {
-        try {
-          val pongResult = master.ping(2, TimeUnit.SECONDS);
-          if (!pongResult) {
-            masterPingsFailed++;
-          }
-        } catch (Exception e) {
-          masterPingsFailed++;
-        }
-      }
-      for (val slave : redisClusterNodes.getSlaves()) {
-        try {
-          val pongResult = slave.ping(2, TimeUnit.SECONDS);
-          if (!pongResult) {
-            slavePingsFailed++;
-          }
-        } catch (Exception e) {
-          slavePingsFailed++;
-        }
-      }
+      masterPingsFailed = getMasterPingsFailed(redisClusterNodes, masterPingsFailed);
+      slavePingsFailed = getSlavePingsFailed(redisClusterNodes, slavePingsFailed);
       log.debug("Redis masters size :: {}, slaves size :: {}, failed pings for server masters :: {}, slaves :: {}", redisClusterNodes.getMasters().size(), redisClusterNodes.getSlaves().size(), masterPingsFailed, slavePingsFailed);
       if (masterPingsFailed == redisClusterNodes.getMasters().size() || slavePingsFailed == redisClusterNodes.getSlaves().size()) {
         isRedisDown = true;
@@ -97,5 +80,33 @@ public class PenServicesAPICustomHealthCheck implements HealthIndicator {
       log.warn("Redis cluster is null");
     }
     return isRedisDown;
+  }
+
+  private int getSlavePingsFailed(RedisCluster redisClusterNodes, int slavePingsFailed) {
+    for (val slave : redisClusterNodes.getSlaves()) {
+      try {
+        val pongResult = slave.ping(2, TimeUnit.SECONDS);
+        if (!pongResult) {
+          slavePingsFailed++;
+        }
+      } catch (Exception e) {
+        slavePingsFailed++;
+      }
+    }
+    return slavePingsFailed;
+  }
+
+  private int getMasterPingsFailed(RedisCluster redisClusterNodes, int masterPingsFailed) {
+    for (val master : redisClusterNodes.getMasters()) {
+      try {
+        val pongResult = master.ping(2, TimeUnit.SECONDS);
+        if (!pongResult) {
+          masterPingsFailed++;
+        }
+      } catch (Exception e) {
+        masterPingsFailed++;
+      }
+    }
+    return masterPingsFailed;
   }
 }
