@@ -30,7 +30,7 @@ public class PenServicesAPICustomHealthCheck implements HealthIndicator {
    * @param natsConnection the nats connection
    * @param redissonClient the redisson client.
    */
-  public PenServicesAPICustomHealthCheck(final Connection natsConnection, RedissonClient redissonClient) {
+  public PenServicesAPICustomHealthCheck(final Connection natsConnection, final RedissonClient redissonClient) {
     this.natsConnection = natsConnection;
     this.redissonClient = redissonClient;
   }
@@ -52,7 +52,7 @@ public class PenServicesAPICustomHealthCheck implements HealthIndicator {
    * @return the health
    */
   private Health healthCheck() {
-    boolean isRedisDown = isRedisDown();
+    final boolean isRedisDown = this.isRedisDown();
 
     if (this.natsConnection.getStatus() == Connection.Status.CLOSED) {
       log.warn("Health Check failed for NATS");
@@ -68,10 +68,8 @@ public class PenServicesAPICustomHealthCheck implements HealthIndicator {
     boolean isRedisDown = false;
     val redisClusterNodes = this.redissonClient.getRedisNodes(RedisNodes.CLUSTER);
     if (redisClusterNodes != null && redisClusterNodes.getMasters() != null && redisClusterNodes.getSlaves() != null) {
-      int masterPingsFailed = 0;
-      int slavePingsFailed = 0;
-      masterPingsFailed = getMasterPingsFailed(redisClusterNodes, masterPingsFailed);
-      slavePingsFailed = getSlavePingsFailed(redisClusterNodes, slavePingsFailed);
+      final int masterPingsFailed = this.getMasterPingsFailed(redisClusterNodes);
+      final int slavePingsFailed = this.getSlavePingsFailed(redisClusterNodes);
       log.debug("Redis masters size :: {}, slaves size :: {}, failed pings for server masters :: {}, slaves :: {}", redisClusterNodes.getMasters().size(), redisClusterNodes.getSlaves().size(), masterPingsFailed, slavePingsFailed);
       if (masterPingsFailed == redisClusterNodes.getMasters().size() || slavePingsFailed == redisClusterNodes.getSlaves().size()) {
         isRedisDown = true;
@@ -82,28 +80,30 @@ public class PenServicesAPICustomHealthCheck implements HealthIndicator {
     return isRedisDown;
   }
 
-  private int getSlavePingsFailed(RedisCluster redisClusterNodes, int slavePingsFailed) {
+  private int getSlavePingsFailed(final RedisCluster redisClusterNodes) {
+    int slavePingsFailed = 0;
     for (val slave : redisClusterNodes.getSlaves()) {
       try {
         val pongResult = slave.ping(2, TimeUnit.SECONDS);
         if (!pongResult) {
           slavePingsFailed++;
         }
-      } catch (Exception e) {
+      } catch (final Exception e) {
         slavePingsFailed++;
       }
     }
     return slavePingsFailed;
   }
 
-  private int getMasterPingsFailed(RedisCluster redisClusterNodes, int masterPingsFailed) {
+  private int getMasterPingsFailed(final RedisCluster redisClusterNodes) {
+    int masterPingsFailed = 0;
     for (val master : redisClusterNodes.getMasters()) {
       try {
         val pongResult = master.ping(2, TimeUnit.SECONDS);
         if (!pongResult) {
           masterPingsFailed++;
         }
-      } catch (Exception e) {
+      } catch (final Exception e) {
         masterPingsFailed++;
       }
     }
