@@ -118,4 +118,7 @@ public class BaseStudentData {
    * The True student id.
    */
   private String trueStudentID;
+  private String documentTypeCode;
+
+  private String dateOfConfirmation;
 }
