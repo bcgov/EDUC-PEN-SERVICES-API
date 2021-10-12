@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -173,5 +175,32 @@ public class SagaService {
         .updateDate(LocalDateTime.now())
         .build();
     return this.createSagaRecord(saga);
+  }
+
+  /**
+   * Create saga records in db saga.
+   *
+   * @param sagaName the saga name
+   * @param userName the user name
+   * @param payloads the list of pen request batch id and the payload
+   * @return the saga
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public List<Saga> createMultipleBatchSagaRecordsInDB(final String sagaName, final String userName, final List<Pair<UUID, String>> payloads) {
+    final List<Saga> sagas = new ArrayList<>();
+    payloads.forEach(payloadPair -> sagas.add(
+      Saga.builder()
+        .payload(payloadPair.getSecond())
+        .studentID(payloadPair.getFirst())
+        .sagaName(sagaName)
+        .status(STARTED.toString())
+        .sagaState(INITIATED.toString())
+        .createDate(LocalDateTime.now())
+        .createUser(userName)
+        .updateUser(userName)
+        .updateDate(LocalDateTime.now())
+        .build()));
+
+    return this.getSagaRepository().saveAll(sagas);
   }
 }

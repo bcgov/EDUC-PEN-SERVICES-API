@@ -18,6 +18,10 @@ public enum TopicsEnum {
    */
   PEN_MATCH_API_TOPIC,
   /**
+   * Sld api topic topics enum.
+   */
+  SLD_API_TOPIC,
+  /**
    * Pen services events topic topics enum.
    */
   PEN_SERVICES_EVENTS_TOPIC,
@@ -35,4 +39,8 @@ public enum TopicsEnum {
    * Pen services split pen saga topic topics enum.
    */
   PEN_SERVICES_SPLIT_PEN_SAGA_TOPIC,
+  /**
+   * Pen services move sld saga topic topics enum.
+   */
+  PEN_SERVICES_MOVE_SLD_SAGA_TOPIC,
 }
