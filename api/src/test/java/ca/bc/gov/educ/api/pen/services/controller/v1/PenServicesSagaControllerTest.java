@@ -202,6 +202,39 @@ public class PenServicesSagaControllerTest {
       .andDo(print()).andExpect(status().isConflict());
   }
 
+  // Move sld
+  @Test
+  public void testProcessMoveSld_GivenInvalidPayload_ShouldReturnStatusBadRequest() throws Exception {
+    this.mockMvc.perform(post(PEN_SERVICES + "/move-sld-saga")
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "STUDENT_MOVE_SLD_SAGA")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON)
+      .content(placeholderInvalidSagaData()))
+      .andDo(print()).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void testProcessMoveSld_GivenValidPayload_ShouldReturnStatusOk() throws Exception {
+    this.mockMvc.perform(post(PEN_SERVICES + "/move-sld-saga")
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "STUDENT_MOVE_SLD_SAGA")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON)
+      .content(placeholderMoveSldSagaData()))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2));
+  }
+
+  @Test
+  public void testProcessMoveSld_GivenValidPayload_and_SagaWithSameStudentIdStarted_ShouldReturnStatusConflict() throws Exception {
+    var payload = placeholderMoveSldSagaData();
+    sagaService.createSagaRecordInDB(PEN_SERVICES_MOVE_SLD_SAGA.toString(), "Test", payload, UUID.fromString(studentID));
+    this.mockMvc.perform(post(PEN_SERVICES + "/move-sld-saga")
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "STUDENT_MOVE_SLD_SAGA")))
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON)
+      .content(payload))
+      .andDo(print()).andExpect(status().isConflict());
+  }
+
   protected String placeholderInvalidSagaData() {
     return " {\n" +
             "    \"createUser\": \"test\",\n" +
@@ -248,6 +281,29 @@ public class PenServicesSagaControllerTest {
       "       \"studentID\": \"" + studentID + "\",\n" +
       "       \"legalFirstName\": \"Jack\"\n" +
       "    }\n" +
+      "  }";
+  }
+
+  protected String placeholderMoveSldSagaData() {
+    return " {\n" +
+      "    \"createUser\": \"test\",\n" +
+      "    \"studentID\": \"" + studentID + "\",\n" +
+      "    \"moveSldSagaData\": [{\n" +
+      "       \"pen\": \"120164447\",\n" +
+      "       \"distNo\": \"069\",\n" +
+      "       \"schlNo\": \"69015\",\n" +
+      "       \"reportDate\": 20030930,\n" +
+      "       \"studentId\": \"120164447\",\n" +
+      "       \"movedToPen\": \"100100010\"\n" +
+      "     },\n" +
+      "     {\n" +
+      "       \"pen\": \"120164447\",\n" +
+      "       \"distNo\": \"069\",\n" +
+      "       \"schlNo\": \"69015\",\n" +
+      "       \"reportDate\": 20040201,\n" +
+      "       \"studentId\": \"120164447\",\n" +
+      "       \"movedToPen\": \"100100010\"\n" +
+      "    }]\n" +
       "  }";
   }
 

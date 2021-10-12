@@ -14,7 +14,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.util.Pair;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
@@ -490,25 +492,52 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
   /**
    * Start to execute saga
    *
+   * @param saga the saga data
+   */
+  @Override
+  @Async("subscriberExecutor")
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void startSaga(@NotNull final Saga saga) {
+    try {
+      this.handleEvent(Event.builder()
+        .eventType(EventType.INITIATED)
+        .eventOutcome(EventOutcome.INITIATE_SUCCESS)
+        .sagaId(saga.getSagaId())
+        .eventPayload(saga.getPayload())
+        .build());
+    } catch (InterruptedException e) {
+      log.error("InterruptedException while startSaga", e);
+      Thread.currentThread().interrupt();
+    } catch (TimeoutException | IOException e) {
+      log.error("Exception while startSaga", e);
+    }
+  }
+
+  /**
+   * create a saga
+   *
    * @param payload   the event payload
    * @param studentID the student id
    * @param userName  the user who created the saga
    * @return saga record
-   * @throws InterruptedException the interrupted exception
-   * @throws TimeoutException     the timeout exception
-   * @throws IOException          the io exception
    */
   @Override
   @Transactional
-  public Saga startSaga(@NotNull final String payload, final UUID studentID, final String userName) throws InterruptedException, TimeoutException, IOException {
-    final var saga = this.sagaService.createSagaRecordInDB(this.sagaName, userName, payload, studentID);
-    this.handleEvent(Event.builder()
-        .eventType(EventType.INITIATED)
-        .eventOutcome(EventOutcome.INITIATE_SUCCESS)
-        .sagaId(saga.getSagaId())
-        .eventPayload(payload)
-        .build());
-    return saga;
+  public Saga createSaga(@NotNull final String payload, final UUID studentID, final String userName) {
+    return this.sagaService.createSagaRecordInDB(this.sagaName, userName, payload, studentID);
+  }
+
+  /**
+   * create multiple sagas
+   *
+   * @param payloads the student ids and the event payloads
+   * @param userName the user who created the saga
+   * @return saga record
+   */
+  @Override
+  @Transactional
+  public List<Saga> createMultipleSagas(@NotNull final List<Pair<UUID, String>> payloads, final String userName) {
+    return this.getSagaService().createMultipleBatchSagaRecordsInDB(this.getSagaName(), userName, payloads);
   }
 
   /**

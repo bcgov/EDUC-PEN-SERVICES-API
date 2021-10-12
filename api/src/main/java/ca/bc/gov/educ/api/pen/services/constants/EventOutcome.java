@@ -75,6 +75,14 @@ public enum EventOutcome {
    */
   POSSIBLE_MATCH_DELETED,
   /**
+   * Sld student updated event outcome.
+   */
+  SLD_STUDENT_UPDATED,
+  /**
+   * Sld student program updated event outcome.
+   */
+  SLD_STUDENT_PROGRAM_UPDATED,
+  /**
    * Saga completed event outcome.
    */
   SAGA_COMPLETED

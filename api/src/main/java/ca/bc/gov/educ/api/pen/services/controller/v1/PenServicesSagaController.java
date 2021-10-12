@@ -3,20 +3,25 @@ package ca.bc.gov.educ.api.pen.services.controller.v1;
 import ca.bc.gov.educ.api.pen.services.constants.SagaEnum;
 import ca.bc.gov.educ.api.pen.services.constants.SagaStatusEnum;
 import ca.bc.gov.educ.api.pen.services.endpoint.v1.PenServicesSagaEndpoint;
+import ca.bc.gov.educ.api.pen.services.exception.InvalidParameterException;
 import ca.bc.gov.educ.api.pen.services.exception.SagaRuntimeException;
 import ca.bc.gov.educ.api.pen.services.mapper.SagaMapper;
 import ca.bc.gov.educ.api.pen.services.orchestrator.base.Orchestrator;
 import ca.bc.gov.educ.api.pen.services.service.SagaService;
 import ca.bc.gov.educ.api.pen.services.struct.v1.*;
 import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.*;
 import static lombok.AccessLevel.PRIVATE;
@@ -79,6 +84,38 @@ public class PenServicesSagaController implements PenServicesSagaEndpoint {
     return this.processServicesSaga(PEN_SERVICES_SPLIT_PEN_SAGA, splitPenSagaData);
   }
 
+  @Override
+  public ResponseEntity<List<String>> moveSld(final MoveMultipleSldSagaData moveMultipleSldSagaData) {
+    try {
+      final var studentID = UUID.fromString(moveMultipleSldSagaData.getStudentID());
+      final var sagaInProgress = this.getSagaService().findAllByStudentIDAndStatusIn(studentID, PEN_SERVICES_MOVE_SLD_SAGA.toString(), this.getStatusesFilter());
+      if (!sagaInProgress.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+      }
+
+      final var payloads = moveMultipleSldSagaData.getMoveSldSagaData().stream().map(sagaData -> {
+        try {
+          val payload = JsonUtil.getJsonStringFromObject(sagaData);
+          return Pair.of(studentID, payload);
+        } catch (final JsonProcessingException e) {
+          throw new InvalidParameterException(e.getMessage());
+        }
+      }).collect(Collectors.toList());
+
+      final var sagas = this.getOrchestratorMap()
+        .get(PEN_SERVICES_MOVE_SLD_SAGA.toString())
+        .createMultipleSagas(payloads, moveMultipleSldSagaData.getCreateUser());
+      for (val saga : sagas) {
+        this.getOrchestratorMap()
+          .get(PEN_SERVICES_MOVE_SLD_SAGA.toString())
+          .startSaga(saga);
+      }
+      return ResponseEntity.ok(sagas.stream().map(saga -> saga.getSagaId().toString()).collect(Collectors.toList()));
+    } catch (final Exception e) {
+      throw new SagaRuntimeException(e.getMessage());
+    }
+  }
+
   /**
    * Process services saga response entity.
    *
@@ -94,9 +131,11 @@ public class PenServicesSagaController implements PenServicesSagaEndpoint {
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
       }
       final String payload = JsonUtil.getJsonStringFromObject(sagaData);
+      final var orchestrator = this.getOrchestratorMap().get(sagaName.toString());
       final var saga = this.getOrchestratorMap()
           .get(sagaName.toString())
-          .startSaga(payload, studentID, sagaData.getCreateUser());
+          .createSaga(payload, studentID, sagaData.getCreateUser());
+      orchestrator.startSaga(saga);
       return ResponseEntity.ok(saga.getSagaId().toString());
     } catch (final Exception e) {
       Thread.currentThread().interrupt();

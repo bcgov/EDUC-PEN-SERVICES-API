@@ -1,9 +1,6 @@
 package ca.bc.gov.educ.api.pen.services.endpoint.v1;
 
-import ca.bc.gov.educ.api.pen.services.struct.v1.Saga;
-import ca.bc.gov.educ.api.pen.services.struct.v1.SplitPenSagaData;
-import ca.bc.gov.educ.api.pen.services.struct.v1.StudentDemergeCompleteSagaData;
-import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMergeCompleteSagaData;
+import ca.bc.gov.educ.api.pen.services.struct.v1.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 import static ca.bc.gov.educ.api.pen.services.constants.v1.URL.PEN_SERVICES;
@@ -68,4 +66,15 @@ public interface PenServicesSagaEndpoint {
   @PreAuthorize("hasAuthority('SCOPE_STUDENT_SPLIT_PEN_SAGA')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK.")})
   ResponseEntity<String> splitPen(@Validated @RequestBody SplitPenSagaData splitPenSagaData);
+
+  /**
+   * Move sld data saga.
+   *
+   * @param moveMultipleSldSagaData the move sld saga data
+   * @return the response entity
+   */
+  @PostMapping("/move-sld-saga")
+  @PreAuthorize("hasAuthority('SCOPE_STUDENT_MOVE_SLD_SAGA')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK.")})
+  ResponseEntity<List<String>> moveSld(@Validated @RequestBody MoveMultipleSldSagaData moveMultipleSldSagaData);
 }

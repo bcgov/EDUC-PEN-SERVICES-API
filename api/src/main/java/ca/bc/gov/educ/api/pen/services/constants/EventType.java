@@ -70,6 +70,16 @@ public enum EventType {
   DELETE_POSSIBLE_MATCH,
 
   /**
+   * Update sld student event type.
+   */
+  UPDATE_SLD_STUDENT,
+
+  /**
+   * Update sld student programs event type.
+   */
+  UPDATE_SLD_STUDENT_PROGRAMS,
+
+  /**
    * Mark saga complete event type.
    */
   MARK_SAGA_COMPLETE,

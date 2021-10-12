@@ -1,8 +1,10 @@
 package ca.bc.gov.educ.api.pen.services.orchestrator.base;
 
 import ca.bc.gov.educ.api.pen.services.model.Saga;
+import org.springframework.data.util.Pair;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -19,17 +21,30 @@ public interface Orchestrator {
   String getSagaName();
 
   /**
-   * Start saga saga.
+   * Start saga.
+   *
+   * @param saga  the saga data
+   */
+  void startSaga(Saga saga);
+
+  /**
+   * create saga.
    *
    * @param payload   the payload
    * @param studentID the student id
    * @param userName  the user who created the saga
    * @return the saga
-   * @throws InterruptedException the interrupted exception
-   * @throws TimeoutException     the timeout exception
-   * @throws IOException          the io exception
    */
-  Saga startSaga(String payload, UUID studentID, String userName) throws InterruptedException, TimeoutException, IOException;
+  Saga createSaga(String payload, UUID studentID, String userName);
+
+  /**
+   * create multiple sagas.
+   *
+   * @param payloads   the list of  pair of student id and payload
+   * @param userName  the user who created the saga
+   * @return the saga
+   */
+  List<Saga> createMultipleSagas(List<Pair<UUID, String>> payloads, String userName);
 
   /**
    * Replay saga.
