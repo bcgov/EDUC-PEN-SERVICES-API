@@ -25,7 +25,13 @@ public class MoveMultipleSldSagaData {
   List<MoveSldSagaData> moveSldSagaData;
 
   /**
-   * The Student id.
+   * The movedToPen.
+   */
+  @NotNull(message = "movedToPen can not be null.")
+  String movedToPen;
+
+  /**
+   * The pen registry student id.
    */
   @NotNull(message = "studentID cannot be null")
   String studentID;

@@ -85,35 +85,9 @@ public class PenServicesSagaController implements PenServicesSagaEndpoint {
   }
 
   @Override
-  public ResponseEntity<List<String>> moveSld(final MoveMultipleSldSagaData moveMultipleSldSagaData) {
-    try {
-      final var studentID = UUID.fromString(moveMultipleSldSagaData.getStudentID());
-      final var sagaInProgress = this.getSagaService().findAllByStudentIDAndStatusIn(studentID, PEN_SERVICES_MOVE_SLD_SAGA.toString(), this.getStatusesFilter());
-      if (!sagaInProgress.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).build();
-      }
-
-      final var payloads = moveMultipleSldSagaData.getMoveSldSagaData().stream().map(sagaData -> {
-        try {
-          val payload = JsonUtil.getJsonStringFromObject(sagaData);
-          return Pair.of(studentID, payload);
-        } catch (final JsonProcessingException e) {
-          throw new InvalidParameterException(e.getMessage());
-        }
-      }).collect(Collectors.toList());
-
-      final var sagas = this.getOrchestratorMap()
-        .get(PEN_SERVICES_MOVE_SLD_SAGA.toString())
-        .createMultipleSagas(payloads, moveMultipleSldSagaData.getCreateUser());
-      for (val saga : sagas) {
-        this.getOrchestratorMap()
-          .get(PEN_SERVICES_MOVE_SLD_SAGA.toString())
-          .startSaga(saga);
-      }
-      return ResponseEntity.ok(sagas.stream().map(saga -> saga.getSagaId().toString()).collect(Collectors.toList()));
-    } catch (final Exception e) {
-      throw new SagaRuntimeException(e.getMessage());
-    }
+  public ResponseEntity<String> moveSld(final MoveMultipleSldSagaData moveMultipleSldSagaData) {
+    final var studentID = UUID.fromString(moveMultipleSldSagaData.getStudentID());
+    return this.processServicesSaga(PEN_SERVICES_MOVE_SLD_SAGA, studentID, moveMultipleSldSagaData, moveMultipleSldSagaData.getCreateUser());
   }
 
   /**
@@ -124,21 +98,33 @@ public class PenServicesSagaController implements PenServicesSagaEndpoint {
    * @return the response entity
    */
   private ResponseEntity<String> processServicesSaga(final SagaEnum sagaName, final BaseStudentSagaData sagaData) {
+    final var studentID = UUID.fromString(sagaData.getStudentID());
+    return this.processServicesSaga(sagaName, studentID, sagaData, sagaData.getCreateUser());
+  }
+
+  /**
+   * Process services saga response entity.
+   *
+   * @param sagaName the saga name
+   * @param studentID the student ID
+   * @param sagaPayload the saga payload
+   * @param createUser the create user
+   * @return the response entity
+   */
+  private ResponseEntity<String> processServicesSaga(final SagaEnum sagaName, final UUID studentID, final Object sagaPayload, final String createUser) {
     try {
-      final var studentID = UUID.fromString(sagaData.getStudentID());
       final var sagaInProgress = this.getSagaService().findAllByStudentIDAndStatusIn(studentID, sagaName.toString(), this.getStatusesFilter());
       if (!sagaInProgress.isEmpty()) {
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
       }
-      final String payload = JsonUtil.getJsonStringFromObject(sagaData);
+      final String payload = JsonUtil.getJsonStringFromObject(sagaPayload);
       final var orchestrator = this.getOrchestratorMap().get(sagaName.toString());
       final var saga = this.getOrchestratorMap()
-          .get(sagaName.toString())
-          .createSaga(payload, studentID, sagaData.getCreateUser());
+        .get(sagaName.toString())
+        .createSaga(payload, studentID, createUser);
       orchestrator.startSaga(saga);
       return ResponseEntity.ok(saga.getSagaId().toString());
     } catch (final Exception e) {
-      Thread.currentThread().interrupt();
       throw new SagaRuntimeException(e.getMessage());
     }
   }
