@@ -172,7 +172,7 @@ public class MoveSldOrchestratorTest {
       var id = it.next();
       assertThat(id.getDistNo()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getDistNo());
       assertThat(id.getSchlNo()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getSchlNo());
-      assertThat(id.getPen()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getPen());
+      assertThat(id.getPen()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getPen().substring(0, 9));
       assertThat(id.getReportDate()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getReportDate());
       assertThat(id.getStudentId()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getStudentId());
     }
@@ -205,7 +205,7 @@ public class MoveSldOrchestratorTest {
       "       \"movedToPen\": \"100100010\"\n" +
       "     },\n" +
       "     {\n" +
-      "       \"pen\": \"120164447\",\n" +
+      "       \"pen\": \"120164447D\",\n" +
       "       \"distNo\": \"069\",\n" +
       "       \"schlNo\": \"69015\",\n" +
       "       \"reportDate\": 20040201,\n" +

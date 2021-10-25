@@ -10,6 +10,7 @@ import ca.bc.gov.educ.api.pen.services.struct.v1.*;
 import ca.bc.gov.educ.api.pen.services.util.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 
@@ -89,6 +90,11 @@ public class MoveSldOrchestrator extends BaseOrchestrator<MoveMultipleSldSagaDat
     final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setSagaState(UPDATE_SLD_STUDENT_PROGRAMS_BY_DATA.toString()); // set current event as saga state.
 
+    moveSldSagaData.getMoveSldSagaData().forEach(sldData -> {
+      if (StringUtils.length(sldData.getPen()) >= 10) {
+        sldData.setPen(StringUtils.substring(sldData.getPen(), 0, 9));  // remove suffix of the pen number to search sld program records
+      }
+    });
     final var sldUpdateStudentProgramsEvent = MOVE_MULTIPLE_SLD_SAGA_DATA_MAPPER.toSldUpdateStudentProgramsByDataEvent(moveSldSagaData);
     this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
