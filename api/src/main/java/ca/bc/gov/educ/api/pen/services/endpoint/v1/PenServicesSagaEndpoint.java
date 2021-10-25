@@ -76,5 +76,5 @@ public interface PenServicesSagaEndpoint {
   @PostMapping("/move-sld-saga")
   @PreAuthorize("hasAuthority('SCOPE_STUDENT_MOVE_SLD_SAGA')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK.")})
-  ResponseEntity<List<String>> moveSld(@Validated @RequestBody MoveMultipleSldSagaData moveMultipleSldSagaData);
+  ResponseEntity<String> moveSld(@Validated @RequestBody MoveMultipleSldSagaData moveMultipleSldSagaData);
 }

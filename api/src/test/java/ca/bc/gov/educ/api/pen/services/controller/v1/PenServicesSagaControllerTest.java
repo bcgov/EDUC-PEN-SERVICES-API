@@ -220,7 +220,7 @@ public class PenServicesSagaControllerTest {
       .contentType(MediaType.APPLICATION_JSON)
       .accept(MediaType.APPLICATION_JSON)
       .content(placeholderMoveSldSagaData()))
-      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2));
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$").exists());
   }
 
   @Test
@@ -288,21 +288,20 @@ public class PenServicesSagaControllerTest {
     return " {\n" +
       "    \"createUser\": \"test\",\n" +
       "    \"studentID\": \"" + studentID + "\",\n" +
+      "    \"movedToPen\": \"100100010\",\n" +
       "    \"moveSldSagaData\": [{\n" +
       "       \"pen\": \"120164447\",\n" +
       "       \"distNo\": \"069\",\n" +
       "       \"schlNo\": \"69015\",\n" +
       "       \"reportDate\": 20030930,\n" +
-      "       \"studentId\": \"120164447\",\n" +
-      "       \"movedToPen\": \"100100010\"\n" +
+      "       \"studentId\": \"120164447\"\n" +
       "     },\n" +
       "     {\n" +
       "       \"pen\": \"120164447\",\n" +
       "       \"distNo\": \"069\",\n" +
       "       \"schlNo\": \"69015\",\n" +
       "       \"reportDate\": 20040201,\n" +
-      "       \"studentId\": \"120164447\",\n" +
-      "       \"movedToPen\": \"100100010\"\n" +
+      "       \"studentId\": \"120164447\"\n" +
       "    }]\n" +
       "  }";
   }

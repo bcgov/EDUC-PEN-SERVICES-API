@@ -25,8 +25,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventType.*;
 import static ca.bc.gov.educ.api.pen.services.constants.SagaEnum.PEN_SERVICES_MOVE_SLD_SAGA;
@@ -72,7 +75,7 @@ public class MoveSldOrchestratorTest {
   /**
    * The Saga data.
    */
-  private MoveSldSagaData sagaData;
+  private MoveMultipleSldSagaData sagaData;
 
   /**
    * The Event captor.
@@ -91,7 +94,7 @@ public class MoveSldOrchestratorTest {
   public void setUp() throws JsonProcessingException {
     MockitoAnnotations.openMocks(this);
     sagaPayload = placeholderMoveSldSagaData();
-    sagaData = getMoveSldSagaDataFromJsonString(sagaPayload);
+    sagaData = getMoveMultipleSldSagaDataFromJsonString(sagaPayload);
     saga = sagaService.createSagaRecordInDB(PEN_SERVICES_MOVE_SLD_SAGA.toString(), "Test",
       sagaPayload, UUID.fromString(studentID));
   }
@@ -118,17 +121,22 @@ public class MoveSldOrchestratorTest {
     orchestrator.handleEvent(event);
     verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(SLD_API_TOPIC.toString()), eventCaptor.capture());
     var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(eventCaptor.getValue()));
-    assertThat(newEvent.getEventType()).isEqualTo(UPDATE_SLD_STUDENT);
-    var sldUpdateSingleStudentEvent = JsonUtil.getJsonObjectFromString(SldUpdateSingleStudentEvent.class, newEvent.getEventPayload());
-    assertThat(sldUpdateSingleStudentEvent.getDistNo()).isEqualTo(sagaData.getDistNo());
-    assertThat(sldUpdateSingleStudentEvent.getSchlNo()).isEqualTo(sagaData.getSchlNo());
-    assertThat(sldUpdateSingleStudentEvent.getPen()).isEqualTo(sagaData.getPen());
-    assertThat(sldUpdateSingleStudentEvent.getReportDate()).isEqualTo(sagaData.getReportDate());
-    assertThat(sldUpdateSingleStudentEvent.getSldStudent().getPen()).isEqualTo(sagaData.getMovedToPen());
+    assertThat(newEvent.getEventType()).isEqualTo(UPDATE_SLD_STUDENTS_BY_IDS);
+    var sldUpdateStudentsEvent = JsonUtil.getJsonObjectFromString(SldUpdateStudentsByIdsEvent.class, newEvent.getEventPayload());
+    assertThat(sldUpdateStudentsEvent.getIds().size()).isEqualTo(sagaData.getMoveSldSagaData().size());
+    int i = 0;
+    for (Iterator<SldStudentId> it = sldUpdateStudentsEvent.getIds().iterator(); it.hasNext(); i++) {
+      var id = it.next();
+      assertThat(id.getDistNo()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getDistNo());
+      assertThat(id.getSchlNo()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getSchlNo());
+      assertThat(id.getPen()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getPen());
+      assertThat(id.getReportDate()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getReportDate());
+    }
+    assertThat(sldUpdateStudentsEvent.getSldStudent().getPen()).isEqualTo(sagaData.getMovedToPen());
 
     var sagaFromDB = sagaService.findSagaById(saga.getSagaId());
     assertThat(sagaFromDB).isPresent();
-    assertThat(sagaFromDB.get().getSagaState()).isEqualTo(UPDATE_SLD_STUDENT.toString());
+    assertThat(sagaFromDB.get().getSagaState()).isEqualTo(UPDATE_SLD_STUDENTS_BY_IDS.toString());
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
     assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(EventType.INITIATED.toString());
@@ -138,39 +146,44 @@ public class MoveSldOrchestratorTest {
   @Test
   public void testUpdateSldStudentPrograms_givenEventAndSagaData_shouldPostEventToSldApi() throws IOException, InterruptedException, TimeoutException {
     var invocations = mockingDetails(messagePublisher).getInvocations().size();
-    var sldStudentPayload = SldStudent.builder()
-      .pen(sagaData.getPen())
-      .distNo(sagaData.getDistNo())
-      .schlNo(sagaData.getSchlNo())
-      .reportDate(sagaData.getReportDate())
-      .studentId(sagaData.getStudentId())
-      .build();
+    var sldStudentPayload = sagaData.getMoveSldSagaData().stream().map(sldData -> SldStudent.builder()
+      .pen(sldData.getPen())
+      .distNo(sldData.getDistNo())
+      .schlNo(sldData.getSchlNo())
+      .reportDate(sldData.getReportDate())
+      .studentId(sldData.getStudentId())
+      .build()
+    ).collect(Collectors.toList());
     var event = Event.builder()
-      .eventType(EventType.UPDATE_SLD_STUDENT)
+      .eventType(EventType.UPDATE_SLD_STUDENTS_BY_IDS)
       .eventOutcome(EventOutcome.SLD_STUDENT_UPDATED)
       .sagaId(saga.getSagaId())
       .studentID(studentID)
-      .eventPayload(JsonUtil.getJsonStringFromObject(sldStudentPayload))
+      .eventPayload(JsonUtil.getJsonStringFromObject(List.of(sldStudentPayload)))
       .build();
 
     orchestrator.handleEvent(event);
     verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(SLD_API_TOPIC.toString()), eventCaptor.capture());
     var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(eventCaptor.getValue()));
-    assertThat(newEvent.getEventType()).isEqualTo(UPDATE_SLD_STUDENT_PROGRAMS);
-    var sldUpdateStudentProgramsEvent = JsonUtil.getJsonObjectFromString(SldUpdateStudentProgramsEvent.class, newEvent.getEventPayload());
-    assertThat(sldUpdateStudentProgramsEvent.getDistNo()).isEqualTo(sagaData.getDistNo());
-    assertThat(sldUpdateStudentProgramsEvent.getSchlNo()).isEqualTo(sagaData.getSchlNo());
-    assertThat(sldUpdateStudentProgramsEvent.getPen()).isEqualTo(sagaData.getPen());
-    assertThat(sldUpdateStudentProgramsEvent.getReportDate()).isEqualTo(sagaData.getReportDate());
-    assertThat(sldUpdateStudentProgramsEvent.getStudentId()).isEqualTo(sagaData.getStudentId());
+    assertThat(newEvent.getEventType()).isEqualTo(UPDATE_SLD_STUDENT_PROGRAMS_BY_DATA);
+    var sldUpdateStudentProgramsEvent = JsonUtil.getJsonObjectFromString(SldUpdateStudentProgramsByDataEvent.class, newEvent.getEventPayload());
+    int i = 0;
+    for (Iterator<SldStudentProgram> it = sldUpdateStudentProgramsEvent.getExamples().iterator(); it.hasNext(); i++) {
+      var id = it.next();
+      assertThat(id.getDistNo()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getDistNo());
+      assertThat(id.getSchlNo()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getSchlNo());
+      assertThat(id.getPen()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getPen());
+      assertThat(id.getReportDate()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getReportDate());
+      assertThat(id.getStudentId()).isEqualTo(sagaData.getMoveSldSagaData().get(i).getStudentId());
+    }
     assertThat(sldUpdateStudentProgramsEvent.getSldStudentProgram().getPen()).isEqualTo(sagaData.getMovedToPen());
 
     var sagaFromDB = sagaService.findSagaById(saga.getSagaId());
     assertThat(sagaFromDB).isPresent();
-    assertThat(sagaFromDB.get().getSagaState()).isEqualTo(UPDATE_SLD_STUDENT_PROGRAMS.toString());
+    assertThat(sagaFromDB.get().getSagaState()).isEqualTo(UPDATE_SLD_STUDENT_PROGRAMS_BY_DATA.toString());
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
-    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(EventType.UPDATE_SLD_STUDENT.toString());
+    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(EventType.UPDATE_SLD_STUDENTS_BY_IDS.toString());
     assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.SLD_STUDENT_UPDATED.toString());
   }
 
@@ -181,24 +194,36 @@ public class MoveSldOrchestratorTest {
    */
   protected String placeholderMoveSldSagaData() {
     return " {\n" +
-      "     \"pen\": \"120164447\",\n" +
-      "     \"distNo\": \"069\",\n" +
-      "     \"schlNo\": \"69015\",\n" +
-      "     \"reportDate\": 20030930,\n" +
-      "     \"studentId\": \"120164447\",\n" +
-      "     \"movedToPen\": \"100100010\"\n" +
+      "    \"createUser\": \"test\",\n" +
+      "    \"studentID\": \"" + studentID + "\",\n" +
+      "    \"moveSldSagaData\": [{\n" +
+      "       \"pen\": \"120164447\",\n" +
+      "       \"distNo\": \"069\",\n" +
+      "       \"schlNo\": \"69015\",\n" +
+      "       \"reportDate\": 20030930,\n" +
+      "       \"studentId\": \"120164447\",\n" +
+      "       \"movedToPen\": \"100100010\"\n" +
+      "     },\n" +
+      "     {\n" +
+      "       \"pen\": \"120164447\",\n" +
+      "       \"distNo\": \"069\",\n" +
+      "       \"schlNo\": \"69015\",\n" +
+      "       \"reportDate\": 20040201,\n" +
+      "       \"studentId\": \"120164447\",\n" +
+      "       \"movedToPen\": \"100100010\"\n" +
+      "    }]\n" +
       "  }";
   }
 
   /**
-   * Gets move sld saga data from json string.
+   * Gets move multiple sld saga data from json string.
    *
    * @param json the json
-   * @return the move sld saga data from json string
+   * @return the move multiple sld saga data from json string
    */
-  protected MoveSldSagaData getMoveSldSagaDataFromJsonString(String json) {
+  protected MoveMultipleSldSagaData getMoveMultipleSldSagaDataFromJsonString(String json) {
     try {
-      return JsonUtil.getJsonObjectFromString(MoveSldSagaData.class, json);
+      return JsonUtil.getJsonObjectFromString(MoveMultipleSldSagaData.class, json);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

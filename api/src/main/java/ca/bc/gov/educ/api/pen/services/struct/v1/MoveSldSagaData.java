@@ -47,9 +47,4 @@ public class MoveSldSagaData {
   @NotNull(message = "studentId can not be null.")
   String studentId;
 
-  /**
-   * The movedToPen.
-   */
-  @NotNull(message = "movedToPen can not be null.")
-  String movedToPen;
 }

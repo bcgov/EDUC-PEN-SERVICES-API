@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.api.pen.services.orchestrator;
 
-import ca.bc.gov.educ.api.pen.services.mapper.v1.MoveSldSagaDataMapper;
+import ca.bc.gov.educ.api.pen.services.mapper.v1.MoveMultipleSldSagaDataMapper;
 import ca.bc.gov.educ.api.pen.services.messaging.MessagePublisher;
 import ca.bc.gov.educ.api.pen.services.model.Saga;
 import ca.bc.gov.educ.api.pen.services.model.SagaEventStates;
@@ -24,12 +24,12 @@ import static ca.bc.gov.educ.api.pen.services.constants.TopicsEnum.*;
  */
 @Component
 @Slf4j
-public class MoveSldOrchestrator extends BaseOrchestrator<MoveSldSagaData> {
+public class MoveSldOrchestrator extends BaseOrchestrator<MoveMultipleSldSagaData> {
 
   /**
-   * The constant MOVE_SLD_SAGA_DATA_MAPPER.
+   * The constant MOVE_MULTIPLE_SLD_SAGA_DATA_MAPPER.
    */
-  protected static final MoveSldSagaDataMapper MOVE_SLD_SAGA_DATA_MAPPER = MoveSldSagaDataMapper.mapper;
+  protected static final MoveMultipleSldSagaDataMapper MOVE_MULTIPLE_SLD_SAGA_DATA_MAPPER = MoveMultipleSldSagaDataMapper.mapper;
 
   /**
    * Instantiates a new Base orchestrator.
@@ -38,7 +38,7 @@ public class MoveSldOrchestrator extends BaseOrchestrator<MoveSldSagaData> {
    * @param messagePublisher the message publisher
    */
   public MoveSldOrchestrator(final SagaService sagaService, final MessagePublisher messagePublisher) {
-    super(sagaService, messagePublisher, MoveSldSagaData.class, PEN_SERVICES_MOVE_SLD_SAGA.toString(), PEN_SERVICES_MOVE_SLD_SAGA_TOPIC.toString());
+    super(sagaService, messagePublisher, MoveMultipleSldSagaData.class, PEN_SERVICES_MOVE_SLD_SAGA.toString(), PEN_SERVICES_MOVE_SLD_SAGA_TOPIC.toString());
   }
 
   /**
@@ -47,34 +47,34 @@ public class MoveSldOrchestrator extends BaseOrchestrator<MoveSldSagaData> {
   @Override
   public void populateStepsToExecuteMap() {
     this.stepBuilder()
-        .begin(UPDATE_SLD_STUDENT, this::updateSldStudent)
-        .step(UPDATE_SLD_STUDENT, SLD_STUDENT_UPDATED, UPDATE_SLD_STUDENT_PROGRAMS, this::updateSldStudentPrograms)
-        .end(UPDATE_SLD_STUDENT_PROGRAMS, SLD_STUDENT_PROGRAM_UPDATED);
+        .begin(UPDATE_SLD_STUDENTS_BY_IDS, this::updateSldStudents)
+        .step(UPDATE_SLD_STUDENTS_BY_IDS, SLD_STUDENT_UPDATED, UPDATE_SLD_STUDENT_PROGRAMS_BY_DATA, this::updateSldStudentPrograms)
+        .end(UPDATE_SLD_STUDENT_PROGRAMS_BY_DATA, SLD_STUDENT_PROGRAM_UPDATED);
   }
 
   /**
-   * Update the pen of sld student record
+   * Update the pen of sld student records
    *
    * @param event                        the event
    * @param saga                         the saga
    * @param moveSldSagaData              the student merge saga data
    * @throws JsonProcessingException the json processing exception
    */
-  protected void updateSldStudent(final Event event, final Saga saga, final MoveSldSagaData moveSldSagaData) throws JsonProcessingException {
+  protected void updateSldStudents(final Event event, final Saga saga, final MoveMultipleSldSagaData moveSldSagaData) throws JsonProcessingException {
     final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
     saga.setStatus(IN_PROGRESS.toString());
-    saga.setSagaState(UPDATE_SLD_STUDENT.toString()); // set current event as saga state.
+    saga.setSagaState(UPDATE_SLD_STUDENTS_BY_IDS.toString()); // set current event as saga state.
 
-    final var sldUpdateSingleStudentEvent = MOVE_SLD_SAGA_DATA_MAPPER.toSldUpdateSingleStudentEvent(moveSldSagaData);
+    final var sldUpdateStudentsEvent = MOVE_MULTIPLE_SLD_SAGA_DATA_MAPPER.toSldUpdateStudentsByIdsEvent(moveSldSagaData);
     this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
     final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
-      .eventType(UPDATE_SLD_STUDENT)
+      .eventType(UPDATE_SLD_STUDENTS_BY_IDS)
       .replyTo(this.getTopicToSubscribe())
-      .eventPayload(JsonUtil.getJsonStringFromObject(sldUpdateSingleStudentEvent))
+      .eventPayload(JsonUtil.getJsonStringFromObject(sldUpdateStudentsEvent))
       .build();
     this.postMessageToTopic(SLD_API_TOPIC.toString(), nextEvent);
-    log.info("message sent to SLD_API_TOPIC for UPDATE_SLD_STUDENT Event.");
+    log.info("message sent to SLD_API_TOPIC for UPDATE_SLD_STUDENTS_BY_IDS Event.");
   }
 
   /**
@@ -85,20 +85,20 @@ public class MoveSldOrchestrator extends BaseOrchestrator<MoveSldSagaData> {
    * @param moveSldSagaData              the student merge saga data
    * @throws JsonProcessingException the json processing exception
    */
-  protected void updateSldStudentPrograms(final Event event, final Saga saga, final MoveSldSagaData moveSldSagaData) throws JsonProcessingException {
+  protected void updateSldStudentPrograms(final Event event, final Saga saga, final MoveMultipleSldSagaData moveSldSagaData) throws JsonProcessingException {
     final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
-    saga.setSagaState(UPDATE_SLD_STUDENT_PROGRAMS.toString()); // set current event as saga state.
+    saga.setSagaState(UPDATE_SLD_STUDENT_PROGRAMS_BY_DATA.toString()); // set current event as saga state.
 
-    final var sldUpdateStudentProgramsEvent = MOVE_SLD_SAGA_DATA_MAPPER.toSldUpdateStudentProgramsEvent(moveSldSagaData);
+    final var sldUpdateStudentProgramsEvent = MOVE_MULTIPLE_SLD_SAGA_DATA_MAPPER.toSldUpdateStudentProgramsByDataEvent(moveSldSagaData);
     this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
 
     final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
-      .eventType(UPDATE_SLD_STUDENT_PROGRAMS)
+      .eventType(UPDATE_SLD_STUDENT_PROGRAMS_BY_DATA)
       .replyTo(this.getTopicToSubscribe())
       .eventPayload(JsonUtil.getJsonStringFromObject(sldUpdateStudentProgramsEvent))
       .build();
     this.postMessageToTopic(SLD_API_TOPIC.toString(), nextEvent);
-    log.info("message sent to SLD_API_TOPIC for UPDATE_SLD_STUDENT_PROGRAMS Event.");
+    log.info("message sent to SLD_API_TOPIC for UPDATE_SLD_STUDENT_PROGRAMS_BY_DATA Event.");
   }
 
 }

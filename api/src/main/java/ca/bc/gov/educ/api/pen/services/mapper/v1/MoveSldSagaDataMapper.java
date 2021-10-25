@@ -17,20 +17,18 @@ public interface MoveSldSagaDataMapper {
   MoveSldSagaDataMapper mapper = Mappers.getMapper(MoveSldSagaDataMapper.class);
 
   /**
-   * To sld update single student event.
+   * To sld student id struct.
    *
    * @param moveSldSagaData the move sld saga data
-   * @return the sld update single student event
+   * @return the sld id struct
    */
-  @Mapping(target = "sldStudent.pen", source = "movedToPen")
-  SldUpdateSingleStudentEvent toSldUpdateSingleStudentEvent(MoveSldSagaData moveSldSagaData);
+  SldStudentId toSldStudentId(MoveSldSagaData moveSldSagaData);
 
   /**
-   * To sld update student programs event.
+   * To sld student program struct.
    *
    * @param moveSldSagaData the move sld saga data
-   * @return the sld update student programs event
+   * @return the sld student program struct
    */
-  @Mapping(target = "sldStudentProgram.pen", source = "movedToPen")
-  SldUpdateStudentProgramsEvent toSldUpdateStudentProgramsEvent(MoveSldSagaData moveSldSagaData);
+  SldStudentProgram toSldStudentProgram(MoveSldSagaData moveSldSagaData);
 }
