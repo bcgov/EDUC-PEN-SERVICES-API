@@ -2,12 +2,15 @@ package ca.bc.gov.educ.api.pen.services.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -78,23 +81,23 @@ public class PENNameText {
    * The Effective date.
    */
   @Column(name = "EFFECTIVE_DATE")
-  @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-  @JsonSerialize(using = LocalDateTimeSerializer.class)
-  LocalDateTime effectiveDate;
+  @JsonDeserialize(using = LocalDateDeserializer.class)
+  @JsonSerialize(using = LocalDateSerializer.class)
+  LocalDate effectiveDate;
 
   /**
    * The Expiry date.
    */
   @Column(name = "EXPIRY_DATE")
-  @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-  @JsonSerialize(using = LocalDateTimeSerializer.class)
-  LocalDateTime expiryDate;
+  @JsonDeserialize(using = LocalDateDeserializer.class)
+  @JsonSerialize(using = LocalDateSerializer.class)
+  LocalDate expiryDate;
 
   /**
    * The Create user.
    */
   @Basic
-  @Column(name = "CREATE_USER", updatable = false , length = 32)
+  @Column(name = "CREATE_USER_NAME", updatable = false, length = 32)
   String createUser;
 
   /**
@@ -109,7 +112,7 @@ public class PENNameText {
    * The Update user.
    */
   @Basic
-  @Column(name = "UPDATE_USER", length = 32)
+  @Column(name = "UPDATE_USER_NAME", length = 32)
   String updateUser;
 
   /**

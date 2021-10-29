@@ -13,7 +13,7 @@ import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -172,17 +172,17 @@ public abstract class BaseRule implements Rule {
    * @param isInteractive if it is interactive or batch mode
    */
   protected void defaultValidationForNameFields(@NonNull final List<PenRequestStudentValidationIssue> results, @NonNull String fieldValue,
-                                                @NonNull final PenRequestStudentValidationFieldCode fieldCode, boolean isInteractive, boolean spaceCheck) {
+                                                @NonNull final PenRequestStudentValidationFieldCode fieldCode, final boolean isInteractive, final boolean spaceCheck) {
     fieldValue = fieldValue.trim();
     if (this.fieldContainsInvalidCharacters(fieldValue, notAllowedChars)) {
       results.add(this.createValidationEntity(ERROR, INV_CHARS, fieldCode));
-    }else if (this.fieldBeginsWithInvalidCharacters(fieldValue, notAllowedCharsToStartWith)) {
+    } else if (this.fieldBeginsWithInvalidCharacters(fieldValue, notAllowedCharsToStartWith)) {
       results.add(this.createValidationEntity(ERROR, BEGIN_INVALID, fieldCode));
-    }else if (this.fieldStartsWithInvertedPrefix(fieldValue)) {
+    } else if (this.fieldStartsWithInvertedPrefix(fieldValue)) {
       results.add(this.createValidationEntity(isInteractive ? WARNING : ERROR, INV_PREFIX, fieldCode));
-    }else if (spaceCheck && this.fieldContainsSpace(fieldValue)) {
+    } else if (spaceCheck && this.fieldContainsSpace(fieldValue)) {
       results.add(this.createValidationEntity(WARNING, BLANK_IN_NAME, fieldCode));
-    }else if (resultsContainNoError(results) && fieldValue.trim().matches(".*\\d.*")) {
+    } else if (this.resultsContainNoError(results) && fieldValue.trim().matches(".*\\d.*")) {
       results.add(this.createValidationEntity(isInteractive ? WARNING : ERROR, NUMBER_NAME, fieldCode));
     }
   }
@@ -206,8 +206,8 @@ public abstract class BaseRule implements Rule {
     if (fieldValue != null && fieldCode != null && penNameTexts != null) {
       final var filteredList = penNameTexts.stream().filter(el ->
         (el.getEffectiveDate() != null && el.getExpiryDate() != null
-          && el.getEffectiveDate().isBefore(LocalDateTime.now())
-          && el.getExpiryDate().isAfter(LocalDateTime.now())
+          && el.getEffectiveDate().isBefore(LocalDate.now())
+          && el.getExpiryDate().isAfter(LocalDate.now())
           && fieldValue.equalsIgnoreCase(el.getInvalidText())))
         .collect(Collectors.toList());
       if (!filteredList.isEmpty()) {
@@ -286,7 +286,7 @@ public abstract class BaseRule implements Rule {
         this.defaultValidationForNameFields(results, fieldValue, fieldCode, isInteractive, spaceCheck);
       }
     }
-    if (resultsContainNoError(results)) {
+    if (this.resultsContainNoError(results)) {
       this.checkFieldValueExactMatchWithInvalidText(results, fieldValue, fieldCode, isInteractive, penNameTextService.getPenNameTexts());
     }
   }
@@ -298,10 +298,10 @@ public abstract class BaseRule implements Rule {
   protected List<PenRequestStudentValidationIssue> checkForInvalidTextAndOneChar(final PenRequestStudentValidationPayload validationPayload, final Stopwatch stopwatch, final List<PenRequestStudentValidationIssue> results, final String fieldValue, final PenRequestStudentValidationFieldCode penRequestStudentValidationFieldCode, final PENNameTextService penNameTextService) {
     //PreReq: Skip this check if any of these issues has been reported for the current field: V2, V3, V4, V5, V6, V7, V8
     // to achieve above we do an empty check here and proceed only if there were no validation error till now, for this field.
-    if (resultsContainNoError(results)) {
+    if (this.resultsContainNoError(results)) {
       this.checkFieldValueExactMatchWithInvalidText(results, fieldValue, penRequestStudentValidationFieldCode, validationPayload.getIsInteractive(), penNameTextService.getPenNameTexts());
     }
-    if (resultsContainNoError(results) && fieldValue.trim().length() == 1) {
+    if (this.resultsContainNoError(results) && fieldValue.trim().length() == 1) {
       results.add(this.createValidationEntity(WARNING, ONE_CHAR_NAME, penRequestStudentValidationFieldCode));
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());

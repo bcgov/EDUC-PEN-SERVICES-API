@@ -66,7 +66,7 @@ public class PENNameTextService {
   /**
    * Reload cache.
    */
-  @Scheduled(cron = "0 1 0 * * *")
+  @Scheduled(cron = "0 0/1 * * * *")//every minute
   public void reloadCache() {
     log.info("started reloading cache..");
     this.setPenNameTexts();
