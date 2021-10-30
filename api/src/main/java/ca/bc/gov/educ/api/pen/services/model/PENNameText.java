@@ -12,6 +12,11 @@ import org.hibernate.annotations.Immutable;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.SignStyle;
+
+import static java.time.temporal.ChronoField.*;
 
 /**
  * The type Pen name text.
@@ -21,7 +26,10 @@ import java.time.LocalDateTime;
 @Table(name = "PEN_NAME_TEXT")
 @Immutable
 public class PENNameText {
-
+  private static final DateTimeFormatter YYYY_MM_DD_FORMATTER = new DateTimeFormatterBuilder()
+    .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+    .appendValue(MONTH_OF_YEAR, 2)
+    .appendValue(DAY_OF_MONTH, 2).toFormatter(); //yyyyMMdd
   /**
    * The Record number.
    */
@@ -80,26 +88,38 @@ public class PENNameText {
   /**
    * The Effective date.
    */
+  @JsonDeserialize(using = LocalDateDeserializer.class)
+  @JsonSerialize(using = LocalDateSerializer.class)
+  @Transient
+  LocalDate effectiveDate;
+
+  /**
+   * The Expiry date.
+   */
+  @JsonDeserialize(using = LocalDateDeserializer.class)
+  @JsonSerialize(using = LocalDateSerializer.class)
+  @Transient
+  LocalDate expiryDate;
+  /**
+   * The Effective date.
+   */
   @Column(name = "EFFECTIVE_DATE")
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonSerialize(using = LocalDateSerializer.class)
-  LocalDate effectiveDate;
-
+  String effectiveDateStr;
   /**
    * The Expiry date.
    */
   @Column(name = "EXPIRY_DATE")
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonSerialize(using = LocalDateSerializer.class)
-  LocalDate expiryDate;
-
+  String expiryDateStr;
   /**
    * The Create user.
    */
   @Basic
   @Column(name = "CREATE_USER_NAME", updatable = false, length = 32)
   String createUser;
-
   /**
    * The Create date.
    */
@@ -107,14 +127,12 @@ public class PENNameText {
   @JsonDeserialize(using = LocalDateTimeDeserializer.class)
   @JsonSerialize(using = LocalDateTimeSerializer.class)
   LocalDateTime createDate;
-
   /**
    * The Update user.
    */
   @Basic
   @Column(name = "UPDATE_USER_NAME", length = 32)
   String updateUser;
-
   /**
    * The Update date.
    */
@@ -122,6 +140,24 @@ public class PENNameText {
   @JsonDeserialize(using = LocalDateTimeDeserializer.class)
   @JsonSerialize(using = LocalDateTimeSerializer.class)
   LocalDateTime updateDate;
+
+  public LocalDate getEffectiveDate() {
+    return this.effectiveDateStr == null ? null : LocalDate.parse(this.effectiveDateStr, YYYY_MM_DD_FORMATTER);
+  }
+
+  public void setEffectiveDate(final LocalDate effectiveDate) {
+    this.effectiveDate = effectiveDate;
+    this.effectiveDateStr = effectiveDate == null ? null : effectiveDate.format(YYYY_MM_DD_FORMATTER);
+  }
+
+  public LocalDate getExpiryDate() {
+    return this.expiryDateStr == null ? null : LocalDate.parse(this.expiryDateStr, YYYY_MM_DD_FORMATTER);
+  }
+
+  public void setExpiryDate(final LocalDate expiryDate) {
+    this.expiryDate = expiryDate;
+    this.expiryDateStr = expiryDate == null ? null : expiryDate.format(YYYY_MM_DD_FORMATTER);
+  }
 
 
 }
