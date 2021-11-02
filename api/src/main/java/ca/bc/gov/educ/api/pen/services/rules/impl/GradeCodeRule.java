@@ -125,7 +125,7 @@ public class GradeCodeRule extends BaseRule {
         && LocalDateTime.now().isBefore(gradeCode1.getExpiryDate())
         && finalGradeCode.equalsIgnoreCase(gradeCode1.getGradeCode()));
       if (!isGradeCodeValid) {
-        results.add(this.createValidationEntity(ERROR, GRADE_CD_ERR, GRADE_CODE));
+        results.add(this.createValidationEntity(validationPayload.getIsInteractive() ? ERROR : WARNING, GRADE_CD_ERR, GRADE_CODE));
       }
       if (results.isEmpty() && this.noDOBErrorReported(validationPayload.getIssueList())) {
         this.checkForYoungAndOld(results, gradeCode, validationPayload);
