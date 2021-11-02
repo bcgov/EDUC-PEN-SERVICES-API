@@ -33,6 +33,7 @@ public abstract class BaseRule implements Rule {
    * The constant FC.
    */
   public static final String FC = "FC";
+  public static final String QC = "QC";
   /**
    * The constant SPACE.
    */
@@ -205,37 +206,44 @@ public abstract class BaseRule implements Rule {
   protected void checkFieldValueExactMatchWithInvalidText(final List<PenRequestStudentValidationIssue> results, final String fieldValue, final PenRequestStudentValidationFieldCode fieldCode, final boolean isInteractive, final List<PENNameText> penNameTexts) {
     if (fieldValue != null && fieldCode != null && penNameTexts != null) {
       final var filteredList = penNameTexts.stream().filter(el ->
-        (el.getEffectiveDate() != null && el.getExpiryDate() != null
-          && el.getEffectiveDate().isBefore(LocalDate.now())
-          && el.getExpiryDate().isAfter(LocalDate.now())
-          && fieldValue.equalsIgnoreCase(el.getInvalidText())))
+          (el.getEffectiveDate() != null && el.getExpiryDate() != null
+            && el.getEffectiveDate().isBefore(LocalDate.now())
+            && el.getExpiryDate().isAfter(LocalDate.now())
+            && fieldValue.equalsIgnoreCase(el.getInvalidText())))
         .collect(Collectors.toList());
       if (!filteredList.isEmpty()) {
         final boolean isError;
+        final boolean isWarning;
         switch (fieldCode) {
           case LEGAL_FIRST:
             isError = filteredList.stream().anyMatch(el -> FC.equalsIgnoreCase(el.getLegalGivenCheck()));
-            this.createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+            isWarning = filteredList.stream().anyMatch(el -> QC.equalsIgnoreCase(el.getLegalGivenCheck()));
+            this.createValidationEntry(results, fieldCode, isInteractive, isError, isWarning);
             break;
           case LEGAL_LAST:
             isError = filteredList.stream().anyMatch(el -> FC.equalsIgnoreCase(el.getLegalSurnameCheck()));
-            this.createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+            isWarning = filteredList.stream().anyMatch(el -> QC.equalsIgnoreCase(el.getLegalSurnameCheck()));
+            this.createValidationEntry(results, fieldCode, isInteractive, isError, isWarning);
             break;
           case LEGAL_MID:
             isError = filteredList.stream().anyMatch(el -> FC.equalsIgnoreCase(el.getLegalMiddleCheck()));
-            this.createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+            isWarning = filteredList.stream().anyMatch(el -> QC.equalsIgnoreCase(el.getLegalMiddleCheck()));
+            this.createValidationEntry(results, fieldCode, isInteractive, isError, isWarning);
             break;
           case USUAL_LAST:
             isError = filteredList.stream().anyMatch(el -> FC.equalsIgnoreCase(el.getUsualSurnameCheck()));
-            this.createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+            isWarning = filteredList.stream().anyMatch(el -> QC.equalsIgnoreCase(el.getUsualSurnameCheck()));
+            this.createValidationEntry(results, fieldCode, isInteractive, isError, isWarning);
             break;
           case USUAL_FIRST:
             isError = filteredList.stream().anyMatch(el -> FC.equalsIgnoreCase(el.getUsualGivenCheck()));
-            this.createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+            isWarning = filteredList.stream().anyMatch(el -> QC.equalsIgnoreCase(el.getUsualGivenCheck()));
+            this.createValidationEntry(results, fieldCode, isInteractive, isError, isWarning);
             break;
           case USUAL_MID:
             isError = filteredList.stream().anyMatch(el -> FC.equalsIgnoreCase(el.getUsualMiddleCheck()));
-            this.createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
+            isWarning = filteredList.stream().anyMatch(el -> QC.equalsIgnoreCase(el.getUsualMiddleCheck()));
+            this.createValidationEntry(results, fieldCode, isInteractive, isError, isWarning);
             break;
           default:
             break;
@@ -245,6 +253,12 @@ public abstract class BaseRule implements Rule {
       if (log.isDebugEnabled()) {
         log.debug("Skip this check as one of the values are null  fieldValue :: {}, fieldCode :: {} ", fieldValue, fieldCode);
       }
+    }
+  }
+
+  private void createValidationEntry(final List<PenRequestStudentValidationIssue> results, final PenRequestStudentValidationFieldCode fieldCode, final boolean isInteractive, final boolean isError, final boolean isWarning) {
+    if (isError || isWarning) {
+      this.createValidationErrorForInteractiveAndBatch(results, fieldCode, isInteractive, isError);
     }
   }
 
@@ -291,7 +305,7 @@ public abstract class BaseRule implements Rule {
     }
   }
 
-  protected boolean resultsContainNoError(final List<PenRequestStudentValidationIssue> results){
+  protected boolean resultsContainNoError(final List<PenRequestStudentValidationIssue> results) {
     return results.stream().noneMatch(el -> el.getPenRequestBatchValidationIssueSeverityCode().equals(ERROR.toString()));
   }
 

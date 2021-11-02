@@ -82,7 +82,7 @@
   {
     "recordNumber": 6,
     "invalidText": "BLANK",
-    "legalSurnameCheck": "  ",
+    "legalSurnameCheck": "FC",
     "legalGivenCheck": "FC",
     "legalMiddleCheck": "FC",
     "usualSurnameCheck": "QC",
