@@ -6,15 +6,15 @@ import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMergeSourceCode;
 import ca.bc.gov.educ.api.pen.services.struct.v1.StudentMergeStats;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 import static ca.bc.gov.educ.api.pen.services.constants.v1.URL.*;
 
@@ -56,4 +56,11 @@ public interface StudentMergeEndpoint {
   @PreAuthorize("hasAuthority('SCOPE_READ_STUDENT_MERGE')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   StudentMergeStats getMergeStats(@RequestParam("statsType") StatsType statsType);
+
+  @Transactional
+  @DeleteMapping(MERGES + "/{studentMergeID}")
+  @PreAuthorize("hasAuthority('SCOPE_DELETE_STUDENT_MERGE')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "No Content.")})
+  @Tag(name = "Delete Merge By Primary Key", description = "to support e2e automation testing.")
+  ResponseEntity<Object> deleteMerge(@PathVariable UUID studentMergeID);
 }
