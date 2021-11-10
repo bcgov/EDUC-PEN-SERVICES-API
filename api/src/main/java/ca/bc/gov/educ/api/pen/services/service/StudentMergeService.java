@@ -276,4 +276,13 @@ public class StudentMergeService {
     }
     return StudentMergeStats.builder().build();
   }
+
+  public Optional<StudentMergeEntity> findStudentMergeByID(final UUID studentMergeID) {
+    return this.studentMergeRepo.findById(studentMergeID);
+  }
+
+  @Transactional(propagation = Propagation.MANDATORY)
+  public void deleteStudentMerge(final StudentMergeEntity studentMergeEntity) {
+    this.studentMergeRepo.delete(studentMergeEntity);
+  }
 }
