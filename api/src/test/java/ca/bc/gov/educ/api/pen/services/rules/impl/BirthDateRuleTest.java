@@ -61,7 +61,9 @@ public class BirthDateRuleTest {
     "20000101, 0",
     "TESTDOBTOOYOUNG1, 1",
     "TESTDOBTOOYOUNG2, 0",
-    "TESTDOBTOOYOUNG3, 1"
+    "TESTDOBTOOYOUNG3, 1",
+    "TESTDOBTOOYOUNG4, 1",
+    "TESTDOBTOOYOUNG5, 0"
   })
   public void testValidate_givenDifferentDOB_shouldReturnResults(String dob, final int expectedErrors) {
     if ("null".equals(dob)) {
@@ -76,7 +78,13 @@ public class BirthDateRuleTest {
     } else if ("TESTDOBTOOYOUNG3".equals(dob)) {
       dob = LocalDate.now().minusYears(4).getYear() + "0101";
       when(restUtils.getSchoolByMincode(any())).thenReturn(schoolOptional3);
-    } else {
+    } else if ("TESTDOBTOOYOUNG4".equals(dob)) {
+      dob = LocalDate.now().minusYears(3).getYear() + "0101";
+      when(restUtils.getSchoolByMincode(any())).thenReturn(schoolOptional1);
+    } else if ("TESTDOBTOOYOUNG5".equals(dob)) {
+      dob = LocalDate.now().minusYears(5).getYear() + "0505";
+      when(restUtils.getSchoolByMincode(any())).thenReturn(schoolOptional3);
+    }  else {
       when(restUtils.getSchoolByMincode(any())).thenReturn(schoolOptional);
     }
 

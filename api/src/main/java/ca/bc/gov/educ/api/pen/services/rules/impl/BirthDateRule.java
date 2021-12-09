@@ -11,6 +11,7 @@ import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
@@ -94,7 +95,7 @@ public class BirthDateRule extends BaseRule {
     if (!StringUtils.equals("02", schoolCategoryCode)
       && !StringUtils.equals("09", schoolCategoryCode)
       && !StringUtils.equals("10", schoolCategoryCode)
-      && (Period.between(dob, this.getComparisonDate()).toTotalMonths() < 61)) {
+      && (Period.between(dob, this.getComparisonDate()).toTotalMonths() < 60)) {
       results.add(this.createValidationEntity(ERROR, DOB_TOO_YOUNG, BIRTH_DATE));
     }
   }
@@ -116,16 +117,17 @@ public class BirthDateRule extends BaseRule {
   private void validateDOBForOffshoreAndIndependentSchool(final List<PenRequestStudentValidationIssue> results, final LocalDate dob, final PenRequestStudentValidationPayload validationPayload) {
     val schoolCategoryCode = this.getSchoolCategoryCode(validationPayload);
     if ((StringUtils.equals("02", schoolCategoryCode) || StringUtils.equals("09", schoolCategoryCode))
-      && (Period.between(dob, this.getComparisonDate()).toTotalMonths() < 49)) {
+      && (Period.between(dob, this.getComparisonDate()).toTotalMonths() < 48)) {
       results.add(this.createValidationEntity(ERROR, DOB_TOO_YOUNG, BIRTH_DATE));
     }
   }
 
   private LocalDate getComparisonDate() {
-    return LocalDate.parse(LocalDate.now().getYear() + "-12-31").plusDays(1);// 1 day is added as the between excludes the date, please read the docs of Period.Between
+    return LocalDate.parse(LocalDate.now().getYear() + "-12-31");// 1 day is added as the between excludes the date, please read the docs of Period.Between
   }
 
   private String getSchoolCategoryCode(final PenRequestStudentValidationPayload validationPayload) {
     return this.restUtils.getSchoolByMincode(validationPayload.getMincode()).orElseThrow(() -> new PenServicesAPIRuntimeException("School not present for " + validationPayload.getMincode() + ", this should not have happened :: " + validationPayload.getTransactionID())).getSchoolCategoryCode();
   }
+
 }
