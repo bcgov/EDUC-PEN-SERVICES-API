@@ -123,7 +123,7 @@ public class BirthDateRule extends BaseRule {
   }
 
   private LocalDate getComparisonDate() {
-    return LocalDate.parse(LocalDate.now().getYear() + "-12-31");// 1 day is added as the between excludes the date, please read the docs of Period.Between
+    return LocalDate.parse(LocalDate.now().getYear() + "-12-31");
   }
 
   private String getSchoolCategoryCode(final PenRequestStudentValidationPayload validationPayload) {
