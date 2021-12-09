@@ -87,8 +87,8 @@ public class LegalFirstNameRuleTest {
     "FANCYPANTS, 1",
     "ESTATE, 1",
     "DUMMY, 1",
-
-    "DUPLICATE, 1"
+    "DUPLICATE, 1",
+    "333-88 HOWARD, 1"
   })
   public void testValidate_givenDifferentLegalFirstName_shouldReturnResults(String legalFirstName, final int expectedErrors) {
     if ("null".equals(legalFirstName)) {

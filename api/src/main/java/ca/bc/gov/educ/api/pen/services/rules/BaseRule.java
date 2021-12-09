@@ -181,10 +181,10 @@ public abstract class BaseRule implements Rule {
       results.add(this.createValidationEntity(ERROR, BEGIN_INVALID, fieldCode));
     } else if (this.fieldStartsWithInvertedPrefix(fieldValue)) {
       results.add(this.createValidationEntity(isInteractive ? WARNING : ERROR, INV_PREFIX, fieldCode));
-    } else if (spaceCheck && this.fieldContainsSpace(fieldValue)) {
-      results.add(this.createValidationEntity(WARNING, BLANK_IN_NAME, fieldCode));
     } else if (this.resultsContainNoError(results) && fieldValue.trim().matches(".*\\d.*")) {
       results.add(this.createValidationEntity(isInteractive ? WARNING : ERROR, NUMBER_NAME, fieldCode));
+    } else if (spaceCheck && this.fieldContainsSpace(fieldValue)) {
+      results.add(this.createValidationEntity(WARNING, BLANK_IN_NAME, fieldCode));
     }
   }
 
