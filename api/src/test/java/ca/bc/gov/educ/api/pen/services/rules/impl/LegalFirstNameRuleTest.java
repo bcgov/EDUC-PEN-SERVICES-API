@@ -101,7 +101,7 @@ public class LegalFirstNameRuleTest {
   }
 
   @Test
-  @Parameters({"true, WARNING,",
+  @Parameters({"true, WARNING, JJ", "true, WARNING,",
     "false, ERROR,", "false, ERROR,XXAS", "false, ERROR,ZZAS", "true, WARNING,XXAS", "true, WARNING,ZZAS", "true, WARNING,MISHRA", "false, ERROR,MISHRA", "false, ERROR,1BANA", "true, WARNING,2BAND"})
   public void testValidate_givenLegalFirstNameBlankInDifferentMode_shouldReturnResultsWithWarningOrError(boolean isInteractive, String issueSeverityCode, String firstName) {
     when(this.service.getPenNameTexts()).thenReturn(penNameTexts);
