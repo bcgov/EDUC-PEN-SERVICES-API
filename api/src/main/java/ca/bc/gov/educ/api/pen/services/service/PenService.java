@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.pen.services.rest.RestUtils;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RAtomicLong;
 import org.redisson.api.RBucket;
 import org.redisson.api.RPermitExpirableSemaphore;
 import org.redisson.api.RedissonClient;
@@ -63,7 +64,7 @@ public class PenService {
     if (penForTransaction.isExists()) {
       return penForTransaction.get();
     } else {
-      final int penWithoutCheckDigit = this.getNextPenNumberWithoutCheckDigit(transactionID);
+      final long penWithoutCheckDigit = this.getNextPenNumberWithoutCheckDigit(transactionID);
       final int checkDigit = this.calculateCheckDigit(String.valueOf(penWithoutCheckDigit), transactionID);
       final String penGenerated = penWithoutCheckDigit + "" + checkDigit;
       penForTransaction.set(penGenerated, 2, TimeUnit.DAYS);
@@ -135,27 +136,26 @@ public class PenService {
    * @param transactionID the transactionID to identify transaction
    * @return the next pen number without check digit
    */
-  private int getNextPenNumberWithoutCheckDigit(final String transactionID) {
+  private long getNextPenNumberWithoutCheckDigit(final String transactionID) {
     log.info("getNextPenNumberWithoutCheckDigit called for transactionID :: {}", transactionID);
     final RPermitExpirableSemaphore semaphore = this.getRedissonClient().getPermitExpirableSemaphore("getNextPen");
     semaphore.trySetPermits(1);
     semaphore.expire(120, TimeUnit.SECONDS);
     try {
       final String id = semaphore.tryAcquire(120, 40, TimeUnit.SECONDS);
-      int pen;
+      long pen;
       if (id != null) {
-        final RBucket<Integer> penBucket = this.getRedissonClient().getBucket("PEN_NUMBER");
-        if (penBucket.isExists()) {
-          pen = penBucket.get();
-        } else {
+        RAtomicLong atomicLong = this.getRedissonClient().getAtomicLong("PEN_NUMBER");
+        if (!atomicLong.isExists()) {
+          log.info("RAtomicLong PEN_NUMBER doesn't exist, getting the latest PEN from Student API");
           pen = this.restUtils.getLatestPenNumberFromStudentAPI(transactionID);
           if (pen == 0) {
             throw new PenServicesAPIRuntimeException("Invalid Pen Returned from downstream method.");
           } else {
-            pen += 1; // increase the number by 1 so that it wont be the same which is already associated to a STUDENT.
+            atomicLong.set(pen);
           }
         }
-        penBucket.set(pen + 1); // store after increasing.
+        pen = atomicLong.incrementAndGet();
         semaphore.tryRelease(id);
         log.info("PEN IS :: {} for transactionID :: {}", pen, transactionID);
         return pen;
