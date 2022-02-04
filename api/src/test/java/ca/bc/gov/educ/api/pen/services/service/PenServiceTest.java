@@ -40,7 +40,7 @@ public class PenServiceTest {
   @After
   public void after() {
     this.redissonClient.getBucket(transactionID).delete();
-    this.redissonClient.getAtomicLong("PEN_NUMBER").delete();
+    this.redissonClient.getAtomicLong("NEXT_PEN_NUMBER").delete();
   }
 
   @Test
@@ -52,7 +52,7 @@ public class PenServiceTest {
 
   @Test
   public void testGetNextPenNumber__whenNewTransactionID_And_PenNumberInRedis_shouldNotCallAPI() throws JsonProcessingException {
-    this.redissonClient.getAtomicLong("PEN_NUMBER").set(120164447);
+    this.redissonClient.getAtomicLong("NEXT_PEN_NUMBER").set(120164447);
     final var penNumber = this.penService.getNextPenNumber(transactionID);
     assertThat(penNumber).startsWith(String.valueOf(120164448));
   }

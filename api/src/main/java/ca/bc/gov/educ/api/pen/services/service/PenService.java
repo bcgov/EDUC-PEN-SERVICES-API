@@ -145,9 +145,9 @@ public class PenService {
       final String id = semaphore.tryAcquire(120, 40, TimeUnit.SECONDS);
       long pen;
       if (id != null) {
-        RAtomicLong atomicLong = this.getRedissonClient().getAtomicLong("PEN_NUMBER");
+        RAtomicLong atomicLong = this.getRedissonClient().getAtomicLong("NEXT_PEN_NUMBER");
         if (!atomicLong.isExists()) {
-          log.info("RAtomicLong PEN_NUMBER doesn't exist, getting the latest PEN from Student API");
+          log.info("RAtomicLong NEXT_PEN_NUMBER doesn't exist, getting the latest PEN from Student API");
           pen = this.restUtils.getLatestPenNumberFromStudentAPI(transactionID);
           if (pen == 0) {
             throw new PenServicesAPIRuntimeException("Invalid Pen Returned from downstream method.");
