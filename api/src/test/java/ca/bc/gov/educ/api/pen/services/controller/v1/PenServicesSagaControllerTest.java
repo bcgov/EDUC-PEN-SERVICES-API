@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
-@SpringBootTest(classes = {TestRedisConfiguration.class, PenServicesApiResourceApplication.class})
+@SpringBootTest(classes = {PenServicesApiResourceApplication.class})
 @AutoConfigureMockMvc
 @Slf4j
 public class PenServicesSagaControllerTest {

@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TestRedisConfiguration.class, PenServicesApiResourceApplication.class})
+@SpringBootTest(classes = {PenServicesApiResourceApplication.class})
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class PenServicesMacroControllerTest {

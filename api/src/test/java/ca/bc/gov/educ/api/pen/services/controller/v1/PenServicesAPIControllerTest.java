@@ -57,7 +57,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * The type Pen validation api controller test.
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TestRedisConfiguration.class, PenServicesApiResourceApplication.class})
+@SpringBootTest(classes = {PenServicesApiResourceApplication.class})
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Slf4j
