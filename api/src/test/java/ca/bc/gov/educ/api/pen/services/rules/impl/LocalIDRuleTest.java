@@ -16,9 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The type Postal code rule test.
  */
 @RunWith(JUnitParamsRunner.class)
-public class PostalCodeRuleTest {
+public class LocalIDRuleTest {
 
-  private PostalCodeRule rule;
+  private LocalIDRule rule;
 
 
   /**
@@ -27,13 +27,13 @@ public class PostalCodeRuleTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    rule = new PostalCodeRule();
+    rule = new LocalIDRule();
   }
 
   /**
    * Validate.
    *
-   * @param postalCode     the postal code
+   * @param localID     the postal code
    * @param expectedErrors the expected errors
    */
   @Test
@@ -48,16 +48,14 @@ public class PostalCodeRuleTest {
       "12354, 0",
       "123456, 0",
       "1234567, 0",
-      "12345678, 0",
-      "1234567890454, 0",
-      "INVALIDPOSTAL, 0",
-      "V8R4Æ4, 1"
+      "12345678,0",
+      "A123Æ4, 1"
   })
-  public void validate(String postalCode, int expectedErrors) {
-    if ("null".equals(postalCode)) {
-      postalCode = null;
+  public void validate(String localID, int expectedErrors) {
+    if ("null".equals(localID)) {
+      localID = null;
     }
-    PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(false).transactionID(UUID.randomUUID().toString()).postalCode(postalCode).build();
+    PenRequestStudentValidationPayload payload = PenRequestStudentValidationPayload.builder().isInteractive(false).transactionID(UUID.randomUUID().toString()).localID(localID).build();
     var result = rule.validate(payload);
     assertThat(result).size().isEqualTo(expectedErrors);
   }

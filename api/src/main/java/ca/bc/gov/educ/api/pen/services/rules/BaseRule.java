@@ -88,6 +88,15 @@ public abstract class BaseRule implements Rule {
     return false;
   }
 
+  protected boolean fieldContainsNonAsciiCharacter(final String fieldValue) {
+    if (fieldValue == null) {
+      return false;
+    }
+    var fieldValueWhole = StringUtils.stripAccents(fieldValue).toUpperCase();
+    var fieldValueStripped = fieldValueWhole.replaceAll("[^\\p{ASCII}]", "").toUpperCase();
+    return !fieldValueWhole.equals(fieldValueStripped);
+  }
+
   protected boolean fieldContainsRepeatedCharacters(final String fieldValue) {
     if (StringUtils.length(fieldValue) < 2) {
       return false;
@@ -176,6 +185,8 @@ public abstract class BaseRule implements Rule {
                                                 @NonNull final PenRequestStudentValidationFieldCode fieldCode, final boolean isInteractive, final boolean spaceCheck) {
     fieldValue = fieldValue.trim();
     if (this.fieldContainsInvalidCharacters(fieldValue, notAllowedChars)) {
+      results.add(this.createValidationEntity(ERROR, INV_CHARS, fieldCode));
+    } else if (this.fieldContainsNonAsciiCharacter(fieldValue)) {
       results.add(this.createValidationEntity(ERROR, INV_CHARS, fieldCode));
     } else if (this.fieldBeginsWithInvalidCharacters(fieldValue, notAllowedCharsToStartWith)) {
       results.add(this.createValidationEntity(ERROR, BEGIN_INVALID, fieldCode));
