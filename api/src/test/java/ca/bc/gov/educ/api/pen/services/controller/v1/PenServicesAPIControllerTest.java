@@ -712,7 +712,7 @@ public class PenServicesAPIControllerTest {
    * @throws Exception the exception
    */
   @Test
-  public void testValidateStudentData_givenInappropriateAgeForGradeCode_shouldReturnStatusOkWithValidationResultsAsWarning() throws Exception {
+  public void testValidateStudentData_givenInappropriateAgeForGradeCode_shouldReturnStatusOkWithValidationResults() throws Exception {
     final var payload = this.createValidationPayload();
     payload.setGradeCode("01");
     when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
@@ -721,7 +721,7 @@ public class PenServicesAPIControllerTest {
       .perform(post(STUDENT_REQUEST_URL)
         .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
         .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
-      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
 
   }
 
