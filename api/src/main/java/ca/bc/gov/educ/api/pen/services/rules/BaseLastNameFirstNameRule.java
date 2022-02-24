@@ -16,8 +16,8 @@ import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidat
 public abstract class BaseLastNameFirstNameRule extends BaseRule {
 
   @Override
-  protected void defaultValidationForNameFields(@NonNull final List<PenRequestStudentValidationIssue> results, @NonNull final String fieldValue, @NonNull final PenRequestStudentValidationFieldCode fieldCode, boolean isInteractive, boolean spaceCheck) {
-    super.defaultValidationForNameFields(results, fieldValue, fieldCode, isInteractive, true);
+  protected void defaultValidationForNameFields(@NonNull final List<PenRequestStudentValidationIssue> results, @NonNull final String fieldValue, @NonNull final PenRequestStudentValidationFieldCode fieldCode, boolean isInteractive) {
+    super.defaultValidationForNameFields(results, fieldValue, fieldCode, isInteractive);
     if (this.fieldContainsRepeatedCharacters(fieldValue)) {
       results.add(this.createValidationEntity(isInteractive ? WARNING : ERROR, REPEATED_CHARS, fieldCode));
     }

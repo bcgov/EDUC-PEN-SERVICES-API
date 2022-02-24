@@ -78,7 +78,7 @@ public class LegalFirstNameRuleTest {
     "ASD, 1",
     "BITCH,1",
     "BRING, 1",
-    "CASH ONLY, 1",
+    "CASH ONLY, 0",
     "DATA, 1",
     "DOE, 1",
     "DOESN'T HAVE ONE, 1",

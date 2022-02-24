@@ -57,7 +57,7 @@ public class LegalFirstNameRule extends BaseLastNameFirstNameRule {
     } else if (StringUtils.equalsIgnoreCase(legalFirstName, legalLastName)) {
       results.add(this.createValidationEntity(validationPayload.getIsInteractive() ? WARNING : ERROR, SAME_NAME, LEGAL_FIRST));
     } else {
-      this.defaultValidationForNameFields(results, legalFirstName, LEGAL_FIRST, validationPayload.getIsInteractive(), true);
+      this.defaultValidationForNameFields(results, legalFirstName, LEGAL_FIRST, validationPayload.getIsInteractive());
     }
     return this.checkForInvalidTextAndOneChar(validationPayload, stopwatch, results, legalFirstName, LEGAL_FIRST, this.penNameTextService);
   }
