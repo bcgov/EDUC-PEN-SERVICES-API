@@ -186,13 +186,8 @@ public class GradeCodeRule extends BaseRule {
   private void checkForYoungAndOld(final List<PenRequestStudentValidationIssue> results, final String gradeCode, final PenRequestStudentValidationPayload validationPayload) {
     final int diff = this.calculateAge(validationPayload.getDob());
     final var gradeAgeRange = Optional.ofNullable(this.gradeAgeRangeMap.get(gradeCode));
-    if (gradeAgeRange.isPresent()) {
-      if (diff < gradeAgeRange.get().getLowerRange()) {
-        results.add(this.createValidationEntity(WARNING, YOUNG4GRADE, GRADE_CODE));
-      }
-      if (diff > gradeAgeRange.get().getUpperRange()) {
-        results.add(this.createValidationEntity(WARNING, OLD4GRADE, GRADE_CODE));
-      }
+    if (gradeAgeRange.isPresent() && diff < gradeAgeRange.get().getLowerRange()) {
+      results.add(this.createValidationEntity(WARNING, YOUNG4GRADE, GRADE_CODE));
     }
   }
 
