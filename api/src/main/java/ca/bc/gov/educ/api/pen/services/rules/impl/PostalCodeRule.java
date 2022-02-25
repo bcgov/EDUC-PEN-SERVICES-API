@@ -25,6 +25,15 @@ import static ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidat
 public class PostalCodeRule extends BaseRule {
 
   /**
+   * The constant pattern.
+   */
+  private static final Pattern pattern = Pattern.compile("^([A-Z]\\d[A-Z]\\d[A-Z]\\d|)$");
+  /**
+   * The constant MINCODE_STARTS_WITH_102.
+   */
+  public static final String MINCODE_STARTS_WITH_102 = "102";
+
+  /**
    * Validates the student record for the given rule.
    *
    * @param validationPayload the validation payload
@@ -35,8 +44,11 @@ public class PostalCodeRule extends BaseRule {
     final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
     final String postalCode = validationPayload.getPostalCode();
+    final String mincode = validationPayload.getMincode();
     if (this.fieldContainsNonAsciiCharacter(postalCode)) {
       results.add(this.createValidationEntity(ERROR, INV_CHARS, POSTAL_CODE));
+    } else if (StringUtils.isNotBlank(postalCode) && !pattern.matcher(postalCode).matches() && !mincode.startsWith(MINCODE_STARTS_WITH_102)) {
+      results.add(this.createValidationEntity(WARNING, PC_ERR, POSTAL_CODE));
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
     stopwatch.stop();
