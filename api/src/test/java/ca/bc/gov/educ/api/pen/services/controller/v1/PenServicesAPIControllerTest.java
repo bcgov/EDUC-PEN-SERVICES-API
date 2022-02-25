@@ -608,7 +608,7 @@ public class PenServicesAPIControllerTest {
       .perform(post(STUDENT_REQUEST_URL)
         .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
         .contentType(APPLICATION_JSON).accept(APPLICATION_JSON).content(this.validationPayloadAsJSONString(payload)))
-      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)));
 
   }
 
@@ -792,6 +792,7 @@ public class PenServicesAPIControllerTest {
     return PenRequestStudentValidationPayload.builder()
         .isInteractive(false)
         .dob("20000101")
+        .mincode("12345678")
         .genderCode("M")
         .gradeCode("SU")
         .legalFirstName("OM")
