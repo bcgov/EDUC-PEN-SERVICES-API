@@ -154,4 +154,14 @@ public class RulesConfig {
     return new GradeCodeRule(restUtils);
   }
 
+  /**
+   * Local ID rule.
+   *
+   * @return the rule
+   */
+  @Bean
+  @Order(12)
+  public Rule localIDRule() {
+    return new LocalIDRule();
+  }
 }
