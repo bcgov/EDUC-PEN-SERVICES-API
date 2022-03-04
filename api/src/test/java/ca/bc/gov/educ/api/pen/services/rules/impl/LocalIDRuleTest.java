@@ -38,6 +38,7 @@ public class LocalIDRuleTest {
    */
   @Test
   @Parameters({
+      "0000000¿7840,1",
       "null, 0",
       ", 0",
       "V8W2E1, 0",
