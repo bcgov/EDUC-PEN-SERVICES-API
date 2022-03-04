@@ -32,7 +32,9 @@ public class LocalIDRule extends BaseRule {
     final var stopwatch = Stopwatch.createStarted();
     final List<PenRequestStudentValidationIssue> results = new LinkedList<>();
     final String localID = validationPayload.getLocalID();
+    log.debug("Local ID for validation :: {}", localID);
     if (this.fieldContainsNonAsciiCharacter(localID)) {
+      log.debug("Local ID validation error found");
       results.add(this.createValidationEntity(ERROR, INV_CHARS, LOCAL_ID));
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());

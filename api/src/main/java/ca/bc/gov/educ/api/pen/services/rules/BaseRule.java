@@ -94,6 +94,7 @@ public abstract class BaseRule implements Rule {
     }
     var fieldValueWhole = StringUtils.stripAccents(fieldValue).toUpperCase();
     var fieldValueStripped = fieldValueWhole.replaceAll("[^\\p{ASCII}]", "").toUpperCase();
+    log.debug("Returning fieldContainsNonAsciiCharacter result for fieldValueWhole :: {} :: fieldValueStripped: {} :: Result :: {}", fieldValueWhole, fieldValueStripped, !fieldValueWhole.equals(fieldValueStripped));
     return !fieldValueWhole.equals(fieldValueStripped);
   }
 
