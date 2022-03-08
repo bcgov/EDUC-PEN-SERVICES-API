@@ -16,5 +16,5 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StudentMergeStats implements Serializable {
-  Map<String, Long> numberOfMergesInLastTwelveMonth;
+  Map<String, Long> numberOfMergesInLastMonths;
 }

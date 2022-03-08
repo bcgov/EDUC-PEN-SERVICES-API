@@ -26,9 +26,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static ca.bc.gov.educ.api.pen.services.constants.v1.URL.*;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -169,5 +171,24 @@ public class StudentMergeControllerTest {
     return StudentMergeSourceCodeEntity.builder().mergeSourceCode("MINISTRY").description("MINISTRY")
       .effectiveDate(LocalDateTime.now()).expiryDate(LocalDateTime.MAX).displayOrder(1).label("label").createDate(LocalDateTime.now())
       .updateDate(LocalDateTime.now()).createUser("TEST").updateUser("TEST").build();
+  }
+
+  @Test
+  public void testGetMergeStats_GivenCreateDateBetweenAndNoDataPresentInDB_ShouldReturnStats() throws Exception {
+    final UUID fromStudentID = UUID.randomUUID();
+    final UUID toStudentID = UUID.randomUUID();
+
+    final StudentMergeEntity studentMergeTo = new StudentMergeEntity();
+    studentMergeTo.setStudentID(toStudentID);
+    studentMergeTo.setMergeStudentID(fromStudentID);
+    studentMergeTo.setStudentMergeDirectionCode("TO");
+    studentMergeTo.setStudentMergeSourceCode("MINISTRY");
+    studentMergeTo.setCreateDate(LocalDateTime.now());
+    this.studentMergeRepo.save(studentMergeTo);
+
+    this.mockMvc.perform(get(PEN_SERVICES + MERGES + STATS)
+      .param("statsType", "NUMBER_OF_MERGES_IN_LAST_13_MONTH")
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_STUDENT_MERGE")))).andDo(print()).andExpect(status().isOk())
+      .andExpect(jsonPath("$.numberOfMergesInLastMonths.CURRENT", is(1)));
   }
 }
