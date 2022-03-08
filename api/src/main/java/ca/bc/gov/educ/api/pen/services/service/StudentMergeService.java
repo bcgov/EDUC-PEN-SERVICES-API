@@ -264,15 +264,16 @@ public class StudentMergeService {
 
   public StudentMergeStats getMergeStats(final StatsType statsType) {
     final LocalDateTime currentDate = LocalDateTime.now();
-    if (statsType == StatsType.NUMBER_OF_MERGES_IN_LAST_12_MONTH) {
+    if (statsType == StatsType.NUMBER_OF_MERGES_IN_LAST_13_MONTH) {
       final Map<String, Long> mergeNumbersMap = new LinkedHashMap<>();
-      for (int i = 11; i >= 0; i--) {
+      for (int i = 12; i >= 0; i--) {
         final LocalDateTime startDate = currentDate.minusMonths(i).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
         final LocalDateTime endDate = currentDate.minusMonths(i).withDayOfMonth(currentDate.minusMonths(i).toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59).withNano(999999999);
         val mergeNumbers = this.studentMergeRepo.countAllByCreateDateBetweenAndStudentMergeDirectionCode(startDate, endDate, "TO");
-        mergeNumbersMap.put(startDate.getMonth().toString(), mergeNumbers);
+        val monthName = (i == 0) ? "CURRENT" : startDate.getMonth().toString();
+        mergeNumbersMap.put(monthName, mergeNumbers);
       }
-      return StudentMergeStats.builder().numberOfMergesInLastTwelveMonth(mergeNumbersMap).build();
+      return StudentMergeStats.builder().numberOfMergesInLastMonths(mergeNumbersMap).build();
     }
     return StudentMergeStats.builder().build();
   }
