@@ -51,7 +51,7 @@ public class PurgeOldRecordsScheduler {
   public void purgeOldRecords() {
     LockAssert.assertLocked();
     final LocalDateTime createDateToCompare = this.calculateCreateDateBasedOnStaleSagaRecordInDays();
-    this.sagaEventRepository.deleteBySaga_createDateBefore(createDateToCompare);
+    this.sagaEventRepository.deleteBySagaCreateDateBefore(createDateToCompare);
     this.servicesEventRepository.deleteByCreateDateBefore(createDateToCompare);
     this.sagaRepository.deleteByCreateDateBefore(createDateToCompare);
   }
