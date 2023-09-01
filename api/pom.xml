@@ -32,12 +32,10 @@
     <org.mapstruct.version>1.5.3.Final</org.mapstruct.version>
     <shedlock.version>4.20.0</shedlock.version>
     <springdoc.version>1.6.15</springdoc.version>
-<!--    <lombok.version>1.18.12</lombok.version>-->
     <nats.version>2.11.0</nats.version>
     <guava.version>30.1.1-jre</guava.version>
     <ojdbc.version>21.3.0.0</ojdbc.version>
     <embedded-redis.version>0.7.3</embedded-redis.version>
-<!--    <redisson.version>3.15.1</redisson.version>&lt;!&ndash; DO NOT CHANGE &ndash;&gt;-->
     <redisson.version>3.21.1</redisson.version>
     <log4j2.version>2.17.1</log4j2.version>
   </properties>
