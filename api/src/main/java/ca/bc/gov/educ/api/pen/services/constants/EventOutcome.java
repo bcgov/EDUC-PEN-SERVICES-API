@@ -43,6 +43,10 @@ public enum EventOutcome {
    */
   STUDENT_UPDATED,
   /**
+   * Merge found event outcome.
+   */
+  MERGE_FOUND,
+  /**
    * Merge created event outcome.
    */
   MERGE_CREATED,
