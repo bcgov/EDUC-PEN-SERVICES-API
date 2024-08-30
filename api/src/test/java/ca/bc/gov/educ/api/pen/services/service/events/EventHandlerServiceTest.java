@@ -31,7 +31,6 @@ import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.*;
 import static ca.bc.gov.educ.api.pen.services.constants.EventType.*;
 import static ca.bc.gov.educ.api.pen.services.constants.TopicsEnum.PEN_SERVICES_API_TOPIC;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -139,7 +138,7 @@ public class EventHandlerServiceTest {
     final ObjectMapper objectMapper = new ObjectMapper();
     final JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, StudentMerge.class);
     final List<StudentMerge> addedStudentMerges = objectMapper.readValue(response.getEventPayload(), type);
-    assertThat(addedStudentMerges.size()).isEqualTo(2);
+    assertThat(addedStudentMerges).hasSize(2);
   }
 
   @Test
@@ -155,7 +154,7 @@ public class EventHandlerServiceTest {
     final ObjectMapper objectMapper = new ObjectMapper();
     final JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, String.class);
     final List<String> deletedIDs = objectMapper.readValue(response.getEventPayload(), type);
-    assertThat(deletedIDs.size()).isZero();
+    assertThat(deletedIDs).isEmpty();
   }
 
   @Test
@@ -173,7 +172,7 @@ public class EventHandlerServiceTest {
     final ObjectMapper objectMapper = new ObjectMapper();
     final JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, StudentMerge.class);
     final List<StudentMerge> addedStudentMerges = objectMapper.readValue(response.getEventPayload(), type);
-    assertThat(addedStudentMerges.size()).isEqualTo(1);
+    assertThat(addedStudentMerges).hasSize(1);
   }
 
   private PenRequestStudentValidationPayload createValidationPayload() {
