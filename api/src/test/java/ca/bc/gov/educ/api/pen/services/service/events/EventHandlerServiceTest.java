@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.pen.services.service.events;
 
 import ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode;
+import ca.bc.gov.educ.api.pen.services.constants.StudentMergeDirectionCodes;
+import ca.bc.gov.educ.api.pen.services.mapper.v1.StudentMergeMapper;
 import ca.bc.gov.educ.api.pen.services.repository.StudentMergeRepository;
 import ca.bc.gov.educ.api.pen.services.service.PenRequestStudentRecordValidationService;
 import ca.bc.gov.educ.api.pen.services.service.PenService;
@@ -38,16 +40,14 @@ public class EventHandlerServiceTest {
 
   @MockBean
   PenRequestStudentRecordValidationService validationService;
-
   @MockBean
   PenService penService;
-
-
   @Autowired
   StudentMergeRepository studentMergeRepository;
-
   @Autowired
   private EventHandlerService eventHandlerServiceUnderTest;
+
+  private static final StudentMergeMapper mapper = StudentMergeMapper.mapper;
 
 
   /**
@@ -138,7 +138,7 @@ public class EventHandlerServiceTest {
     final ObjectMapper objectMapper = new ObjectMapper();
     final JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, StudentMerge.class);
     final List<StudentMerge> addedStudentMerges = objectMapper.readValue(response.getEventPayload(), type);
-    assertThat(addedStudentMerges.size()).isEqualTo(2);
+    assertThat(addedStudentMerges).hasSize(2);
   }
 
   @Test
@@ -154,7 +154,25 @@ public class EventHandlerServiceTest {
     final ObjectMapper objectMapper = new ObjectMapper();
     final JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, String.class);
     final List<String> deletedIDs = objectMapper.readValue(response.getEventPayload(), type);
-    assertThat(deletedIDs.size()).isZero();
+    assertThat(deletedIDs).isEmpty();
+  }
+
+  @Test
+  public void testHandleGetMergeEvent_givenStudentIdPayload_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_FOUND() throws JsonProcessingException {
+    final var studentMerge = this.createStudentMergePayload();
+    studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.TO.getCode());
+    final var studentMergeEntity = this.studentMergeRepository.save(mapper.toModel(studentMerge));
+    final var event = Event.builder().eventType(GET_MERGES).replyTo(PEN_SERVICES_API_TOPIC.toString()).eventPayload(studentMergeEntity.getStudentID().toString()).build();
+
+    final var rawResponse = this.eventHandlerServiceUnderTest.handleGetMergeEvent(event);
+    assertThat(rawResponse).hasSizeGreaterThan(0);
+    final var response = JsonUtil.getJsonObjectFromString(Event.class, new String(rawResponse));
+    assertThat(response.getEventOutcome()).isEqualTo(MERGE_FOUND);
+
+    final ObjectMapper objectMapper = new ObjectMapper();
+    final JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, StudentMerge.class);
+    final List<StudentMerge> addedStudentMerges = objectMapper.readValue(response.getEventPayload(), type);
+    assertThat(addedStudentMerges).hasSize(1);
   }
 
   private PenRequestStudentValidationPayload createValidationPayload() {

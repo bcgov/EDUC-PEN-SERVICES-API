@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.pen.services.service.events;
 
 import ca.bc.gov.educ.api.pen.services.constants.EventOutcome;
 import ca.bc.gov.educ.api.pen.services.constants.PenRequestStudentValidationIssueSeverityCode;
+import ca.bc.gov.educ.api.pen.services.constants.StudentMergeDirectionCodes;
 import ca.bc.gov.educ.api.pen.services.mapper.v1.StudentMergeMapper;
 import ca.bc.gov.educ.api.pen.services.model.ServicesEvent;
 import ca.bc.gov.educ.api.pen.services.model.StudentMergeEntity;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.*;
@@ -225,6 +227,22 @@ public class EventHandlerService {
       log.debug(RESPONDING_BACK, newEvent);
     }
     return Pair.of(this.obMapper.writeValueAsBytes(newEvent), pair.getRight());
+  }
+
+  @Transactional(propagation = REQUIRES_NEW)
+  public byte[] handleGetMergeEvent(@NonNull final Event event) throws JsonProcessingException {
+    final var studentId = event.getEventPayload();
+    final List<StudentMergeEntity> mergeEntities = this.getStudentMergeService().findStudentMerges(UUID.fromString(studentId), StudentMergeDirectionCodes.TO.getCode());
+
+    final Event newEvent = Event.builder()
+            .sagaId(event.getSagaId())
+            .eventType(event.getEventType())
+            .eventOutcome(MERGE_FOUND)
+            .eventPayload(JsonUtil.getJsonStringFromObject(mergeEntities)).build();
+    if (log.isDebugEnabled()) {
+      log.debug(RESPONDING_BACK, newEvent);
+    }
+    return this.obMapper.writeValueAsBytes(newEvent);
   }
 
 

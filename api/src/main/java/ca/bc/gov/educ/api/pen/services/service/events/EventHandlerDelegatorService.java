@@ -96,6 +96,12 @@ public class EventHandlerDelegatorService {
           this.publishToNATS(event, message, isSynchronous, pairedResult.getLeft());
           pairedResult.getRight().ifPresent(this::publishToJetStream);
           break;
+        case GET_MERGES:
+          log.info("received get merge data :: {}", event.getSagaId());
+          log.trace(PAYLOAD_LOG, event.getEventPayload());
+          response = this.getEventHandlerService().handleGetMergeEvent(event);
+          this.publishToNATS(event, message, isSynchronous, response);
+          break;
         default:
           log.info("silently ignoring other event :: {}", event);
           break;

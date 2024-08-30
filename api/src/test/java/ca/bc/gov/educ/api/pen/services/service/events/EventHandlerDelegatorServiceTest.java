@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.pen.services.service.events;
 
 import ca.bc.gov.educ.api.pen.services.constants.EventOutcome;
+import ca.bc.gov.educ.api.pen.services.constants.StudentMergeDirectionCodes;
+import ca.bc.gov.educ.api.pen.services.mapper.v1.StudentMergeMapper;
 import ca.bc.gov.educ.api.pen.services.messaging.MessagePublisher;
 import ca.bc.gov.educ.api.pen.services.messaging.jetstream.Publisher;
 import ca.bc.gov.educ.api.pen.services.model.ServicesEvent;
@@ -29,13 +31,12 @@ import java.util.List;
 import java.util.UUID;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.MERGE_DELETED;
-import static ca.bc.gov.educ.api.pen.services.constants.EventType.CREATE_MERGE;
-import static ca.bc.gov.educ.api.pen.services.constants.EventType.DELETE_MERGE;
+import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.MERGE_FOUND;
+import static ca.bc.gov.educ.api.pen.services.constants.EventType.*;
 import static ca.bc.gov.educ.api.pen.services.constants.TopicsEnum.PEN_SERVICES_API_TOPIC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -63,6 +64,7 @@ public class EventHandlerDelegatorServiceTest {
   StudentMergeRepository studentMergeRepository;
   @Autowired
   ServicesEventRepository servicesEventRepository;
+  private static final StudentMergeMapper mapper = StudentMergeMapper.mapper;
 
   @After
   public void after() {
@@ -144,6 +146,42 @@ public class EventHandlerDelegatorServiceTest {
     final List<StudentMerge> mergesFromChoreography = new ObjectMapper().readValue(servicesEvent.getEventPayload(), new TypeReference<>() {
     });
     assertThat(mergesFromChoreography).size().isEqualTo(2);
+  }
+
+  @Test
+  public void testHandleGetMergeEvent_givenStudentId_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_FOUND() throws JsonProcessingException {
+    // Given
+    final var studentMerge = mapper.toModel(createStudentMergePayload());
+    studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.TO.getCode());
+    final var studentId = studentMerge.getStudentID();
+    this.studentMergeRepository.save(studentMerge);
+
+    final var event = Event.builder()
+            .eventType(GET_MERGES)
+            .replyTo(PEN_SERVICES_API_TOPIC.toString())
+            .eventPayload(studentId.toString())
+            .sagaId(UUID.randomUUID())
+            .build();
+
+    final Message message = NatsMessageImpl.builder()
+            .connection(this.connection)
+            .data(JsonUtil.getJsonBytesFromObject(event))
+            .SID("SID")
+            .replyTo("TEST_TOPIC")
+            .build();
+
+    // When
+    this.eventHandlerDelegatorService.handleEvent(event, message);
+
+    // Then
+    verify(this.messagePublisher, atLeastOnce()).dispatchMessage(eq("TEST_TOPIC"), eventCaptor.capture());
+
+    final var replyEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(this.eventCaptor.getValue()));
+    final List<StudentMerge> merges = new ObjectMapper().readValue(replyEvent.getEventPayload(), new TypeReference<>() {});
+
+    assertThat(replyEvent).isNotNull();
+    assertThat(replyEvent.getEventOutcome()).isEqualTo(MERGE_FOUND);
+    assertThat(merges).isNotEmpty().hasSize(1);
   }
 
   private StudentMerge createStudentMergePayload() {

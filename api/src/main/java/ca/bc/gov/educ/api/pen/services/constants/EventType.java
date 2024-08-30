@@ -43,6 +43,10 @@ public enum EventType {
    * Delete Merge Data.
    */
   DELETE_MERGE,
+  /**
+   * Get Merge Data.
+   */
+  GET_MERGES,
 
   /**
    * Read Audit History from student.
