@@ -238,7 +238,7 @@ public class EventHandlerService {
             .sagaId(event.getSagaId())
             .eventType(event.getEventType())
             .eventOutcome(MERGE_FOUND)
-            .eventPayload(JsonUtil.getJsonStringFromObject(mergeEntities)).build();
+            .eventPayload(JsonUtil.getJsonStringFromObject(mergeEntities.stream().map(StudentMergeMapper.mapper::toStructure).toList())).build();
     if (log.isDebugEnabled()) {
       log.debug(RESPONDING_BACK, newEvent);
     }
