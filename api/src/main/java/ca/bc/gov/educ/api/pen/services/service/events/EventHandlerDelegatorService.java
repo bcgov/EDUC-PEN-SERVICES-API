@@ -71,33 +71,33 @@ public class EventHandlerDelegatorService {
     try {
       switch (event.getEventType()) {
         case VALIDATE_STUDENT_DEMOGRAPHICS:
-          log.info("received validate student demographics event :: ");
+          log.debug("received validate student demographics event :: ");
           log.trace(PAYLOAD_LOG, event.getEventPayload());
           response = this.getEventHandlerService().handleValidateStudentDemogDataEvent(event);
           this.publishToNATS(event, message, isSynchronous, response);
           break;
         case GET_NEXT_PEN_NUMBER:
-          log.info("received get next pen number event :: ");
+          log.debug("received get next pen number event :: ");
           log.trace(PAYLOAD_LOG, event.getEventPayload());
           response = this.getEventHandlerService().handleGetNextPenNumberEvent(event);
           this.publishToNATS(event, message, isSynchronous, response);
           break;
         case CREATE_MERGE:
-          log.info("received create merge data :: {}", event.getSagaId());
+          log.debug("received create merge data :: {}", event.getSagaId());
           log.trace(PAYLOAD_LOG, event.getEventPayload());
           pairedResult = this.getEventHandlerService().handleCreateMergeEvent(event);
           this.publishToNATS(event, message, isSynchronous, pairedResult.getLeft());
           pairedResult.getRight().ifPresent(this::publishToJetStream);
           break;
         case DELETE_MERGE:
-          log.info("received delete merge data :: {}", event.getSagaId());
+          log.debug("received delete merge data :: {}", event.getSagaId());
           log.trace(PAYLOAD_LOG, event.getEventPayload());
           pairedResult = this.getEventHandlerService().handleDeleteMergeEvent(event);
           this.publishToNATS(event, message, isSynchronous, pairedResult.getLeft());
           pairedResult.getRight().ifPresent(this::publishToJetStream);
           break;
         case GET_MERGES:
-          log.info("received get merge data :: {}", event.getSagaId());
+          log.debug("received get merge data :: {}", event.getSagaId());
           log.trace(PAYLOAD_LOG, event.getEventPayload());
           response = this.getEventHandlerService().handleGetMergeEvent(event);
           this.publishToNATS(event, message, isSynchronous, response);
