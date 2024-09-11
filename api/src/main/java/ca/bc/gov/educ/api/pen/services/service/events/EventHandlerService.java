@@ -232,7 +232,7 @@ public class EventHandlerService {
   @Transactional(propagation = REQUIRES_NEW)
   public byte[] handleGetMergeEvent(@NonNull final Event event) throws JsonProcessingException {
     final var studentId = event.getEventPayload();
-    final List<StudentMergeEntity> mergeEntities = this.getStudentMergeService().findStudentMerges(UUID.fromString(studentId), StudentMergeDirectionCodes.TO.getCode());
+    final List<StudentMergeEntity> mergeEntities = this.getStudentMergeService().findStudentMerges(UUID.fromString(studentId), StudentMergeDirectionCodes.FROM.getCode());
 
     final Event newEvent = Event.builder()
             .sagaId(event.getSagaId())
