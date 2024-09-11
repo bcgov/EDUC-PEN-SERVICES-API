@@ -113,7 +113,7 @@ public class MessageSubscriber {
   private MessageHandler onMessage() {
     return (Message message) -> {
       if (message != null) {
-        log.debug("Message received is :: {} ", message);
+        log.info("Message received is :: {} ", message);
         try {
           final var eventString = new String(message.getData());
           LogHelper.logMessagingEventDetails(eventString);
