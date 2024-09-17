@@ -220,7 +220,7 @@ public abstract class BaseRule implements Rule {
             && el.getEffectiveDate().isBefore(LocalDate.now())
             && el.getExpiryDate().isAfter(LocalDate.now())
             && fieldValue.equalsIgnoreCase(el.getInvalidText())))
-        .collect(Collectors.toList());
+        .toList();
       if (!filteredList.isEmpty()) {
         final boolean isError;
         final boolean isWarning;
@@ -325,7 +325,7 @@ public abstract class BaseRule implements Rule {
     if (this.resultsContainNoError(results)) {
       this.checkFieldValueExactMatchWithInvalidText(results, fieldValue, penRequestStudentValidationFieldCode, validationPayload.getIsInteractive(), penNameTextService.getPenNameTexts());
     }
-    if (this.resultsContainNoError(results) && fieldValue.trim().length() == 1) {
+    if (this.resultsContainNoError(results) && StringUtils.isNotBlank(fieldValue) && fieldValue.trim().length() == 1) {
       results.add(this.createValidationEntity(WARNING, ONE_CHAR_NAME, penRequestStudentValidationFieldCode));
     }
     log.debug("transaction ID :: {} , returning results size :: {}", validationPayload.getTransactionID(), results.size());
