@@ -138,7 +138,7 @@ jobs:
           oc: 4
 
         # https://github.com/redhat-actions/oc-login#readme
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Deploy API
         run: |
