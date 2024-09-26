@@ -160,7 +160,7 @@ public class EventHandlerServiceTest {
   @Test
   public void testHandleGetMergeEvent_givenStudentIdPayload_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_FOUND() throws JsonProcessingException {
     final var studentMerge = this.createStudentMergePayload();
-    studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.TO.getCode());
+    studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.FROM.getCode());
     final var studentMergeEntity = this.studentMergeRepository.save(mapper.toModel(studentMerge));
     final var event = Event.builder().eventType(GET_MERGES).replyTo(PEN_SERVICES_API_TOPIC.toString()).eventPayload(studentMergeEntity.getStudentID().toString()).build();
 
