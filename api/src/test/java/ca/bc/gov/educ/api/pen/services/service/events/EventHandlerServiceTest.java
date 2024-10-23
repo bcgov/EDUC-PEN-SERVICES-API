@@ -175,6 +175,33 @@ public class EventHandlerServiceTest {
     assertThat(addedStudentMerges).hasSize(1);
   }
 
+  @Test
+  public void testHandleGetMergeInDateRangeEvent_givenDateRangePayload_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_FOUND() throws JsonProcessingException {
+    final var studentMerge = this.createStudentMergePayload();
+    studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.FROM.getCode());
+    this.studentMergeRepository.save(mapper.toModel(studentMerge));
+
+    final String eventPayload = "createDateStart=2023-01-01T00:00:00&createDateEnd=2024-12-31T23:59:59";
+    final var event = Event.builder()
+            .eventType(GET_MERGES_IN_DATE_RANGE)
+            .replyTo(PEN_SERVICES_API_TOPIC.toString())
+            .eventPayload(eventPayload)
+            .build();
+
+    final var rawResponse = this.eventHandlerServiceUnderTest.handleGetMergeInDateRangeEvent(event);
+
+    assertThat(rawResponse).hasSizeGreaterThan(0);
+    final var response = JsonUtil.getJsonObjectFromString(Event.class, new String(rawResponse));
+    assertThat(response.getEventOutcome()).isEqualTo(MERGE_FOUND);
+
+
+    final ObjectMapper objectMapper = new ObjectMapper();
+    final JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, StudentMerge.class);
+
+    final List<StudentMerge> addedStudentMerges = objectMapper.readValue(response.getEventPayload(), type);
+    assertThat(addedStudentMerges).hasSize(1);
+  }
+
   private PenRequestStudentValidationPayload createValidationPayload() {
     return PenRequestStudentValidationPayload.builder()
       .isInteractive(false)

@@ -245,5 +245,34 @@ public class EventHandlerService {
     return this.obMapper.writeValueAsBytes(newEvent);
   }
 
+  @Transactional(propagation = REQUIRES_NEW)
+  public byte[] handleGetMergeInDateRangeEvent(@NonNull final Event event) throws JsonProcessingException {
+    String payload = event.getEventPayload();
+    String[] keyValuePairs = payload.split("&");
+
+    LocalDateTime createDateStart = null;
+    LocalDateTime createDateEnd = null;
+
+    for (String pair : keyValuePairs) {
+      String[] parts = pair.split("=");
+      if (parts[0].equals("createDateStart")) {
+        createDateStart = LocalDateTime.parse(parts[1], DateTimeFormatter.ISO_DATE_TIME);
+      } else if (parts[0].equals("createDateEnd")) {
+        createDateEnd = LocalDateTime.parse(parts[1], DateTimeFormatter.ISO_DATE_TIME);
+      }
+    }
+
+    final List<StudentMergeEntity> mergeEntities = this.getStudentMergeService().findStudentMerges(createDateStart, createDateEnd, StudentMergeDirectionCodes.FROM.getCode());
+
+    final Event newEvent = Event.builder()
+            .sagaId(event.getSagaId())
+            .eventType(event.getEventType())
+            .eventOutcome(MERGE_FOUND)
+            .eventPayload(JsonUtil.getJsonStringFromObject(mergeEntities.stream().map(StudentMergeMapper.mapper::toStructure).toList())).build();
+    if (log.isDebugEnabled()) {
+      log.debug(RESPONDING_BACK, newEvent);
+    }
+    return this.obMapper.writeValueAsBytes(newEvent);
+  }
 
 }
