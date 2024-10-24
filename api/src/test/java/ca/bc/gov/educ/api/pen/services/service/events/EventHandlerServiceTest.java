@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.*;
 import static ca.bc.gov.educ.api.pen.services.constants.EventType.*;
@@ -183,7 +182,7 @@ public class EventHandlerServiceTest {
     studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.FROM.getCode());
     var studentMergeEntity = mapper.toModel(studentMerge);
     studentMergeEntity.setCreateDate(LocalDateTime.now().minusDays(1));
-    studentMergeEntity = this.studentMergeRepository.save(studentMergeEntity);
+    this.studentMergeRepository.save(studentMergeEntity);
 
     final String eventPayload = "createDateStart=" + LocalDateTime.now().getYear() + "-01-01T00:00:00&createDateEnd=" + LocalDateTime.now().getYear() + "-12-31T23:59:59";
     final var event = Event.builder()

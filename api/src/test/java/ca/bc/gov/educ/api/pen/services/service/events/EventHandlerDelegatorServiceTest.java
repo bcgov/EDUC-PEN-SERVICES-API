@@ -30,7 +30,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.List;
 import java.util.UUID;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.MERGE_DELETED;
 import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.MERGE_FOUND;
