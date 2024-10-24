@@ -264,7 +264,7 @@ public class EventHandlerService {
       }
     }
 
-    final List<StudentMergeEntity> mergeEntities = this.getStudentMergeService().findStudentMerges(String.valueOf(createDateStart), String.valueOf(createDateEnd), StudentMergeDirectionCodes.TO.getCode());
+    final List<StudentMergeEntity> mergeEntities = this.getStudentMergeService().findStudentMerges(createDateStart, createDateEnd, StudentMergeDirectionCodes.TO.getCode());
 
     final Event newEvent = Event.builder()
             .sagaId(event.getSagaId())
