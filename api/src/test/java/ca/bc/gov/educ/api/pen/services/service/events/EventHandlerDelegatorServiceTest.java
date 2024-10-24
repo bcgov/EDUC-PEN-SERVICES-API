@@ -184,6 +184,41 @@ public class EventHandlerDelegatorServiceTest {
     assertThat(merges).isNotEmpty().hasSize(1);
   }
 
+  @Test
+  public void testHandleGetMergeInDateRangeEvent_givenDateRange_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_FOUND() throws JsonProcessingException {
+    final var studentMerge = mapper.toModel(createStudentMergePayload());
+    studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.FROM.getCode());
+    this.studentMergeRepository.save(studentMerge);
+
+    final var event = Event.builder()
+            .eventType(GET_MERGES_IN_DATE_RANGE)
+            .replyTo(PEN_SERVICES_API_TOPIC.toString())
+            .eventPayload("{\"startDate\":\"2023-01-01\",\"endDate\":\"2024-01-01\"}")
+            .sagaId(UUID.randomUUID())
+            .build();
+
+    final Message message = NatsMessageImpl.builder()
+            .connection(this.connection)
+            .data(JsonUtil.getJsonBytesFromObject(event))
+            .SID("SID")
+            .replyTo("TEST_TOPIC")
+
+            .build();
+
+    this.eventHandlerDelegatorService.handleEvent(event, message);
+
+    verify(this.messagePublisher, atLeastOnce()).dispatchMessage(eq("TEST_TOPIC"), eventCaptor.capture());
+
+    final var replyEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(this.eventCaptor.getValue()));
+    final List<StudentMerge> merges = new ObjectMapper().readValue(replyEvent.getEventPayload(), new TypeReference<>()
+    {});
+
+    assertThat(replyEvent).isNotNull();
+    assertThat(replyEvent.getEventOutcome()).isEqualTo(MERGE_FOUND);
+
+    assertThat(merges).isNotEmpty();
+  }
+
   private StudentMerge createStudentMergePayload() {
     return StudentMerge.builder()
         .studentID("7f000101-7151-1d84-8171-5187006c0001")
