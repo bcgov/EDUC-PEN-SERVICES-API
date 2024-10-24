@@ -179,7 +179,7 @@ public class EventHandlerServiceTest {
   @Test
   public void testHandleGetMergeInDateRangeEvent_givenDateRangePayload_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_FOUND() throws JsonProcessingException {
     final var studentMerge = this.createStudentMergePayload();
-    studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.FROM.getCode());
+    studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.TO.getCode());
     var studentMergeEntity = mapper.toModel(studentMerge);
     studentMergeEntity.setCreateDate(LocalDateTime.now().minusDays(1));
     this.studentMergeRepository.save(studentMergeEntity);
