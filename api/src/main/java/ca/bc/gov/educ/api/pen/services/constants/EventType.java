@@ -47,6 +47,7 @@ public enum EventType {
    * Get Merge Data.
    */
   GET_MERGES,
+  GET_MERGES_IN_DATE_RANGE,
 
   /**
    * Read Audit History from student.
