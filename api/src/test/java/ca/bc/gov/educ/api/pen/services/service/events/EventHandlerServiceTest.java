@@ -179,9 +179,11 @@ public class EventHandlerServiceTest {
   public void testHandleGetMergeInDateRangeEvent_givenDateRangePayload_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_FOUND() throws JsonProcessingException {
     final var studentMerge = this.createStudentMergePayload();
     studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.FROM.getCode());
-    this.studentMergeRepository.save(mapper.toModel(studentMerge));
+    var studentMergeEntity = mapper.toModel(studentMerge);
+    studentMergeEntity.setCreateDate(LocalDateTime.now().minusDays(1));
+    studentMergeEntity = this.studentMergeRepository.save(studentMergeEntity);
 
-    final String eventPayload = "createDateStart=2023-01-01T00:00:00&createDateEnd=2024-12-31T23:59:59";
+    final String eventPayload = "createDateStart=" + LocalDateTime.now().getYear() + "-01-01T00:00:00&createDateEnd=" + LocalDateTime.now().getYear() + "-12-31T23:59:59";
     final var event = Event.builder()
             .eventType(GET_MERGES_IN_DATE_RANGE)
             .replyTo(PEN_SERVICES_API_TOPIC.toString())
