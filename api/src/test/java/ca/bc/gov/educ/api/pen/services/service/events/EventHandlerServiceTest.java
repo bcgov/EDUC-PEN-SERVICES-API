@@ -26,6 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.*;
 import static ca.bc.gov.educ.api.pen.services.constants.EventType.*;
@@ -171,6 +172,35 @@ public class EventHandlerServiceTest {
 
     final ObjectMapper objectMapper = new ObjectMapper();
     final JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, StudentMerge.class);
+    final List<StudentMerge> addedStudentMerges = objectMapper.readValue(response.getEventPayload(), type);
+    assertThat(addedStudentMerges).hasSize(1);
+  }
+
+  @Test
+  public void testHandleGetMergeInDateRangeEvent_givenDateRangePayload_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_FOUND() throws JsonProcessingException {
+    final var studentMerge = this.createStudentMergePayload();
+    studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.FROM.getCode());
+    var studentMergeEntity = mapper.toModel(studentMerge);
+    studentMergeEntity.setCreateDate(LocalDateTime.now().minusDays(1));
+    this.studentMergeRepository.save(studentMergeEntity);
+
+    final String eventPayload = "createDateStart=" + LocalDateTime.now().getYear() + "-01-01T00:00:00&createDateEnd=" + LocalDateTime.now().getYear() + "-12-31T23:59:59";
+    final var event = Event.builder()
+            .eventType(GET_MERGES_IN_DATE_RANGE)
+            .replyTo(PEN_SERVICES_API_TOPIC.toString())
+            .eventPayload(eventPayload)
+            .build();
+
+    final var rawResponse = this.eventHandlerServiceUnderTest.handleGetMergeInDateRangeEvent(event);
+
+    assertThat(rawResponse).hasSizeGreaterThan(0);
+    final var response = JsonUtil.getJsonObjectFromString(Event.class, new String(rawResponse));
+    assertThat(response.getEventOutcome()).isEqualTo(MERGE_FOUND);
+
+
+    final ObjectMapper objectMapper = new ObjectMapper();
+    final JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, StudentMerge.class);
+
     final List<StudentMerge> addedStudentMerges = objectMapper.readValue(response.getEventPayload(), type);
     assertThat(addedStudentMerges).hasSize(1);
   }

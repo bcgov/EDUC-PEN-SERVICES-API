@@ -102,6 +102,12 @@ public class EventHandlerDelegatorService {
           response = this.getEventHandlerService().handleGetMergeEvent(event);
           this.publishToNATS(event, message, isSynchronous, response);
           break;
+        case GET_MERGES_IN_DATE_RANGE:
+          log.debug("received get merge in date range data :: {}", event.getSagaId());
+          log.trace(PAYLOAD_LOG, event.getEventPayload());
+          response = this.getEventHandlerService().handleGetMergeInDateRangeEvent(event);
+          this.publishToNATS(event, message, isSynchronous, response);
+          break;
         default:
           log.info("silently ignoring other event :: {}", event);
           break;
