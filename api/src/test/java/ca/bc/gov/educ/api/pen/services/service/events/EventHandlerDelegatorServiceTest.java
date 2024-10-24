@@ -188,12 +188,13 @@ public class EventHandlerDelegatorServiceTest {
   public void testHandleGetMergeInDateRangeEvent_givenDateRange_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_FOUND() throws JsonProcessingException {
     final var studentMerge = mapper.toModel(createStudentMergePayload());
     studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.FROM.getCode());
+    studentMerge.setCreateDate(LocalDateTime.now().minusDays(5)); // Set creation date within the range
     this.studentMergeRepository.save(studentMerge);
 
     final var event = Event.builder()
             .eventType(GET_MERGES_IN_DATE_RANGE)
             .replyTo(PEN_SERVICES_API_TOPIC.toString())
-            .eventPayload("{\"startDate\":\"2023-01-01\",\"endDate\":\"2024-01-01\"}")
+            .eventPayload("createDateStart=2024-10-18T11:34:21&createDateEnd=2024-10-24T11:34:21")
             .sagaId(UUID.randomUUID())
             .build();
 
@@ -202,7 +203,6 @@ public class EventHandlerDelegatorServiceTest {
             .data(JsonUtil.getJsonBytesFromObject(event))
             .SID("SID")
             .replyTo("TEST_TOPIC")
-
             .build();
 
     this.eventHandlerDelegatorService.handleEvent(event, message);
@@ -210,12 +210,10 @@ public class EventHandlerDelegatorServiceTest {
     verify(this.messagePublisher, atLeastOnce()).dispatchMessage(eq("TEST_TOPIC"), eventCaptor.capture());
 
     final var replyEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(this.eventCaptor.getValue()));
-    final List<StudentMerge> merges = new ObjectMapper().readValue(replyEvent.getEventPayload(), new TypeReference<>()
-    {});
+    final List<StudentMerge> merges = new ObjectMapper().readValue(replyEvent.getEventPayload(), new TypeReference<>() {});
 
     assertThat(replyEvent).isNotNull();
     assertThat(replyEvent.getEventOutcome()).isEqualTo(MERGE_FOUND);
-
     assertThat(merges).isNotEmpty();
   }
 
