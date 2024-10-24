@@ -29,6 +29,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.MERGE_DELETED;
 import static ca.bc.gov.educ.api.pen.services.constants.EventOutcome.MERGE_FOUND;
@@ -188,7 +190,7 @@ public class EventHandlerDelegatorServiceTest {
   public void testHandleGetMergeInDateRangeEvent_givenDateRange_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_FOUND() throws JsonProcessingException {
     final var studentMerge = mapper.toModel(createStudentMergePayload());
     studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.FROM.getCode());
-    studentMerge.setCreateDate(LocalDateTime.now().minusDays(5)); // Set creation date within the range
+    studentMerge.setCreateDate(LocalDateTime.now().minusDays(5));
     this.studentMergeRepository.save(studentMerge);
 
     final var event = Event.builder()
