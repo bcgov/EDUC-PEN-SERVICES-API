@@ -27,6 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.time.LocalDateTime;
@@ -189,13 +190,16 @@ public class EventHandlerDelegatorServiceTest {
   public void testHandleGetMergeInDateRangeEvent_givenDateRange_whenSuccessfullyProcessed_shouldHaveEventOutcomeMERGE_FOUND() throws JsonProcessingException {
     final var studentMerge = mapper.toModel(createStudentMergePayload());
     studentMerge.setStudentMergeDirectionCode(StudentMergeDirectionCodes.TO.getCode());
-    studentMerge.setCreateDate(LocalDateTime.now().minusDays(5));
+    studentMerge.setCreateDate(LocalDateTime.now().minusDays(1));
     this.studentMergeRepository.save(studentMerge);
+
+    var twoDaysAgo = LocalDateTime.now().minusDays(2).format(DateTimeFormatter.ISO_DATE_TIME);
+    var tomorrow = LocalDateTime.now().plusDays(1).format(DateTimeFormatter.ISO_DATE_TIME);
 
     final var event = Event.builder()
             .eventType(GET_MERGES_IN_DATE_RANGE)
             .replyTo(PEN_SERVICES_API_TOPIC.toString())
-            .eventPayload("createDateStart=2024-10-18T11:34:21&createDateEnd=2024-10-24T11:34:21")
+            .eventPayload("createDateStart=" + twoDaysAgo + "&createDateEnd=" + tomorrow)
             .sagaId(UUID.randomUUID())
             .build();
 

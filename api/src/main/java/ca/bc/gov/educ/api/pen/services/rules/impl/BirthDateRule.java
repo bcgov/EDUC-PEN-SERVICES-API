@@ -82,9 +82,10 @@ public class BirthDateRule extends BaseRule {
    * <p>
    * Public, Yukon, PSI etc schools – Set to ‘Y’ if
    * <p>
-   * SCHOOL_CATEGORY_CODE OF SCHOOL_MASTER NE "02" and & ; Not Independent
-   * SCHOOL_CATEGORY_CODE OF SCHOOL_MASTER NE "09" and & ; Not Offshore
-   * SCHOOL_CATEGORY_CODE OF SCHOOL_MASTER NE "10"       ; Not Early Learning
+   * SCHOOL_CATEGORY_CODE OF INSTITUTE_API NE "INDEPEND" legacy code "02" and & ; Not Independent
+   * SCHOOL_CATEGORY_CODE OF INSTITUTE_API NE "INDP_FNS" legacy code "02" and & ; Not Independent First Nations
+   * SCHOOL_CATEGORY_CODE OF INSTITUTE_API NE "OFFSHORE" legacy code "09" and & ; Not Offshore
+   * SCHOOL_CATEGORY_CODE OF INSTITUTE NE_API "EAR_LEARN" legacy code "10"      ; Not Early Learning
    *
    * @param results           the error/warning list
    * @param dob               the dob of student
@@ -92,9 +93,10 @@ public class BirthDateRule extends BaseRule {
    */
   private void validateDOBForPublicSchool(final List<PenRequestStudentValidationIssue> results, final LocalDate dob, final PenRequestStudentValidationPayload validationPayload) {
     val schoolCategoryCode = this.getSchoolCategoryCode(validationPayload);
-    if (!StringUtils.equals("02", schoolCategoryCode)
-      && !StringUtils.equals("09", schoolCategoryCode)
-      && !StringUtils.equals("10", schoolCategoryCode)
+    if (!StringUtils.equals("INDEPEND", schoolCategoryCode)
+      && !StringUtils.equals("INDP_FNS", schoolCategoryCode)
+      && !StringUtils.equals("OFFSHORE", schoolCategoryCode)
+      && !StringUtils.equals("EAR_LEARN", schoolCategoryCode)
       && (Period.between(dob, this.getComparisonDate()).toTotalMonths() < 60)) {
       results.add(this.createValidationEntity(ERROR, DOB_TOO_YOUNG, BIRTH_DATE));
     }
@@ -106,8 +108,9 @@ public class BirthDateRule extends BaseRule {
    * <p>
    * Independent or Offshore school– Set to ‘Y’ if
    * <p>
-   * SCHOOL_CATEGORY_CODE OF SCHOOL_MASTER = "02" or ; Independent School
-   * SCHOOL_CATEGORY_CODE OF SCHOOL_MASTER = "09"      ; Offshore School
+   * SCHOOL_CATEGORY_CODE OF INSTITUTE_API = "INDEPEND" legacy code "02" or ; Independent School
+   * SCHOOL_CATEGORY_CODE OF INSTITUTE_API = "INDP_FNS" legacy code "02" or ; Independent First Nations School
+   * SCHOOL_CATEGORY_CODE OF INSTITUTE_API = "OFFSHORE" legacy code "09"    ; Offshore School
    * BIRTHDATE	ERROR	ERROR	DOB TOO YOUNG
    *
    * @param results           the error/warning list
@@ -116,7 +119,7 @@ public class BirthDateRule extends BaseRule {
    */
   private void validateDOBForOffshoreAndIndependentSchool(final List<PenRequestStudentValidationIssue> results, final LocalDate dob, final PenRequestStudentValidationPayload validationPayload) {
     val schoolCategoryCode = this.getSchoolCategoryCode(validationPayload);
-    if ((StringUtils.equals("02", schoolCategoryCode) || StringUtils.equals("09", schoolCategoryCode))
+    if ((StringUtils.equals("INDEPEND", schoolCategoryCode) || StringUtils.equals("INDP_FNS", schoolCategoryCode) || StringUtils.equals("OFFSHORE", schoolCategoryCode))
       && (Period.between(dob, this.getComparisonDate()).toTotalMonths() < 48)) {
       results.add(this.createValidationEntity(ERROR, DOB_TOO_YOUNG, BIRTH_DATE));
     }

@@ -8,10 +8,7 @@ import ca.bc.gov.educ.api.pen.services.repository.PenRequestBatchValidationField
 import ca.bc.gov.educ.api.pen.services.repository.PenRequestBatchValidationIssueSeverityCodeRepository;
 import ca.bc.gov.educ.api.pen.services.repository.PenRequestBatchValidationIssueTypeCodeRepository;
 import ca.bc.gov.educ.api.pen.services.rest.RestUtils;
-import ca.bc.gov.educ.api.pen.services.struct.v1.GenderCode;
-import ca.bc.gov.educ.api.pen.services.struct.v1.GradeCode;
-import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
-import ca.bc.gov.educ.api.pen.services.struct.v1.School;
+import ca.bc.gov.educ.api.pen.services.struct.v1.*;
 import ca.bc.gov.educ.api.pen.services.support.TestRedisConfiguration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -117,7 +114,7 @@ public class PenServicesAPIControllerTest {
     this.penRequestBatchValidationFieldCodeRepo.save(this.createPenRequestBatchValidationFieldCodeData());
     this.penRequestBatchValidationIssueSeverityCodeRepo.save(this.createPenRequestBatchValidationSeverityCodeData());
     this.penRequestBatchValidationIssueTypeCodeRepo.save(this.createPenRequestBatchValidationTypeCodeData());
-    val school = Optional.of(School.builder().schoolName("testSchool").schoolCategoryCode("02").build());
+    val school = Optional.of(SchoolTombstone.builder().displayName("testSchool").schoolCategoryCode("INDEPEND").build());
     when(this.restUtils.getSchoolByMincode(any())).thenReturn(school);
   }
 
@@ -163,7 +160,7 @@ public class PenServicesAPIControllerTest {
     payload.setSubmittedPen("120164446");
     when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
     when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
-    when(this.restUtils.getSchoolByMincode(anyString())).thenReturn(Optional.of(School.builder().schoolName("testSchool").schoolCategoryCode("02").build()));
+    when(this.restUtils.getSchoolByMincode(anyString())).thenReturn(Optional.of(SchoolTombstone.builder().displayName("testSchool").schoolCategoryCode("INDEPEND").build()));
     this.mockMvc
       .perform(post(STUDENT_REQUEST_URL)
         .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
@@ -183,7 +180,7 @@ public class PenServicesAPIControllerTest {
     payload.setLegalLastName("");
     when(this.restUtils.getGenderCodes()).thenReturn(this.genderCodes);
     when(this.restUtils.getGradeCodes()).thenReturn(this.gradeCodes);
-    when(this.restUtils.getSchoolByMincode(anyString())).thenReturn(Optional.of(School.builder().schoolName("testSchool").schoolCategoryCode("02").build()));
+    when(this.restUtils.getSchoolByMincode(anyString())).thenReturn(Optional.of(SchoolTombstone.builder().displayName("testSchool").schoolCategoryCode("INDEPEND").build()));
     this.mockMvc
       .perform(post(STUDENT_REQUEST_URL)
         .with(jwt().jwt((jwt) -> jwt.claim("scope", "VALIDATE_STUDENT_DEMOGRAPHICS")))
