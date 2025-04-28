@@ -4,7 +4,7 @@ import ca.bc.gov.educ.api.pen.services.properties.ApplicationProperties;
 import ca.bc.gov.educ.api.pen.services.struct.*;
 import ca.bc.gov.educ.api.pen.services.struct.v1.GenderCode;
 import ca.bc.gov.educ.api.pen.services.struct.v1.GradeCode;
-import ca.bc.gov.educ.api.pen.services.struct.v1.School;
+import ca.bc.gov.educ.api.pen.services.struct.v1.SchoolTombstone;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +60,10 @@ public class RestUtils {
    */
   private final ReadWriteLock gradeLock = new ReentrantReadWriteLock();
   /**
+   * The School lock
+   */
+  private final ReadWriteLock schoolLock = new ReentrantReadWriteLock();
+  /**
    * The Props.
    */
   private final ApplicationProperties props;
@@ -69,7 +73,7 @@ public class RestUtils {
    */
   private final WebClient webClient;
 
-  private final Map<String, School> schoolMap = new ConcurrentHashMap<>();
+  private final Map<String, SchoolTombstone> schoolMap = new ConcurrentHashMap<>();
 
   /**
    * Instantiates a new Rest utils.
@@ -103,7 +107,11 @@ public class RestUtils {
    * @param mincode the mincode
    * @return the school by min code
    */
-  public Optional<School> getSchoolByMincode(final String mincode) {
+  public Optional<SchoolTombstone> getSchoolByMincode(final String mincode) {
+    if (this.schoolMap.isEmpty()) {
+      log.info("School map is empty reloading schools");
+      this.populateSchoolMap();
+    }
     return Optional.ofNullable(this.schoolMap.get(mincode));
   }
 
@@ -111,26 +119,29 @@ public class RestUtils {
    * Populate school map.
    */
   public void populateSchoolMap() {
-    for (val school : this.getSchools()) {
-      this.schoolMap.putIfAbsent(school.getDistNo() + school.getSchlNo(), school);
+    val writeLock = this.schoolLock.writeLock();
+    try {
+      writeLock.lock();
+      for (val school : this.getSchools()) {
+        this.schoolMap.putIfAbsent(school.getMincode(), school);
+      }
+    } catch (Exception ex) {
+      log.error("Unable to load map cache school {}", ex);
+    } finally {
+      writeLock.unlock();
     }
     log.info("loaded  {} schools to memory", this.schoolMap.values().size());
   }
 
-  /**
-   * Gets schools.
-   *
-   * @return the schools
-   */
-  public List<School> getSchools() {
-    log.info("calling school api to load schools to memory");
+  public List<SchoolTombstone> getSchools() {
+    log.info("Calling Institute api to load schools to memory");
     return this.webClient.get()
-      .uri(this.props.getSchoolApiURL())
-      .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-      .retrieve()
-      .bodyToFlux(School.class)
-      .collectList()
-      .block();
+            .uri(this.props.getInstituteApiURL() + "/school")
+            .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .retrieve()
+            .bodyToFlux(SchoolTombstone.class)
+            .collectList()
+            .block();
   }
 
   /**

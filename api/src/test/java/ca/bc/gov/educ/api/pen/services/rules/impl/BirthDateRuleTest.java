@@ -2,7 +2,7 @@ package ca.bc.gov.educ.api.pen.services.rules.impl;
 
 import ca.bc.gov.educ.api.pen.services.rest.RestUtils;
 import ca.bc.gov.educ.api.pen.services.struct.v1.PenRequestStudentValidationPayload;
-import ca.bc.gov.educ.api.pen.services.struct.v1.School;
+import ca.bc.gov.educ.api.pen.services.struct.v1.SchoolTombstone;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Before;
@@ -27,10 +27,10 @@ public class BirthDateRuleTest {
   @Mock
   static RestUtils restUtils;
   private static BirthDateRule birthDateRule;
-  private static Optional<School> schoolOptional = Optional.empty();
-  private static Optional<School> schoolOptional1 = Optional.empty();
-  private static Optional<School> schoolOptional2 = Optional.empty();
-  private static Optional<School> schoolOptional3 = Optional.empty();
+  private static Optional<SchoolTombstone> schoolOptional = Optional.empty();
+  private static Optional<SchoolTombstone> schoolOptional1 = Optional.empty();
+  private static Optional<SchoolTombstone> schoolOptional2 = Optional.empty();
+  private static Optional<SchoolTombstone> schoolOptional3 = Optional.empty();
 
   /**
    * Sets .
@@ -39,10 +39,10 @@ public class BirthDateRuleTest {
   public void setup() {
     MockitoAnnotations.openMocks(this);
     birthDateRule = new BirthDateRule(restUtils);
-    schoolOptional = Optional.of(School.builder().schoolName("testSchool").schoolCategoryCode("02").build());
-    schoolOptional1 = Optional.of(School.builder().schoolName("testSchool").schoolCategoryCode("09").build());
-    schoolOptional2 = Optional.of(School.builder().schoolName("testSchool").schoolCategoryCode("10").build());
-    schoolOptional3 = Optional.of(School.builder().schoolName("testSchool").schoolCategoryCode("11").build());
+    schoolOptional = Optional.of(SchoolTombstone.builder().displayName("testSchool").schoolCategoryCode("INDEPEND").build());
+    schoolOptional1 = Optional.of(SchoolTombstone.builder().displayName("testSchool").schoolCategoryCode("OFFSHORE").build());
+    schoolOptional2 = Optional.of(SchoolTombstone.builder().displayName("testSchool").schoolCategoryCode("EAR_LEARN").build());
+    schoolOptional3 = Optional.of(SchoolTombstone.builder().displayName("testSchool").schoolCategoryCode("UNKNOWN").build());
   }
 
   /**
